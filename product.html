@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Product — Ammi Kids by Ammi Enterprises</title>
+<meta name="description" content="Product details - Ammi Enterprises Kidswear."/>
+<link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#6c438c;--primary-dark:#311d40;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;
+  --cream:#fdfcff;--blush:#fef0f7;--blush-deep:#f7cbd1;--mauve:var(--accent);--gold:var(--accent);--gold-dark:var(--accent-dark);
+  --ink:#1E1E1E;--muted:#7A6E6A;--sage:#f3f0f7;--line:#efe6f0;--card:#fff;--radius:24px;--radius-lg:36px;
+  --shadow:0 20px 60px rgba(108,67,140,.12);--shadow-sm:0 8px 30px rgba(108,67,140,.08);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{font:inherit}
+.announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap}.announce b{color:var(--yellow)}
+.header{position:sticky;top:0;z-index:40;background:rgba(253,252,255,.85);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+.header-inner{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:24px}
+.logo{display:flex;align-items:center;gap:10px;font-family:"Cormorant Garamond",serif;font-weight:700;font-size:26px;letter-spacing:.08em}
+.logo i{font-family:"Instrument Serif",serif;font-style:italic;color:var(--accent)} .logo img{height:42px;background:#fff;border-radius:8px;padding:4px 6px}
+.nav{display:flex;gap:26px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#4A3F3B}
+.nav a:after{content:"";display:block;height:1px;background:var(--accent);transform:scaleX(0);transition:.25s} .nav a:hover:after{transform:scaleX(1)}
+.spacer{flex:1}.icon-btn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative}.badge{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center}
+.breadcrumb{max-width:1280px;margin:18px auto 0;padding:0 20px;font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.breadcrumb a:hover{color:var(--primary)} .breadcrumb b{color:var(--ink)}
+.pdp{max-width:1280px;margin:18px auto;padding:0 20px;display:grid;grid-template-columns:1.15fr .85fr;gap:28px}
+@media(max-width:900px){.pdp{grid-template-columns:1fr}.nav{display:none}}
+.gallery{background:var(--sage);border-radius:28px;overflow:hidden;padding:14px}
+.main-img{aspect-ratio:1/1.15;background:#fff;border-radius:18px;overflow:hidden;display:grid;place-items:center;position:relative;cursor:zoom-in}
+.main-img img{width:100%;height:100%;object-fit:contain;object-position:center}
+.thumbs{display:flex;gap:10px;margin-top:12px;overflow:auto;padding-bottom:4px}
+.thumbs img{width:74px;height:74px;border-radius:12px;object-fit:cover;border:2px solid transparent;cursor:pointer;background:#fff}
+.thumbs img.active{border-color:var(--accent)}
+.main-img .zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(49,29,64,.75);color:#fff;font-size:11px;padding:6px 10px;border-radius:999px;letter-spacing:.06em;pointer-events:none}
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(20,12,30,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lightbox .lb-close{position:absolute;top:20px;right:24px;color:#fff;font-size:32px;cursor:pointer;background:none;border:none;line-height:1;z-index:2}
+.info{background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px}
+.pill{font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:var(--blush);color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700}
+.info h1{font-family:"Cormorant Garamond",serif;font-size:34px;margin:10px 0 8px;line-height:1}
+.rating{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.price{font-size:26px;font-weight:800;margin:14px 0 4px}
+.price s{font-size:14px;color:#B8AFA9;margin-left:8px}
+.price small{font-size:12px;color:var(--muted);font-weight:500}
+.desc{color:var(--muted);line-height:1.7;font-size:14px;margin:12px 0}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.meta{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--cream)}
+.meta b{font-size:12px;display:block} .meta span{font-size:12px;color:var(--muted)}
+.variants{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.opt{border:1px solid var(--line);padding:9px 14px;border-radius:999px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.qty{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px}
+.qty button{width:30px;height:30px;border-radius:999px;border:none;background:var(--sage);cursor:pointer;font-size:16px}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:14px 22px;border-radius:999px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;cursor:pointer;flex:1;justify-content:center;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--accent-dark)} .btn-ghost{background:#fff;border:1px solid var(--line);padding:14px 22px;border-radius:999px;font-weight:700;cursor:pointer}
+.trust{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.trust span{border:1px solid var(--line);background:var(--cream);padding:8px 10px;border-radius:999px}
+.related{max-width:1280px;margin:40px auto 0;padding:0 20px}
+.rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1000px){.rgrid{grid-template-columns:repeat(2,1fr)}}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.card img{aspect-ratio:1/1;object-fit:cover}
+.card-body{padding:12px}.card-title{font-family:"Cormorant Garamond",serif;font-size:15px;margin:0}
+.footer{background:var(--primary-dark);color:#FFF9F2;margin-top:56px;padding:42px 20px 24px}
+.footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:28px}
+@media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr}}
+.footer a{color:#CFC4BE;font-size:13px;line-height:2}
+.brand-foot{font-family:"Cormorant Garamond",serif;font-size:22px;letter-spacing:.1em;font-weight:700} .brand-foot i{color:var(--accent);font-family:"Instrument Serif",serif;font-style:italic}
+.legal{max-width:1280px;margin:18px auto 0;padding-top:18px;border-top:1px solid #2A2320;display:flex;justify-content:space-between;flex-wrap:wrap;color:#8A7D77;font-size:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--primary-dark);color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:.35s;z-index:70}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.drawer{position:fixed;inset:0;z-index:60;display:none}.drawer.open{display:block}
+.drawer-bg{position:absolute;inset:0;background:rgba(20,14,14,.42);backdrop-filter:blur(4px)}
+.drawer-panel{position:absolute;right:0;top:0;bottom:0;width:min(420px,92vw);background:var(--cream);box-shadow:-20px 0 60px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.drawer-body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.draw-foot{padding:16px;border-top:1px solid var(--line);background:#fff;display:flex;flex-direction:column;gap:12px}
+.draw-foot .sub-row{display:flex;justify-content:space-between;font-size:14px}
+.draw-foot .sub-row span{color:var(--muted)}
+.draw-foot .sub-row b{font-size:15px}
+.draw-foot .btn-primary{padding:15px;border-radius:14px;font-size:14px;background:var(--accent);border:2px solid var(--accent);box-shadow:0 6px 18px rgba(235,28,95,.25)}
+.draw-foot .btn-primary:hover{background:var(--accent-dark)}
+.draw-foot .btn-ghost{padding:13px;border-radius:14px;font-size:13px;text-align:center;display:block;border:2px solid var(--accent);color:var(--accent);background:#fff;font-weight:700}
+.draw-foot .btn-ghost:hover{background:var(--blush);color:var(--accent-dark)}
+.draw-head #closeDrawer{width:34px;height:34px;border-radius:999px;border:2px solid var(--accent);background:#fff;color:var(--accent);font-size:15px;cursor:pointer;display:grid;place-items:center;line-height:1;transition:.2s}
+.draw-head #closeDrawer:hover{background:var(--accent);color:#fff}
+.line-item > button{width:28px;height:28px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12px;cursor:pointer;display:grid;place-items:center;line-height:1;flex-shrink:0;transition:.2s}
+.line-item > button:hover{border-color:var(--accent);color:var(--accent);background:var(--blush)}
+.draw-foot .checkout-note{font-size:12px;color:var(--muted);text-align:center}
+.line-item{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
+</style>
+</head>
+<body>
+<div class="announce"><span>Ammi Enterprises • Est. 2003 • Mumbai</span><span>•</span><span><a href="index.html" style="color:var(--yellow);text-decoration:underline">← Back to Store</a></span><span>•</span><span><a href="https://www.ammienterprises.in/" target="_blank" style="color:var(--yellow);text-decoration:underline">ammienterprises.in →</a></span></div>
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi"/></a>
+    <nav class="nav"><a href="index.html#shop">Shop</a><a href="index.html#collections">Collections</a><a href="index.html#story">Our Story</a><a href="checkout.html">Checkout</a></nav>
+    <div class="spacer"></div>
+    <a class="icon-btn" href="checkout.html" id="cartBtn" aria-label="cart">🛒<span class="badge" id="cartCount">0</span></a>
+  </div>
+</header>
+<nav class="breadcrumb" id="crumb"><a href="index.html">Home</a> <span>/</span> <a href="index.html#shop">Shop</a> <span>/</span> <b id="crumbName">Loading…</b></nav>
+
+<section class="pdp" id="pdp">
+  <div class="gallery">
+    <div class="main-img"><img id="mainImg" alt="product"/><span class="zoom-hint">⛶ Click to zoom</span></div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+  <div class="info">
+    <span class="pill" id="pCat">Loading</span>
+    <h1 id="pName">Loading product…</h1>
+    <div class="rating">★★★★★ <span> (Pan India • by Ammi Enterprises)</span> • <span id="pSku">—</span></div>
+    <div class="price" id="pPrice">—</div>
+    <div id="variantWrap"><div class="variants" id="variants"></div></div>
+    <div style="display:flex;gap:12px;align-items:center;margin:10px 0">
+      <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
+      <span style="font-size:12px;color:var(--muted)">Quantity</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">Stock: live via Saleor</span>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="addBtn">Add to Bag — <span id="addPrice">—</span></button>
+      <button class="btn-ghost" onclick="buyNow()">Buy Now</button>
+      <button class="btn-ghost" id="wishBtn">♡ Wishlist</button>
+    </div>
+    <p class="desc" id="pDesc">Fetching from Saleor GraphQL…</p>
+    <div class="meta-grid">
+      <div class="meta"><b>Fabric</b><span>Premium Cotton Blend / Moss Crepe / Rayon</span></div>
+      <div class="meta"><b>Closure</b><span>Button • Easy Wash</span></div>
+      <div class="meta"><b>Sleeve</b><span>Short / Full • Regular Fit</span></div>
+      <div class="meta"><b>Ideal</b><span>Festive • Party • Casual</span></div>
+    </div>
+    <div class="trust"><span>✓ Free shipping over ₹999</span><span>COD Available</span><span>7-Day Returns</span><span>Manufacturer: Ammi Enterprises</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px">Sold by Ammi Enterprises, A-7 Kasturchand Mill Compound, Mumbai – 400028 • <a href="mailto:ammi.kidz@gmail.com" style="color:var(--primary);text-decoration:underline">ammi.kidz@gmail.com</a> • <a href="tel:+919321508566" style="color:var(--primary);text-decoration:underline">+91-9321508566</a><br/>API: <a href="https://ammikids.themanagemate.com/graphql/" target="_blank" style="text-decoration:underline">ammikids.themanagemate.com/graphql/</a></p>
+  </div>
+</section>
+
+<section class="related" id="related">
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;margin:0 0 12px">You may also like</h3>
+  <div class="rgrid" id="rgrid"></div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><div class="brand-foot"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="" style="height:36px;background:#fff;border-radius:8px;padding:4px 8px"/><br/>AMMI<i>kids</i></div><p style="color:#CFC4BE">A-7, Ground Floor, Kasturchand Mill Compound, Mumbai - 400028<br/>📞 +91-9321508566 • ✉️ ammi.kidz@gmail.com • <a href="https://www.ammienterprises.in" target="_blank" style="color:var(--yellow);text-decoration:underline">www.ammienterprises.in</a></p></div>
+    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Shop</h4><a href="index.html#shop">All Frocks</a><br/><a href="checkout.html">Checkout</a></div>
+    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Ammi Enterprises</h4><a href="https://www.ammienterprises.in/products.htm" target="_blank">Products</a><br/><a href="https://www.ammienterprises.in/about-us.htm" target="_blank">About Us</a></div>
+    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Help</h4><a href="mailto:ammi.kidz@gmail.com">Send Email</a><br/><a href="https://api.whatsapp.com/send?phone=919321508566" target="_blank">WhatsApp</a></div>
+  </div>
+  <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#6c438c • #e70080 • Saleor</span></div>
+</footer>
+
+<!-- mini cart drawer -->
+<div class="drawer" id="drawer"><div class="drawer-bg" id="drawerBg"></div>
+  <div class="drawer-panel"><div class="drawer-head"><b>Your bag</b><button id="closeDrawer">✕</button></div><div class="drawer-body" id="cartBody"></div><div class="draw-foot" id="cartFoot"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="lightbox" id="lightbox" onclick="closeLb()"><button class="lb-close" onclick="closeLb()">✕</button><img id="lbImg" src="" alt="Zoomed product"/></div>
+<script>
+const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+let PRODUCT=null, VARIANT=null, QTY=1;
+let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]"), WISH=JSON.parse(localStorage.getItem("ak_wish")||"[]");
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})});const j=await r.json();return j.data}
+function save(){localStorage.setItem("ak_cart",JSON.stringify(CART));localStorage.setItem("ak_wish",JSON.stringify(WISH));document.getElementById('cartCount').textContent=CART.reduce((s,c)=>s+c.qty,0); renderCart()}
+function getSlug(){const u=new URL(location.href);return u.searchParams.get('slug')||u.searchParams.get('id')||localStorage.getItem('ak_last_slug')||"fm108-00001"}
+async function load(){
+  const slug=getSlug();
+  document.getElementById('crumbName').textContent=slug;
+  const q=`query P($slug:String!){ product(slug:$slug){ id name slug description media{url} thumbnail{url} category{name slug} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
+  const d=await gql(q,{slug});
+  PRODUCT=d?.product;
+  if(!PRODUCT){document.getElementById('pName').textContent="Product not found"; document.getElementById('pDesc').textContent="Try going back to shop."; return;}
+  localStorage.setItem('ak_last_slug', slug);
+  // describe
+  let plain=PRODUCT.description||"";
+  try{if(plain.trim().startsWith("{")){const b=JSON.parse(plain); if(b.blocks) plain=b.blocks.map(x=>x.data?.text).filter(Boolean).join(" ")}}catch(e){}
+  PRODUCT.plain=plain||"Premium kidswear from Ammi Enterprises — comfortable, easily washable, anti-wrinkle.";
+  const price=PRODUCT.variants?.[0]?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross;
+  const und=PRODUCT.pricing?.priceRangeUndiscounted?.start?.gross;
+  document.getElementById('pCat').textContent=PRODUCT.category?.name||"Kidswear";
+  document.getElementById('pName').textContent=PRODUCT.name;
+  document.getElementById('crumbName').textContent=PRODUCT.name;
+  document.title=PRODUCT.name+" — Ammi Kids by Ammi Enterprises";
+  document.getElementById('pSku').textContent=PRODUCT.variants?.[0]?.sku||PRODUCT.slug;
+  document.getElementById('pDesc').textContent=PRODUCT.plain;
+  document.getElementById('pPrice').innerHTML=`${price?money(price.amount,price.currency):"—"} ${und && price && und.amount>price.amount?`<s>${money(und.amount,price.currency)}</s> <span style="color:var(--accent);font-size:12px">${Math.round((1-price.amount/und.amount)*100)}% OFF</span>`:""} `;
+  document.getElementById('addPrice').textContent=price?money(price.amount,price.currency):"—";
+  // images
+  const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean);
+  const urls=media.map(m=>m.url);
+  document.getElementById('mainImg').src=urls[0]||"";
+  document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" onclick="setImg('${u}',this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
+  // variants
+  const vwrap=document.getElementById('variants');
+  if(PRODUCT.variants?.length){ vwrap.innerHTML=PRODUCT.variants.map((v,i)=>`<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="pick('${v.id}')">${v.sku||v.name} • ${v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):""}</button>`).join(""); VARIANT=PRODUCT.variants[0]; } else { vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"}
+  updateWish();
+  // related
+  const rel=(d?.products?.edges||[]).filter(e=>e.node.slug!==slug).slice(0,4);
+  document.getElementById('rgrid').innerHTML=rel.map(e=>{const n=e.node; return `<a class="card" href="product.html?slug=${n.slug}"><img src="${n.thumbnail?.url||''}" alt=""/><div class="card-body"><div class="card-title">${n.name}</div><div style="font-size:13px;font-weight:700">${n.pricing?.priceRange?money(n.pricing.priceRange.start.gross.amount,n.pricing.priceRange.start.gross.currency):""}</div></div></a>`}).join("");
+}
+function setImg(u,el){document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); el.classList.add('active')}
+function openLb(){const i=document.getElementById('lbImg'); i.src=document.getElementById('mainImg').src||i.src; document.getElementById('lightbox').classList.add('open')}
+function closeLb(){document.getElementById('lightbox').classList.remove('open')}
+document.getElementById('mainImg').onclick=openLb;
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
+function pick(id){document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug}
+function updateWish(){const b=document.getElementById('wishBtn');const on=WISH.includes(PRODUCT?.id); b.textContent= on?"♥ Wishlisted":"♡ Wishlist"; b.style.borderColor=on?"var(--accent)":"var(--line)"; b.style.color=on?"var(--accent)":"inherit"}
+document.getElementById('wishBtn').onclick=()=>{const i=WISH.indexOf(PRODUCT.id); if(i>=0) WISH.splice(i,1); else WISH.push(PRODUCT.id); localStorage.setItem("ak_wish",JSON.stringify(WISH)); updateWish(); toast(i>=0?"Removed from wishlist":"Added to wishlist ♥")};
+document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.getElementById('qVal').textContent=QTY; refreshAdd()};
+document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
+function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
+document.getElementById('addBtn').onclick=()=>{const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid); if(ex) ex.qty+=QTY; else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added to bag"); openDrawer()};
+function buyNow(){document.getElementById('addBtn').click(); location.href="checkout.html"}
+function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999 • COD Available</div>`}
+window.rem=(i)=>{CART.splice(i,1);save()}
+function openDrawer(){document.getElementById('drawer').classList.add('open')}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open')}
+document.getElementById('drawerBg').onclick=closeDrawer; document.getElementById('closeDrawer').onclick=closeDrawer;
+document.getElementById('cartBtn').onclick=(e)=>{e.preventDefault(); openDrawer()};
+load(); save();
+</script>
+</body>
+</html>

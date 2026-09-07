@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Checkout — Ammi Kids by Ammi Enterprises</title>
+<link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#6c438c;--primary-dark:#311d40;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--blush:#fef0f7;--line:#efe6f0;--muted:#7A6E6A;--ink:#1E1E1E;--sage:#f3f0f7;--card:#fff;--radius:20px}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}
+.announce b{color:var(--yellow)}
+.header{position:sticky;top:0;z-index:20;background:rgba(253,252,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+.header-inner{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-family:"Cormorant Garamond",serif;font-weight:700;font-size:24px;letter-spacing:.08em}
+.logo i{color:var(--accent);font-style:italic;font-family:"Cormorant Garamond",serif}
+.logo img{height:38px;background:#fff;border-radius:8px;padding:4px 6px}
+.steps{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.steps b{color:var(--primary)} .steps span{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;border:1px solid var(--line);background:#fff;font-weight:700}
+.steps span.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.steps span.done{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wrap{max-width:1280px;margin:10px auto;padding:0 20px;display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px}
+.card h2{font-family:"Cormorant Garamond",serif;margin:0 0 12px;font-size:22px}
+.card h3{margin:18px 0 10px;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--primary)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:12px;padding:12px 12px;font-size:14px;outline:none;background:#fff}
+.field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,67,140,.1)}
+.pay{display:flex;flex-direction:column;gap:10px}
+.pay label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}
+.pay label.active{border-color:var(--primary);background:rgba(108,67,140,.05)}
+.summary{position:sticky;top:90px}
+.lines{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+.line{display:flex;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--cream)}
+.line img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#fff}
+.tot{border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
+.row{display:flex;justify-content:space-between;margin:6px 0;font-size:14px}
+.row.total{font-weight:800;font-size:18px}
+.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;padding:15px 18px;border-radius:999px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:10px;display:inline-flex;justify-content:center;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--accent-dark)} .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px}
+.note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+.badge{font-size:11px;background:var(--sage);padding:4px 8px;border-radius:999px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--primary-dark);color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.3s;z-index:50}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.footer{background:var(--primary-dark);color:#FFF9F2;margin-top:40px;padding:28px 20px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:#CFC4BE}
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:20px;z-index:60}
+.modal.open{display:grid}.modal-bg{position:absolute;inset:0;background:rgba(20,14,14,.5);backdrop-filter:blur(6px)}
+.modal-card{position:relative;background:#fff;border-radius:24px;padding:28px;max-width:520px;width:100%;text-align:center}
+</style>
+</head>
+<body>
+<div class="announce">Secure Checkout • Ammi Enterprises • A-7 Kasturchand Mill Compound, Mumbai – 400028 • <b>ammi.kidz@gmail.com</b></div>
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt=""/></a>
+    <div style="flex:1"></div>
+    <a href="index.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">← Continue Shopping</a>
+  </div>
+</header>
+<div class="steps"><span class="done">✓</span> Bag <span>—</span> <span class="on">2</span> <b>Checkout</b> <span>—</span> <span>3</span> Payment</div>
+
+<div class="wrap">
+  <div>
+    <div class="card">
+      <h2>Contact & Shipping</h2>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 12px">Powered by Saleor GraphQL <a href="https://ammikids.themanagemate.com/graphql/" target="_blank" style="color:var(--primary);text-decoration:underline">ammikids.themanagemate.com/graphql</a> • COD & Dummy payments supported</p>
+      <form id="form">
+        <h3>Contact</h3>
+        <div class="grid2">
+          <div class="field"><label>Email *</label><input required type="email" id="email" placeholder="you@example.com"/></div>
+          <div class="field"><label>Phone *</label><input required id="phone" placeholder="+91 9321508566"/></div>
+        </div>
+        <h3>Shipping address</h3>
+        <div class="grid2">
+          <div class="field"><label>First name *</label><input required id="firstName" placeholder="Aqueel"/></div>
+          <div class="field"><label>Last name *</label><input required id="lastName" placeholder="Khan"/></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Street address *</label><input required id="street" placeholder="A-7, Kasturchand Mill Compound, M.C. Jawale Marg"/></div>
+        <div class="grid2" style="margin-top:12px">
+          <div class="field"><label>City *</label><input required id="city" value="Mumbai"/></div>
+          <div class="field"><label>State *</label><input required id="state" value="Maharashtra"/></div>
+        </div>
+        <div class="grid2" style="margin-top:12px">
+          <div class="field"><label>Postal code *</label><input required id="postal" value="400028"/></div>
+          <div class="field"><label>Country</label><select id="country"><option value="IN" selected>India (IN)</option></select></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Order notes (optional)</label><textarea id="notes" rows="2" placeholder="Delivery instructions..."></textarea></div>
+
+        <h3>Payment</h3>
+        <div class="pay">
+          <label class="active"><input type="radio" name="pay" value="cod" checked/> <span><b>Cash on Delivery (COD)</b> — Pay on delivery</span></label>
+          <label><input type="radio" name="pay" value="dummy"/> <span><b>Dummy Gateway</b> — Saleor mirumee.payments.dummy</span></label>
+          <label><input type="radio" name="pay" value="upi"/> <span><b>UPI / Card</b> — demo</span></label>
+        </div>
+        <p class="note">By placing order you agree to Ammi Enterprises terms. Manufacturer & Wholesaler since 2003.</p>
+      </form>
+    </div>
+
+    <div class="card" style="margin-top:14px;display:flex;gap:14px;align-items:center">
+      <img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="" style="height:42px;background:#fff;border-radius:8px;padding:4px 8px"/>
+      <div style="font-size:12px;color:var(--muted)"><b style="color:var(--ink)">Ammi Enterprises</b> • Founder Aqueel Yusuf Khan • Pan India • Upto 10 Employees<br/>A-7, Ground Floor, Kasturchand Mill Compound, Mumbai • ammi.kidz@gmail.com • +91-9321508566 • <a href="https://www.ammienterprises.in" target="_blank" style="color:var(--primary);text-decoration:underline">www.ammienterprises.in</a></div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="card">
+      <h2>Order summary <span class="badge" id="countBadge">0 items</span></h2>
+      <div class="lines" id="lines"></div>
+      <div style="display:flex;gap:8px;margin-top:10px"><input id="coupon" placeholder="Coupon code" style="flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px"/><button class="btn-ghost" style="width:auto;padding:10px 16px" onclick="applyCoupon()">Apply</button></div>
+      <div class="tot" id="totals"></div>
+      <button class="btn-primary" id="placeBtn" onclick="placeOrder()">Place Order — <span id="payTotal">—</span></button>
+      <button class="btn-ghost" onclick="location.href='index.html#shop'">← Back to shop</button>
+      <p class="note" id="saleorNote">Saleor checkoutCreate will be attempted; if stock is 0, demo success will be shown and bag cleared.</p>
+      <p class="note">Need help? WhatsApp <a href="https://api.whatsapp.com/send?phone=919321508566" target="_blank" style="color:var(--primary);text-decoration:underline">+91-9321508566</a></p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises — All Rights Reserved • Ammikids Retail</span><span>Theme #6c438c • #e70080 • Saleor Headless</span></div></footer>
+
+<div class="modal" id="success"><div class="modal-bg" onclick="closeSucc()"></div><div class="modal-card">
+  <div style="font-size:40px">🎉</div>
+  <h2 style="font-family:'Cormorant Garamond',serif;margin:8px 0">Order confirmed!</h2>
+  <p style="color:var(--muted)">Thank you for shopping with <b>Ammi Kids by Ammi Enterprises</b>.<br/>Your bag has been cleared. A confirmation has been simulated.</p>
+  <p style="font-size:12px;background:var(--sage);padding:10px;border-radius:12px" id="succId">Checkout ID: —</p>
+  <a href="index.html" class="btn-primary" style="text-decoration:none">Back to Store</a>
+  <p style="font-size:11px;color:var(--muted);margin-top:8px">Questions? ammi.kidz@gmail.com • +91-9321508566</p>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]");
+function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})});const j=await r.json(); if(j.errors) throw new Error(j.errors[0]?.message||"GraphQL error"); return j.data}
+function render(){
+  const lines=document.getElementById('lines'), badge=document.getElementById('countBadge'), tot=document.getElementById('totals'), payTotal=document.getElementById('payTotal');
+  if(!CART.length){ lines.innerHTML=`<div class="empty">Your bag is empty. <a href="index.html#shop" style="color:var(--primary);text-decoration:underline">Go to shop →</a></div>`; badge.textContent="0 items"; tot.innerHTML=""; payTotal.textContent="—"; document.getElementById('placeBtn').disabled=true; return;}
+  document.getElementById('placeBtn').disabled=false;
+  badge.textContent=CART.length+" items • "+CART.reduce((s,c)=>s+c.qty,0)+" pcs";
+  lines.innerHTML=CART.map((c,i)=>`<div class="line"><img src="${c.img}" alt=""/><div style="flex:1"><div style="font-weight:700;font-size:13px">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.sku} • Qty ${c.qty}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:13px">${money(c.price,c.currency)} × ${c.qty}</span><b>${money(c.price*c.qty,c.currency)}</b></div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="chg(${i},-1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">−</button><button onclick="chg(${i},1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">+</button><button onclick="rem(${i})" style="margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer">Remove</button></div></div></div>`).join("");
+  const sub=CART.reduce((s,c)=>s+c.price*c.qty,0), cur=CART[0]?.currency||"INR", ship=sub>999?0:79, discount=0, total=sub+ship-discount;
+  tot.innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub,cur)}</b></div><div class="row"><span>Shipping</span><span>${ship?money(ship,cur):"Free"}</span></div>${discount?`<div class="row"><span>Discount</span><span>- ${money(discount,cur)}</span></div>`:""}<div class="row total"><span>Total</span><span>${money(total,cur)}</span></div>`;
+  payTotal.textContent=money(total,cur);
+}
+window.chg=(i,d)=>{CART[i].qty+=d; if(CART[i].qty<=0) CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render()};
+window.rem=(i)=>{CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render()};
+function applyCoupon(){const c=document.getElementById('coupon').value.trim(); if(!c) return toast("Enter coupon"); toast("Coupon '"+c+"' applied (demo) — 0% off")}
+document.querySelectorAll('.pay label').forEach(l=>l.addEventListener('click',()=>{document.querySelectorAll('.pay label').forEach(x=>x.classList.remove('active')); l.classList.add('active'); l.querySelector('input').checked=true}));
+async function placeOrder(){
+  if(!CART.length) return toast("Bag empty");
+  const email=document.getElementById('email').value.trim(), phone=document.getElementById('phone').value.trim();
+  const fn=document.getElementById('firstName').value.trim(), ln=document.getElementById('lastName').value.trim();
+  const street=document.getElementById('street').value.trim(), city=document.getElementById('city').value.trim(), state=document.getElementById('state').value.trim(), postal=document.getElementById('postal').value.trim();
+  if(!email||!phone||!fn||!ln||!street||!city||!postal) return toast("Please fill all required fields");
+  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Processing…";
+  const lines=CART.map(c=>({quantity:c.qty, variantId:c.variantId}));
+  try{
+    const mutation=`mutation Create($lines:[CheckoutLineInput!]!, $email:String, $addr:AddressInput){
+      checkoutCreate(input:{ lines:$lines, email:$email, shippingAddress:$addr, billingAddress:$addr }){
+        checkout{ id token }
+        errors{ field message code }
+      }
+    }`;
+    const addr={firstName:fn, lastName:ln, streetAddress1:street, city, postalCode:postal, country:"IN", countryArea:state, phone};
+    const data=await gql(mutation,{lines, email, addr});
+    const errs=data?.checkoutCreate?.errors;
+    if(errs?.length) throw new Error(errs.map(e=>e.message).join(", "));
+    const chk=data?.checkoutCreate?.checkout;
+    if(chk){ document.getElementById('succId').textContent="Checkout ID: "+chk.id+" • Token: "+chk.token.slice(0,16)+"…"; showSuccess(); CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); render(); btn.textContent="Placed ✓"; return; }
+    throw new Error("No checkout returned");
+  }catch(e){
+    console.warn(e);
+    // graceful demo fallback: treat as success when stock insufficient, etc.
+    if(String(e.message).toLowerCase().includes("stock") || String(e.message).toLowerCase().includes("insufficient") || e.message.includes("Could not add")){
+      document.getElementById('succId').textContent="Demo order (Saleor stock 0) — "+e.message.slice(0,80);
+      showSuccess();
+      CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); render();
+      toast("Stock issue — demo order confirmed");
+    } else {
+      toast("Saleor: "+e.message.slice(0,90));
+      btn.disabled=false; btn.innerHTML=`Place Order — <span id="payTotal">${document.getElementById('payTotal').textContent}</span>`;
+    }
+  } finally {
+    setTimeout(()=>{btn.disabled=false; btn.innerHTML=`Place Order — <span id="payTotal">${document.getElementById('payTotal').textContent}</span>`}, 1200);
+  }
+}
+function showSuccess(){document.getElementById('success').classList.add('open')}
+function closeSucc(){document.getElementById('success').classList.remove('open')}
+render();
+</script>
+</body>
+</html>
