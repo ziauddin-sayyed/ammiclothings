@@ -318,25 +318,7 @@ button{font:inherit}
       <div class="item"><img src="images/slider/slide7.jpeg" alt="Slider 7" loading="lazy"/></div>
       <div class="item"><img src="images/slider/slide8.jpeg" alt="Slider 8" loading="lazy"/></div>
     </div>
-    <div class="hero-float">
-      <img id="heroFloatImg" src="https://ammikids.themanagemate.com/thumbnail/UHJvZHVjdE1lZGlhOjg=/256/" alt=""/>
-      <div>
-        <h4 id="heroFloatName">Bubblegum Sequence Frock</h4>
-        <p>from <b id="heroFloatPrice">₹432</b> • <span id="heroFloatCat">Mini Frocks</span></p>
-      </div>
-    </div>
   </div>
-</section>
-
-<section class="section" id="collections">
-  <div class="section-head">
-    <div>
-      <h2>Shop by daydream</h2>
-      <p>Curated capsules for every little personality — from petal-soft sets to statement party gowns.</p>
-    </div>
-    <a class="link" href="#shop">View all collections</a>
-  </div>
-  <div class="cat-grid" id="catGrid"></div>
 </section>
 
 <section class="section" id="shop">
@@ -556,10 +538,10 @@ async function loadProducts(){
     if(!p.plainDesc) p.plainDesc = p.description || "Premium kidswear stitched for twirls and everyday magic.";
   });
   if(PRODUCTS[0]){
-    document.getElementById('heroFloatName').textContent = PRODUCTS[0].name;
-    document.getElementById('heroFloatPrice').textContent = money(PRODUCTS[0].pricing?.priceRange?.start?.gross?.amount || 432, PRODUCTS[0].pricing?.priceRange?.start?.gross?.currency || "INR");
-    document.getElementById('heroFloatCat').textContent = PRODUCTS[0].category?.name || "Kidswear";
-    document.getElementById('heroFloatImg').src = PRODUCTS[0].thumbnail?.url || document.getElementById('heroFloatImg').src;
+    const hName=document.getElementById('heroFloatName'); if(hName) hName.textContent = PRODUCTS[0].name;
+    const hPrice=document.getElementById('heroFloatPrice'); if(hPrice) hPrice.textContent = money(PRODUCTS[0].pricing?.priceRange?.start?.gross?.amount || 432, PRODUCTS[0].pricing?.priceRange?.start?.gross?.currency || "INR");
+    const hCat=document.getElementById('heroFloatCat'); if(hCat) hCat.textContent = PRODUCTS[0].category?.name || "Kidswear";
+    const hImg=document.getElementById('heroFloatImg'); if(hImg) hImg.src = PRODUCTS[0].thumbnail?.url || hImg.src;
   }
   renderProducts();
   document.getElementById('status').textContent = PRODUCTS.length ? `Showing ${PRODUCTS.length} styles • Live from Saleor` : `No products found — API returned empty. Check channel config.`;
@@ -579,19 +561,21 @@ function renderCategories(){
   });
   const grid = document.getElementById('catGrid');
   const imgFallbacks = ["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1522771930-78848d9293e4?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?q=80&w=800&auto=format&fit=crop"];
-  if(grid) grid.innerHTML = CATEGORIES.map((c,i)=>{
-    const img = c.backgroundImage?.url || PRODUCTS.find(p=>(p.category?.slug===c.slug))?.thumbnail?.url || imgFallbacks[i%imgFallbacks.length];
-    return `<a class="cat-card" href="#shop" data-cat="${c.slug}">
-      <img src="${img}" alt="${c.name}"/>
-      <div class="cat-overlay"></div>
-      <div class="cat-content"><div><h3>${c.name}</h3></div></div>
-    </a>`;
-  }).join("");
-  grid.querySelectorAll('.cat-card').forEach(c=>c.addEventListener('click', e=>{
-    e.preventDefault();
-    FILTER=c.dataset.cat; document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active', x.dataset.filter===FILTER));
-    document.getElementById('shop').scrollIntoView({behavior:'smooth'}); renderProducts();
-  }));
+  if(grid){
+    grid.innerHTML = CATEGORIES.map((c,i)=>{
+      const img = c.backgroundImage?.url || PRODUCTS.find(p=>(p.category?.slug===c.slug))?.thumbnail?.url || imgFallbacks[i%imgFallbacks.length];
+      return `<a class="cat-card" href="#shop" data-cat="${c.slug}">
+        <img src="${img}" alt="${c.name}"/>
+        <div class="cat-overlay"></div>
+        <div class="cat-content"><div><h3>${c.name}</h3></div></div>
+      </a>`;
+    }).join("");
+    grid.querySelectorAll('.cat-card').forEach(c=>c.addEventListener('click', e=>{
+      e.preventDefault();
+      FILTER=c.dataset.cat; document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active', x.dataset.filter===FILTER));
+      document.getElementById('shop').scrollIntoView({behavior:'smooth'}); renderProducts();
+    }));
+  }
 }
 
 function filtered(){
