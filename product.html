@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
-  --primary:#6c438c;--primary-dark:#311d40;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;
+  --primary:#c0006b;--primary-dark:#c0006b;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;
   --cream:#fdfcff;--blush:#fef0f7;--blush-deep:#f7cbd1;--mauve:var(--accent);--gold:var(--accent);--gold-dark:var(--accent-dark);
   --ink:#1E1E1E;--muted:#7A6E6A;--sage:#f3f0f7;--line:#efe6f0;--card:#fff;--radius:24px;--radius-lg:36px;
   --shadow:0 20px 60px rgba(108,67,140,.12);--shadow-sm:0 8px 30px rgba(108,67,140,.08);
@@ -24,10 +24,26 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .nav{display:flex;gap:26px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#4A3F3B}
 .nav a:after{content:"";display:block;height:1px;background:var(--accent);transform:scaleX(0);transition:.25s} .nav a:hover:after{transform:scaleX(1)}
 .spacer{flex:1}.icon-btn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative}.badge{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center}
+.hamburger{display:none;width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;flex-shrink:0;transition:.2s}
+.hamburger span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);backdrop-filter:blur(2px);z-index:39}
+.nav-backdrop.open{display:block}
+@media(max-width:900px){
+  .header-inner{gap:12px;padding:12px 14px}
+  .hamburger{display:flex}
+  .nav{display:none}
+  .nav.open{display:flex;position:fixed;top:62px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18);z-index:45;gap:0}
+  .nav.open a{padding:14px 8px;border-bottom:1px solid var(--line);font-size:14px}
+  .nav.open a:last-child{border-bottom:none}
+  .nav.open a:after{display:none}
+}
 .breadcrumb{max-width:1280px;margin:18px auto 0;padding:0 20px;font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
 .breadcrumb a:hover{color:var(--primary)} .breadcrumb b{color:var(--ink)}
 .pdp{max-width:1280px;margin:18px auto;padding:0 20px;display:grid;grid-template-columns:1.15fr .85fr;gap:28px}
-@media(max-width:900px){.pdp{grid-template-columns:1fr}.nav{display:none}}
+@media(max-width:900px){.pdp{grid-template-columns:1fr}}
 .gallery{background:var(--sage);border-radius:28px;overflow:hidden;padding:14px}
 .main-img{aspect-ratio:1/1.15;background:#fff;border-radius:18px;overflow:hidden;display:grid;place-items:center;position:relative;cursor:zoom-in}
 .main-img img{width:100%;height:100%;object-fit:contain;object-position:center}
@@ -100,8 +116,10 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 <header class="header">
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi"/></a>
-    <nav class="nav"><a href="index.html#shop">Shop</a><a href="index.html#collections">Collections</a><a href="index.html#story">Our Story</a><a href="checkout.html">Checkout</a></nav>
+    <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="index.html#collections">Collections</a><a href="index.html#story">Our Story</a><a href="checkout.html">Checkout</a></nav>
     <div class="spacer"></div>
+    <div class="nav-backdrop" id="navBackdrop"></div>
     <a class="icon-btn" href="checkout.html" id="cartBtn" aria-label="cart">🛒<span class="badge" id="cartCount">0</span></a>
   </div>
 </header>
@@ -152,7 +170,7 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Ammi Enterprises</h4><a href="https://www.ammienterprises.in/products.htm" target="_blank">Products</a><br/><a href="https://www.ammienterprises.in/about-us.htm" target="_blank">About Us</a></div>
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Help</h4><a href="mailto:ammi.kidz@gmail.com">Send Email</a><br/><a href="https://api.whatsapp.com/send?phone=919321508566" target="_blank">WhatsApp</a></div>
   </div>
-  <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#6c438c • #e70080 • Saleor</span></div>
+  <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#c0006b • #e70080 • Saleor</span></div>
 </footer>
 
 <!-- mini cart drawer -->
@@ -224,6 +242,22 @@ function openDrawer(){document.getElementById('drawer').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open')}
 document.getElementById('drawerBg').onclick=closeDrawer; document.getElementById('closeDrawer').onclick=closeDrawer;
 document.getElementById('cartBtn').onclick=(e)=>{e.preventDefault(); openDrawer()};
+(function(){
+  const btn=document.getElementById('hamBtn'), nav=document.getElementById('mainNav'), backdrop=document.getElementById('navBackdrop');
+  if(!btn||!nav) return;
+  function toggle(open){
+    const isOpen = open ?? !nav.classList.contains('open');
+    nav.classList.toggle('open', isOpen);
+    btn.classList.toggle('open', isOpen);
+    backdrop.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  btn.addEventListener('click', ()=> toggle());
+  backdrop.addEventListener('click', ()=> toggle(false));
+  nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
+  window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
+})();
 load(); save();
 </script>
 </body>

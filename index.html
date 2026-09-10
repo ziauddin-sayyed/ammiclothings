@@ -9,11 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"/>
 <style>
 :root{
   /* Ammi Enterprises palette - from ammienterprises.in */
-  --primary:#6c438c;
-  --primary-dark:#311d40;
+  --primary:#c0006b;
+  --primary-dark:#c0006b;
   --accent:#e70080;
   --accent-dark:#c0006b;
   --yellow:#f6ba22;
@@ -44,6 +46,10 @@ button{font:inherit}
 .announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
 .announce span{opacity:.95}
 .announce b{color:var(--yellow)}
+.splash{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease, visibility .6s}
+.splash img{max-width:90%;max-height:90%;object-fit:contain;display:block}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+@media(max-width:760px){.splash{background:#fff} .splash img{width:90%;height:90%;max-width:90%;max-height:90%;object-fit:contain}}
 
 /* header */
 .header{position:sticky;top:0;z-index:40;background:rgba(255,249,242,.8);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line)}
@@ -61,11 +67,29 @@ button{font:inherit}
 .icon-btn svg{width:18px;height:18px;stroke:#1E1E1E;fill:none;stroke-width:1.6}
 .badge{position:absolute;top:-6px;right:-6px;background:var(--mauve);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px}
 .search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;min-width:220px}
+.hamburger{display:none;width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;flex-shrink:0;transition:.2s}
+.hamburger span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);backdrop-filter:blur(2px);z-index:39}
+.nav-backdrop.open{display:block}
+@media(max-width:900px){
+  .header-inner{gap:12px;padding:12px 14px}
+  .hamburger{display:flex}
+  .nav{display:none}
+  .nav.open{display:flex;position:fixed;top:62px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18);z-index:45;gap:0}
+  .nav.open a{padding:14px 8px;border-bottom:1px solid var(--line);font-size:14px}
+  .nav.open a:last-child{border-bottom:none}
+  .nav.open a:after{display:none}
+  .search-box{display:none;min-width:0}
+  .search-box.open{display:flex;position:fixed;top:66px;left:12px;right:12px;z-index:44;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+}
 .search-box input{border:none;outline:none;font-size:13px;width:100%;background:transparent}
 .search-box svg{width:16px;height:16px;opacity:.6}
 
 /* hero */
-.hero{max-width:1280px;margin:0 auto;padding:24px 20px 0;display:grid;grid-template-columns:1.05fr .9fr;gap:28px;align-items:stretch}
+.hero{max-width:1280px;margin:0 auto;padding:24px 20px 0;display:grid;grid-template-columns:0.55fr 1.45fr;gap:28px;align-items:stretch}
 .hero-card{background:var(--blush);border-radius:var(--radius-lg);padding:44px 42px 36px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .hero-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mauve);font-weight:700;display:flex;align-items:center;gap:10px}
 .hero-eyebrow:before{content:"";width:28px;height:1px;background:var(--mauve)}
@@ -83,8 +107,23 @@ button{font:inherit}
 .hero-note{font-size:12px;color:var(--muted);line-height:1.4}
 .hero-note b{color:var(--ink)}
 
-.hero-visual{border-radius:var(--radius-lg);overflow:hidden;position:relative;background:#E8D9D1;min-height:520px;display:grid}
+.hero-visual{border-radius:var(--radius-lg);overflow:hidden;position:relative;background:#E8D9D1;min-height:520px;display:block}
 .hero-visual img{width:100%;height:100%;object-fit:cover}
+.hero-visual .owl-carousel,.hero-visual .owl-stage-outer,.hero-visual .owl-stage,.hero-visual .owl-item{height:100%}
+.hero-visual .owl-item .item{height:520px}
+.hero-visual .owl-item .item img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-visual .owl-nav{position:absolute;inset:auto 14px 14px auto;display:flex;gap:8px;z-index:2}
+.hero-visual .owl-nav button{width:36px;height:36px;border-radius:999px!important;background:rgba(255,255,255,.9)!important;color:var(--ink)!important;border:1px solid var(--line)!important;display:grid;place-items:center;font-size:18px!important;line-height:1}
+.hero-visual .owl-nav button:hover{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
+.hero-visual .owl-dots{display:none!important}
+#videoCarousel .item{border-radius:20px;overflow:hidden;background:#000}
+#videoCarousel .item video{width:100%;height:420px;object-fit:cover;display:block;border-radius:20px;background:#000}
+@media(max-width:760px){#videoCarousel .item video{height:460px}}
+#videoCarousel .owl-nav{margin-top:14px;display:flex;justify-content:center;gap:10px}
+#videoCarousel .owl-nav button{width:38px;height:38px;border-radius:999px!important;background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important;display:grid;place-items:center;font-size:18px!important}
+#videoCarousel .owl-nav button:hover{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
+#videoCarousel .owl-dots{display:none!important}
+.hero-float{z-index:3}
 .hero-float{position:absolute;left:18px;bottom:18px;background:#fff;border-radius:20px;padding:12px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);max-width:300px}
 .hero-float img{width:64px;height:64px;border-radius:14px;object-fit:cover}
 .hero-float h4{margin:0;font-size:14px}
@@ -114,7 +153,7 @@ button{font:inherit}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 @media(max-width:1100px){.products{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:760px){.products{grid-template-columns:repeat(2,1fr)} .hero{grid-template-columns:1fr} .cat-grid{grid-template-columns:1fr} .hero h1{font-size:42px}}
+@media(max-width:760px){.products{grid-template-columns:repeat(2,1fr)} .hero{grid-template-columns:1fr} .hero-card{order:2} .hero-visual{order:1} .cat-grid{grid-template-columns:1fr} .hero h1{font-size:42px}}
 .card{background:#fff;border-radius:22px;overflow:hidden;border:1px solid #F6EDE6;display:flex;flex-direction:column;transition:.25s;position:relative}
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm);border-color:#F0DDD2}
 .card-img{aspect-ratio:4/4.8;background:var(--sage);position:relative;overflow:hidden}
@@ -214,6 +253,8 @@ button{font:inherit}
 </style>
 </head>
 <body>
+<div id="splash" class="splash"><img src="images/splash.jpeg" alt="Ammikids splash"/></div>
+<script>setTimeout(function(){var s=document.getElementById('splash');if(s)s.classList.add('hide');},1500);document.getElementById('splash').addEventListener('click',function(){this.classList.add('hide')});</script>
 <div class="announce">
   <span>Ammi Enterprises • Est. 2003 • Mumbai</span>
   <span>•</span>
@@ -227,7 +268,8 @@ button{font:inherit}
 <header class="header">
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi Enterprises" onerror="this.style.display='none'"/></a>
-    <nav class="nav">
+    <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="nav" id="mainNav">
       <a href="index.html#shop">Shop</a>
       <a href="product.html">Product</a>
       <a href="checkout.html">Checkout</a>
@@ -240,6 +282,7 @@ button{font:inherit}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="M20 20L16 16"/></svg>
       <input id="search" placeholder="Search frocks, sets..." />
     </label>
+    <div class="nav-backdrop" id="navBackdrop"></div>
     <button class="icon-btn" id="wishlistBtn" aria-label="wishlist">
       <svg viewBox="0 0 24 24"><path d="M12 20l-3.6-3.2C5 13.6 2 10.8 2 7.5 2 4.2 4.5 2 7.3 2c1.6 0 3.1.8 3.9 2 0 0 0 0 0 0 .8-1.2 2.3-2 3.9-2C18 2 20.5 4.2 20.5 7.5c0 3.3-3 6.1-6.4 9.3L12 20z"/></svg>
       <span class="badge" id="wishCount" style="display:none">0</span>
@@ -254,11 +297,10 @@ button{font:inherit}
 <section class="hero">
   <div class="hero-card" style="background:linear-gradient(135deg, var(--blush) 0%, #f3e8ff 100%);border:1px solid var(--line)">
     <div class="hero-eyebrow"> Since 2003 • Ammi Enterprises • Mumbai </div>
-    <h1>Dressed for <em>twirls,</em><br/> giggles & grand entrances</h1>
+    <h1>Dressed for <em>twirls,</em></h1>
     <p>From the house of <b>Ammi Enterprises</b> — Manufacturer, Supplier & Wholesaler of Kids Wear & Ladies Wear since 2003. Founder <b>Aqueel Yusuf Khan</b>. Our wide range: kids Co Ord sets, embroidery tops, frocks, jumpsuits, night suits, kurti palazzo sets & more — now shoppable via Saleor.</p>
     <div class="hero-actions">
       <a href="#shop" class="btn-primary">Shop Festive Edit →</a>
-      <a href="https://www.ammienterprises.in/products.htm" target="_blank" class="btn-ghost">View on Ammi Enterprises</a>
     </div>
     <div class="hero-meta">
       <div class="avatars">
@@ -271,7 +313,39 @@ button{font:inherit}
     <div class="ribbon" style="background:var(--accent)">Est. 2003</div>
   </div>
   <div class="hero-visual">
-    <img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=900&auto=format&fit=crop" alt="Kidswear hero"/>
+    <div class="owl-carousel owl-theme" id="heroCarousel">
+      <div class="item"><img src="images/slider/slide1.jpeg" alt="Slider 1" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide2.jpeg" alt="Slider 2" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide3.jpeg" alt="Slider 3" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide4.jpeg" alt="Slider 4" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide5.jpeg" alt="Slider 5" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide6.jpeg" alt="Slider 6" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide7.jpeg" alt="Slider 7" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide8.jpeg" alt="Slider 8" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide9.jpeg" alt="Slider 9" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide10.jpeg" alt="Slider 10" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide11.jpeg" alt="Slider 11" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide12.jpeg" alt="Slider 12" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide13.jpeg" alt="Slider 13" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide14.jpeg" alt="Slider 14" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide15.jpeg" alt="Slider 15" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide16.jpeg" alt="Slider 16" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide17.jpeg" alt="Slider 17" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide18.jpeg" alt="Slider 18" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide19.jpeg" alt="Slider 19" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide20.jpeg" alt="Slider 20" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide21.jpeg" alt="Slider 21" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide22.jpeg" alt="Slider 22" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide23.jpeg" alt="Slider 23" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide24.jpeg" alt="Slider 24" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide25.jpeg" alt="Slider 25" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide26.jpeg" alt="Slider 26" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide27.jpeg" alt="Slider 27" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide28.jpeg" alt="Slider 28" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide29.jpeg" alt="Slider 29" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide30.jpeg" alt="Slider 30" loading="lazy"/></div>
+      <div class="item"><img src="images/slider/slide31.jpeg" alt="Slider 31" loading="lazy"/></div>
+    </div>
     <div class="hero-float" id="heroFloat">
       <img id="heroFloatImg" src="https://ammikids.themanagemate.com/thumbnail/UHJvZHVjdE1lZGlhOjg=/256/" alt=""/>
       <div>
@@ -349,6 +423,22 @@ button{font:inherit}
   </div>
 </section>
 
+<section class="section" id="videos">
+  <div class="section-head">
+    <div>
+      <h2>Watch the twirl</h2>
+      <p>10-second glimpses — our little models in motion. Tap to play with sound.</p>
+    </div>
+    <a class="link" href="#videos">All videos</a>
+  </div>
+  <div class="owl-carousel owl-theme" id="videoCarousel">
+    <div class="item"><video src="videos/002.mp4" autoplay muted playsinline controls preload="metadata" poster="images/slider/slide1.jpeg"></video></div>
+    <div class="item"><video src="videos/01.mp4" autoplay muted playsinline controls preload="metadata" poster="images/slider/slide2.jpeg"></video></div>
+    <div class="item"><video src="videos/07.mp4" autoplay muted playsinline controls preload="metadata" poster="images/slider/slide3.jpeg"></video></div>
+    <div class="item"><video src="videos/16.mp4" autoplay muted playsinline controls preload="metadata" poster="images/slider/slide4.jpeg"></video></div>
+  </div>
+</section>
+
 <footer class="footer" id="contact">
   <div class="footer-inner">
     <div>
@@ -387,7 +477,7 @@ button{font:inherit}
   </div>
   <div class="legal">
     <span>© 2026 Ammi Enterprises • All Rights Reserved. Developed retail by Ammikids • <a href="https://www.ammienterprises.in" target="_blank">ammienterprises.in</a></span>
-    <span>Theme: #6c438c • #e70080 • Saleor Headless • Mumbai 400028</span>
+    <span>Theme: #c0006b • #e70080 • Saleor Headless • Mumbai 400028</span>
   </div>
 </footer>
 
@@ -474,7 +564,7 @@ async function loadProducts(){
       }}
       totalCount
     }
-    categories(first:10){ edges{ node{ name slug } } }
+    categories(first:10){ edges{ node{ name slug backgroundImage{ url alt } } } }
   }`;
   const d = await gql(q);
   PRODUCTS = (d?.products?.edges||[]).map(e=>e.node);
@@ -516,7 +606,7 @@ function renderCategories(){
   const imgFallbacks = ["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1522771930-78848d9293e4?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?q=80&w=800&auto=format&fit=crop"];
   if(grid) grid.innerHTML = CATEGORIES.map((c,i)=>{
     const count = PRODUCTS.filter(p=>(p.category?.slug===c.slug)).length;
-    const img = PRODUCTS.find(p=>(p.category?.slug===c.slug))?.thumbnail?.url || imgFallbacks[i%imgFallbacks.length];
+    const img = c.backgroundImage?.url || PRODUCTS.find(p=>(p.category?.slug===c.slug))?.thumbnail?.url || imgFallbacks[i%imgFallbacks.length];
     return `<a class="cat-card" href="#shop" data-cat="${c.slug}">
       <img src="${img}" alt="${c.name}"/>
       <div class="cat-overlay"></div>
@@ -746,8 +836,75 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
   }
 })();
 
+// hamburger menu — mobile
+(function(){
+  const btn=document.getElementById('hamBtn'), nav=document.getElementById('mainNav'), backdrop=document.getElementById('navBackdrop');
+  if(!btn||!nav) return;
+  function toggle(open){
+    const isOpen = open ?? !nav.classList.contains('open');
+    nav.classList.toggle('open', isOpen);
+    btn.classList.toggle('open', isOpen);
+    backdrop.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  btn.addEventListener('click', ()=> toggle());
+  backdrop.addEventListener('click', ()=> toggle(false));
+  nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
+  window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
+})();
 // expose for inline handlers
 window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.closeDrawer=closeDrawer; window.checkout=checkout;
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script>
+$(function(){
+  $('#heroCarousel').owlCarousel({
+    loop:true,
+    autoplay:true,
+    autoplayTimeout:2500,
+    autoplayHoverPause:true,
+    smartSpeed:600,
+    margin:12,
+    nav:true,
+    dots:false,
+    navText:['‹','›'],
+    responsive:{
+      0:{items:1},
+      900:{items:3}
+    }
+  });
+  $('#videoCarousel').owlCarousel({
+    loop:true,
+    margin:16,
+    nav:true,
+    dots:false,
+    navText:['‹','›'],
+    responsive:{
+      0:{items:1},
+      900:{items:3}
+    }
+  });
+  // pause other videos when one plays; ensure autoplay muted; advance carousel when video ends
+  document.querySelectorAll('#videoCarousel video').forEach(v=>{
+    v.muted = true;
+    v.play().catch(()=>{});
+    v.addEventListener('play', ()=> {
+      document.querySelectorAll('#videoCarousel video').forEach(o=>{ if(o!==v) o.pause(); });
+    });
+    v.addEventListener('ended', ()=> {
+      $('#videoCarousel').trigger('next.owl.carousel');
+    });
+  });
+  // autoplay next video when slide changes
+  $('#videoCarousel').on('translated.owl.carousel', function(){
+    const activeVideos = document.querySelectorAll('#videoCarousel .owl-item.active video');
+    if(activeVideos.length){
+      activeVideos[0].play().catch(()=>{});
+    }
+  });
+});
 </script>
 </body>
 </html>

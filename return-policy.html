@@ -8,7 +8,7 @@
 <link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--primary:#6c438c;--primary-dark:#311d40;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--ink:#1E1E1E;--muted:#7A6E6A;--line:#efe6f0;--card:#fff;--radius:24px;--shadow:0 20px 60px rgba(108,67,140,.12)}
+:root{--primary:#c0006b;--primary-dark:#c0006b;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--ink:#1E1E1E;--muted:#7A6E6A;--line:#efe6f0;--card:#fff;--radius:24px;--shadow:0 20px 60px rgba(108,67,140,.12)}
 *{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--cream);color:var(--ink)}
 a{color:inherit;text-decoration:none}
 .announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}.announce b{color:var(--yellow)}
@@ -38,15 +38,34 @@ p,li{font-size:14.5px;line-height:1.75;color:#3d3633}ul,ol{padding-left:20px}
 .footer h4{color:#fff;margin:0 0 10px;font-family:"Cormorant Garamond",serif;font-size:18px}
 .footer a{display:inline-block;font-size:13.5px;margin:3px 0;color:#D9CBE4}.footer a:hover{color:var(--yellow)}
 .legal{max-width:1100px;margin:0 auto;padding:14px 20px 22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#B9A8C7;border-top:1px solid rgba(255,255,255,.12)}
+.hamburger{display:none;width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;flex-shrink:0}
+.hamburger span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);backdrop-filter:blur(2px);z-index:39}
+.nav-backdrop.open{display:block}
+@media(max-width:900px){
+  .header-inner{gap:12px;padding:12px 14px}
+  .hamburger{display:flex}
+  .header .nav{display:none}
+  .header .nav.open{display:flex;position:fixed;top:62px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18);z-index:45;gap:0}
+  .header .nav.open a{padding:14px 8px;border-bottom:1px solid var(--line);font-size:14px}
+  .header .nav.open a:last-child{border-bottom:none}
+  #contactNav.open{top:260px}
+}
+
 </style>
 </head>
 <body>
 <div class="announce">Ammi Enterprises • Est. 2003 • <b>Mumbai</b> • Pan India</div>
 <header class="header"><div class="header-inner">
 <a href="index.html" class="logo"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi Enterprises"/></a>
-<nav class="nav"><a href="index.html#shop">Shop</a><a href="product.html">Product</a><a href="checkout.html">Checkout</a><a href="index.html#story">Our Story</a></nav>
+<button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="product.html">Product</a><a href="checkout.html">Checkout</a><a href="index.html#story">Our Story</a></nav>
 <div class="spacer"></div>
-<nav class="nav"><a href="mailto:ammi.kidz@gmail.com">Contact</a></nav>
+<nav class="nav" id="contactNav"><a href="mailto:ammi.kidz@gmail.com">Contact</a></nav>
+<div class="nav-backdrop" id="navBackdrop"></div>
 </div></header>
 <main class="wrap"><div class="card">
 <div class="eyebrow">Ammikids • by Ammi Enterprises</div>
@@ -93,5 +112,27 @@ p,li{font-size:14.5px;line-height:1.75;color:#3d3633}ul,ol{padding-left:20px}
 <div><h4>Policies</h4><a href="terms-and-conditions.html">Terms and Conditions</a><br/><a href="privacy-policy.html">Privacy Policy</a><br/><a href="refund-policy.html">Refund Policy</a><br/><a href="return-policy.html">Return Policy</a><br/><a href="shipping-policy.html">Shipping Policy</a></div>
 <div><h4>Contact</h4><a href="mailto:ammi.kidz@gmail.com">ammi.kidz@gmail.com</a><br/><a href="tel:+919321508566">+91-9321508566</a><br/><a href="https://www.ammienterprises.in" target="_blank">ammienterprises.in</a></div>
 </div><div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028 • Saleor Headless</span></div></footer>
+<script>
+(function(){
+  const btn=document.getElementById('hamBtn'), nav=document.getElementById('mainNav'), backdrop=document.getElementById('navBackdrop');
+  const contactNav=document.getElementById('contactNav');
+  if(!btn||!nav) return;
+  function toggle(open){
+    const isOpen = open ?? !nav.classList.contains('open');
+    nav.classList.toggle('open', isOpen);
+    if(contactNav) contactNav.classList.toggle('open', isOpen);
+    btn.classList.toggle('open', isOpen);
+    backdrop.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  btn.addEventListener('click', ()=> toggle());
+  backdrop.addEventListener('click', ()=> toggle(false));
+  nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
+  if(contactNav) contactNav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
+  window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
+})();
+</script>
+
 </body>
 </html>
