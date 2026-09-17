@@ -46,9 +46,8 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm)}
 .card-img{aspect-ratio:4/4.8;background:var(--sage);position:relative;overflow:hidden;cursor:pointer}
 .card-img img{width:100%;height:100%;object-fit:cover}
-.badge-new{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 8px;border-radius:999px}
 .card-body{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card-cat{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mauve);font-weight:700}
+.card-cat{display:inline-block;align-self:flex-start;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 10px;border-radius:999px}
 .card-title{font-family:"Cormorant Garamond",serif;font-size:17px;margin:0}
 .card-price{display:flex;gap:8px;align-items:baseline}
 .card-price b{font-size:15px}
@@ -151,7 +150,7 @@ function render(){
     const img=p.thumbnail?.url||p.media?.[0]?.url||"";
     const fab=(valsOf(p,"Fabric")[0]||"");
     return `<article class="card">
-      <div class="card-img" onclick="location.href='product.html?slug=${p.slug}'">${img?`<img loading="lazy" src="${img}" alt="${p.name}"/>`:""}<span class="badge-new">${p.category?.name||'Ammikids'}</span></div>
+      <div class="card-img" onclick="location.href='product.html?slug=${p.slug}'">${img?`<img loading="lazy" src="${img}" alt="${p.name}"/>`:""}</div>
       <div class="card-body"><div class="card-cat">${p.category?.name||'Kidswear'}</div>
       <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
       ${fab?`<div class="card-attr">${fab}</div>`:""}
