@@ -63,6 +63,17 @@ a{color:inherit;text-decoration:none}
 .btn-primary:hover{background:var(--accent-dark)} .btn-primary:disabled{opacity:.6;cursor:not-allowed}
 .btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px}
 .note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+.tabs{display:flex;gap:8px;margin:0 0 14px}
+.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px;font-weight:700;cursor:pointer;font-size:13px}
+.tabs button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.localbox{display:none;margin-top:12px;border:1px dashed var(--accent);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted);background:var(--blush)}
+.localbox.show{display:block}
+.localbox button{border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;margin:4px 6px 4px 0}
+.shipopts{display:flex;flex-direction:column;gap:10px}
+.shipopts label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;font-size:14px}
+.shipopts label.on{border-color:var(--primary);background:rgba(108,67,140,.05)}
+.accthi{display:flex;align-items:center;gap:10px;background:var(--sage);border-radius:14px;padding:12px;font-size:14px}
+.accthi b{color:var(--primary)}
 .empty{text-align:center;padding:30px;color:var(--muted)}
 .badge{font-size:11px;background:var(--sage);padding:4px 8px;border-radius:999px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--primary-dark);color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.3s;z-index:50}
@@ -80,19 +91,46 @@ a{color:inherit;text-decoration:none}
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt=""/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="product.html">Product</a></nav>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
     <div style="flex:1"></div>
     <div class="nav-backdrop" id="navBackdrop"></div>
     <a href="index.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">← Continue Shopping</a>
   </div>
 </header>
-<div class="steps"><span class="done">✓</span> Bag <span>—</span> <span class="on">2</span> <b>Checkout</b> <span>—</span> <span>3</span> Payment</div>
+<div class="steps"><span class="done">✓</span> Bag <span>—</span> <span class="on">2</span> <b>Account & Details</b> <span>—</span> <span>3</span> <b>Delivery & Payment</b></div>
 
 <div class="wrap">
   <div>
-    <div class="card">
+    <div class="card" id="accountCard">
+      <h2>Account</h2>
+      <div id="loggedOut">
+        <div class="tabs"><button id="tabLogin" class="on" onclick="acctTab('login')">Log in</button><button id="tabReg" onclick="acctTab('reg')">Register</button></div>
+        <div id="paneLogin">
+          <div class="grid2">
+            <div class="field"><label>Email *</label><input type="email" id="liEmail" placeholder="you@example.com"/></div>
+            <div class="field"><label>Password *</label><input type="password" id="liPass" placeholder="••••••••"/></div>
+          </div>
+          <button class="btn-ghost" onclick="doLogin()">Log in</button>
+        </div>
+        <div id="paneReg" style="display:none">
+          <div class="grid2">
+            <div class="field"><label>First name *</label><input id="rgFirst" placeholder="Aqueel"/></div>
+            <div class="field"><label>Last name *</label><input id="rgLast" placeholder="Khan"/></div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div class="field"><label>Email *</label><input type="email" id="rgEmail" placeholder="you@example.com"/></div>
+            <div class="field"><label>Password *</label><input type="password" id="rgPass" placeholder="Min 8 characters"/></div>
+          </div>
+          <button class="btn-ghost" onclick="doRegister()">Create account</button>
+          <p class="note">New accounts need email confirmation before first login.</p>
+        </div>
+        <div class="localbox" id="localLoginBox">🧪 <b>Local testing</b> — demo login:<br/><button onclick="fillDummyLogin()">Fill demo login</button><span style="font-size:11px">localtest@example.com / local1234</span></div>
+      </div>
+      <div id="loggedIn" style="display:none"><div class="accthi">👋 Hi, <b id="acctName">—</b><span style="color:var(--muted);font-size:12px" id="acctEmail"></span><button class="btn-ghost" style="width:auto;margin:0 0 0 auto;padding:8px 16px" onclick="doLogout()">Log out</button></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
       <h2>Contact & Shipping</h2>
-      <p style="font-size:12px;color:var(--muted);margin:0 0 12px">Powered by Saleor GraphQL <a href="https://ammikids.themanagemate.com/graphql/" target="_blank" style="color:var(--primary);text-decoration:underline">ammikids.themanagemate.com/graphql</a> • COD & Dummy payments supported</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 12px">COD & online payments supported • Secure checkout</p>
       <form id="form">
         <h3>Contact</h3>
         <div class="grid2">
@@ -114,11 +152,16 @@ a{color:inherit;text-decoration:none}
           <div class="field"><label>Country</label><select id="country"><option value="IN" selected>India (IN)</option></select></div>
         </div>
         <div class="field" style="margin-top:12px"><label>Order notes (optional)</label><textarea id="notes" rows="2" placeholder="Delivery instructions..."></textarea></div>
+        <div class="localbox" id="localAddrBox">🧪 <b>Local testing</b><br/><button onclick="fillDummyAddr()">Fill dummy address</button></div>
+
+        <h3>Delivery method</h3>
+        <div class="shipopts" id="shipOpts"><p class="note" style="text-align:left;margin:0">Delivery options load when you place the order — or tap below.</p></div>
+        <button class="btn-ghost" style="width:auto;padding:10px 18px" onclick="loadShipOpts(true)">Check delivery options</button>
 
         <h3>Payment</h3>
         <div class="pay">
           <label class="active"><input type="radio" name="pay" value="cod" checked/> <span><b>Cash on Delivery (COD)</b> — Pay on delivery</span></label>
-          <label><input type="radio" name="pay" value="dummy"/> <span><b>Dummy Gateway</b> — Saleor mirumee.payments.dummy</span></label>
+          <label><input type="radio" name="pay" value="dummy"/> <span><b>Online Payment</b> — UPI / card (demo)</span></label>
           <label><input type="radio" name="pay" value="upi"/> <span><b>UPI / Card</b> — demo</span></label>
         </div>
         <p class="note">By placing order you agree to Ammi Enterprises terms. Manufacturer & Wholesaler since 2003.</p>
@@ -139,13 +182,13 @@ a{color:inherit;text-decoration:none}
       <div class="tot" id="totals"></div>
       <button class="btn-primary" id="placeBtn" onclick="placeOrder()">Place Order — <span id="payTotal">—</span></button>
       <button class="btn-ghost" onclick="location.href='index.html#shop'">← Back to shop</button>
-      <p class="note" id="saleorNote">Saleor checkoutCreate will be attempted; if stock is 0, demo success will be shown and bag cleared.</p>
+      <p class="note" id="orderNote">Your order will be confirmed on this page; the bag is cleared after a successful order.</p>
       <p class="note">Need help? WhatsApp <a href="https://api.whatsapp.com/send?phone=917021946362" target="_blank" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a></p>
     </div>
   </div>
 </div>
 
-<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises — All Rights Reserved • Ammikids Retail</span><span>Theme #c0006b • #e70080 • Saleor Headless</span></div></footer>
+<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises — All Rights Reserved • Ammikids Retail</span><span>Theme #c0006b • #e70080 • Mumbai 400028</span></div></footer>
 
 <div class="modal" id="success"><div class="modal-bg" onclick="closeSucc()"></div><div class="modal-card">
   <div style="font-size:40px">🎉</div>
@@ -153,21 +196,109 @@ a{color:inherit;text-decoration:none}
   <p style="color:var(--muted)">Thank you for shopping with <b>Ammi Kids by Ammi Enterprises</b>.<br/>Your bag has been cleared. A confirmation has been simulated.</p>
   <p style="font-size:12px;background:var(--sage);padding:10px;border-radius:12px" id="succId">Checkout ID: —</p>
   <a href="index.html" class="btn-primary" style="text-decoration:none">Back to Store</a>
+  <a href="orders.html" id="succOrders" class="btn-ghost" style="text-decoration:none;display:none">View My Orders →</a>
   <p style="font-size:11px;color:var(--muted);margin-top:8px">Questions? +91 70219 46362 • +91 70219 46362</p>
 </div></div>
 <div class="toast" id="toast"></div>
 <script>
 const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+const CHANNEL="in", DUMMY_GATEWAY="mirumee.payments.dummy";
+const IS_LOCAL=["localhost","127.0.0.1",""].includes(location.hostname);
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]");
+let USER=JSON.parse(localStorage.getItem("ak_user")||"null"), TOKEN=localStorage.getItem("ak_token")||null;
+let CHECKOUT=null, CHECKOUT_KEY="", SHIPMETHOD=null;
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
-async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})});const j=await r.json(); if(j.errors) throw new Error(j.errors[0]?.message||"GraphQL error"); return j.data}
+async function gql(q,v={},token=null){const h={"Content-Type":"application/json"}; if(token) h["Authorization"]="Bearer "+token; const r=await fetch(GRAPHQL,{method:"POST",headers:h,body:JSON.stringify({query:q,variables:v})});const j=await r.json(); if(j.errors) throw new Error(j.errors[0]?.message||"Checkout error"); return j.data}
+/* ---------- account ---------- */
+function acctTab(w){document.getElementById('tabLogin').classList.toggle('on',w==='login'); document.getElementById('tabReg').classList.toggle('on',w==='reg'); document.getElementById('paneLogin').style.display=w==='login'?"":"none"; document.getElementById('paneReg').style.display=w==='reg'?"":"none"}
+function refreshAcct(){const on=!!(USER&&TOKEN); document.getElementById('loggedOut').style.display=on?"none":""; document.getElementById('loggedIn').style.display=on?"":"none"; if(on){document.getElementById('acctName').textContent=USER.firstName||USER.email; document.getElementById('acctEmail').textContent="("+USER.email+")";}}
+async function doLogin(){const e=document.getElementById('liEmail').value.trim(), p=document.getElementById('liPass').value; if(!e||!p) return toast("Enter email + password"); try{const d=await gql(`mutation($e:String!,$p:String!){tokenCreate(email:$e,password:$p){token refreshToken user{id email firstName lastName} errors{message}}}` ,{e,p}); const errs=d.tokenCreate.errors; if(errs?.length) throw new Error(errs.map(x=>x.message).join(", ")); if(!d.tokenCreate.token) throw new Error("Login failed"); TOKEN=d.tokenCreate.token; USER=d.tokenCreate.user; localStorage.setItem("ak_token",TOKEN); localStorage.setItem("ak_user",JSON.stringify(USER)); if(document.getElementById('email')&&!document.getElementById('email').value) document.getElementById('email').value=USER.email; CHECKOUT=null; refreshAcct(); toast("Logged in ✓");}catch(err){toast(err.message.slice(0,120))}}
+async function doRegister(){const f=document.getElementById('rgFirst').value.trim(), l=document.getElementById('rgLast').value.trim(), e=document.getElementById('rgEmail').value.trim(), p=document.getElementById('rgPass').value; if(!f||!e||!p) return toast("Fill name, email + password"); if(p.length<8) return toast("Password needs 8+ characters"); try{const d=await gql(`mutation($i:AccountRegisterInput!){accountRegister(input:$i){user{email} requiresConfirmation errors{field message}}}`,
+ {i:{firstName:f,lastName:l,email:e,password:p,channel:CHANNEL,redirectUrl:location.origin+"/"}}); if(d.accountRegister.errors?.length) throw new Error(d.accountRegister.errors.map(x=>x.message).join(", ")); toast(d.accountRegister.requiresConfirmation?"Account created — confirm via email, then log in":"Account created — please log in"); acctTab('login'); document.getElementById('liEmail').value=e;}catch(err){toast(err.message.slice(0,140))}}
+function doLogout(){USER=null; TOKEN=null; CHECKOUT=null; localStorage.removeItem("ak_token"); localStorage.removeItem("ak_user"); refreshAcct(); toast("Logged out")}
+function fillDummyLogin(){document.getElementById('liEmail').value="localtest@example.com"; document.getElementById('liPass').value="local1234"; toast("Demo login filled — tap Log in")}
+function fillDummyAddr(){document.getElementById('email').value="dummy.user@example.com"; document.getElementById('phone').value="+917021946362"; document.getElementById('firstName').value="Dummy"; document.getElementById('lastName').value="User"; document.getElementById('street').value="A-7, Kasturchand Mill Compound"; document.getElementById('city').value="Mumbai"; document.getElementById('state').value="Maharashtra"; document.getElementById('postal').value="400028"; toast("Dummy address filled")}
+/* ---------- checkout flow ---------- */
+function formAddr(){return {firstName:document.getElementById('firstName').value.trim(),lastName:document.getElementById('lastName').value.trim(),streetAddress1:document.getElementById('street').value.trim(),city:document.getElementById('city').value.trim(),postalCode:document.getElementById('postal').value.trim(),country:"IN",countryArea:document.getElementById('state').value.trim(),phone:document.getElementById('phone').value.trim()}}
+function validForm(){const email=document.getElementById('email').value.trim(), a=formAddr(); if(!email||!a.phone||!a.firstName||!a.lastName||!a.streetAddress1||!a.city||!a.postalCode) {toast("Please fill all required fields"); return null;} return {email, addr:a}}
+function sizeNote(){return CART.map(c=>`${c.sku} x${c.qty}${c.size?` in Size ${c.size}`:""}`).join("; ")}
+async function ensureCheckout(email,addr){
+  const key=JSON.stringify([CART,email,addr]);
+  if(CHECKOUT&&CHECKOUT_KEY===key) return CHECKOUT;
+  const lines=CART.map(c=>({quantity:c.qty,variantId:c.variantId}));
+  const notes=[document.getElementById('notes').value.trim(),("Sizes: "+sizeNote())].filter(Boolean).join(" | ");
+  const d=await gql(`mutation($lines:[CheckoutLineInput!]!,$email:String,$addr:AddressInput){checkoutCreate(input:{channel:"${CHANNEL}",lines:$lines,email:$email,shippingAddress:$addr,billingAddress:$addr}){checkout{id token} errors{field message code}}}`,
+    {lines,email,addr});
+  if(d.checkoutCreate.errors?.length) throw new Error(d.checkoutCreate.errors.map(e=>e.message).join(", "));
+  CHECKOUT=d.checkoutCreate.checkout; CHECKOUT_KEY=key; SHIPMETHOD=null;
+  const note=[document.getElementById('notes').value.trim(),("Sizes: "+sizeNote())].filter(Boolean).join(" | ").slice(0,500);
+  try{await gql(`mutation($id:ID!,$n:String!){checkoutCustomerNoteUpdate(id:$id,customerNote:$n){checkout{id} errors{field message}}}`,
+    {id:CHECKOUT.id,n:note});}catch(e){console.warn("note skipped:",e.message)}
+  if(USER&&TOKEN){try{await gql(`mutation($cid:ID!,$uid:ID!){checkoutCustomerAttach(checkoutId:$cid,customerId:$uid){checkout{id} errors{field message}}}`,
+    {cid:CHECKOUT.id,uid:USER.id},TOKEN);}catch(e){console.warn("attach skipped:",e.message)}}
+  return CHECKOUT;
+}
+async function fetchShipMethods(){
+  const d=await gql(`{checkout(id:"${CHECKOUT.id}"){shippingMethods{id name price{amount currency}} totalPrice{gross{amount currency}}}}`.replace("${CHECKOUT.id}",CHECKOUT.id));
+  return d.checkout;
+}
+function renderShipMethods(methods,total){
+  const box=document.getElementById('shipOpts');
+  if(!methods?.length){box.innerHTML=`<p class="note" style="text-align:left;margin:0">No delivery options for this address.</p>`; return;}
+  if(!SHIPMETHOD||!methods.some(m=>m.id===SHIPMETHOD)) SHIPMETHOD=methods[0].id;
+  box.innerHTML=methods.map(m=>`<label class="${m.id===SHIPMETHOD?'on':''}"><input type="radio" name="ship" value="${m.id}" ${m.id===SHIPMETHOD?'checked':''} onchange="pickShip('${m.id}')"/> <span style="flex:1"><b>${m.name}</b></span><b>${money(m.price.amount,m.price.currency)}</b></label>`).join("");
+}
+function pickShip(id){SHIPMETHOD=id; document.querySelectorAll('#shipOpts label').forEach(l=>l.classList.toggle('on',l.querySelector('input').value===id))}
+async function loadShipOpts(manual){
+  const f=validForm(); if(!f) return;
+  if(!CART.length) return toast("Bag empty");
+  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Loading delivery…";
+  try{
+    await ensureCheckout(f.email,f.addr);
+    const c=await fetchShipMethods();
+    renderShipMethods(c.shippingMethods,c.totalPrice);
+    toast(c.shippingMethods.length?"Delivery options loaded":"No delivery options");
+  }catch(e){toast(e.message.slice(0,140))}finally{btn.disabled=false; refreshPlaceBtn()}
+}
+function refreshPlaceBtn(){const p=document.getElementById('payTotal'); document.getElementById('placeBtn').innerHTML=`Place Order — <span id="payTotal">${p?p.textContent:"—"}</span>`}
+async function placeOrder(){
+  if(!CART.length) return toast("Bag empty");
+  const f=validForm(); if(!f) return;
+  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Placing order…";
+  try{
+    const co=await ensureCheckout(f.email,f.addr);
+    let info=await fetchShipMethods();
+    if(!info.shippingMethods?.length) throw new Error("No delivery methods for this address");
+    renderShipMethods(info.shippingMethods,info.totalPrice);
+    if(!SHIPMETHOD){toast("Delivery options loaded — tap Place Order again"); btn.disabled=false; refreshPlaceBtn(); document.getElementById('shipOpts').scrollIntoView({behavior:"smooth",block:"center"}); return;}
+    await gql(`mutation($id:ID!,$m:ID!){checkoutDeliveryMethodUpdate(id:$id,deliveryMethodId:$m){checkout{id totalPrice{gross{amount currency}}} errors{field message code}}}`,
+      {id:co.id,m:SHIPMETHOD}).then(d=>{if(d.checkoutDeliveryMethodUpdate.errors?.length) throw new Error(d.checkoutDeliveryMethodUpdate.errors.map(e=>e.message).join(", ")); return d;});
+    info=await fetchShipMethods();
+    const total=info.totalPrice.gross.amount, cur=info.totalPrice.gross.currency;
+    const pay=document.querySelector('input[name="pay"]:checked')?.value||"cod";
+    if(pay!=="cod"){
+      const pd=await gql(`mutation($id:ID!,$in:PaymentInput!){checkoutPaymentCreate(checkoutId:$id,input:$in){payment{id} errors{field message code}}}`,
+        {id:co.id,in:{gateway:DUMMY_GATEWAY,token:"charged",amount:total}});
+      if(pd.checkoutPaymentCreate.errors?.length) throw new Error(pd.checkoutPaymentCreate.errors.map(e=>e.message).join(", "));
+    }
+    const done=await gql(`mutation($id:ID!){checkoutComplete(id:$id){order{id number status total{gross{amount currency}}} errors{field message code}}}`,
+      {id:co.id});
+    if(done.checkoutComplete.errors?.length) throw new Error(done.checkoutComplete.errors.map(e=>e.message).join(", "));
+    const o=done.checkoutComplete.order;
+    document.getElementById('succId').textContent=`Order #${o.number} • ${money(o.total.gross.amount,o.total.gross.currency)} • ${pay==="cod"?"Cash on Delivery":"Paid online (demo)"} • ${o.status}`;
+    if(USER&&TOKEN){const s=document.getElementById('succOrders'); if(s) s.style.display="";}
+    showSuccess(); CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); CHECKOUT=null; SHIPMETHOD=null; render(); btn.textContent="Placed ✓";
+  }catch(e){
+    console.warn(e); toast(e.message.slice(0,150)); btn.disabled=false; refreshPlaceBtn();
+  }
+}
 function render(){
   const lines=document.getElementById('lines'), badge=document.getElementById('countBadge'), tot=document.getElementById('totals'), payTotal=document.getElementById('payTotal');
   if(!CART.length){ lines.innerHTML=`<div class="empty">Your bag is empty. <a href="index.html#shop" style="color:var(--primary);text-decoration:underline">Go to shop →</a></div>`; badge.textContent="0 items"; tot.innerHTML=""; payTotal.textContent="—"; document.getElementById('placeBtn').disabled=true; return;}
   document.getElementById('placeBtn').disabled=false;
   badge.textContent=CART.length+" items • "+CART.reduce((s,c)=>s+c.qty,0)+" pcs";
-  lines.innerHTML=CART.map((c,i)=>`<div class="line"><img src="${c.img}" alt=""/><div style="flex:1"><div style="font-weight:700;font-size:13px">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.sku} • Qty ${c.qty}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:13px">${money(c.price,c.currency)} × ${c.qty}</span><b>${money(c.price*c.qty,c.currency)}</b></div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="chg(${i},-1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">−</button><button onclick="chg(${i},1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">+</button><button onclick="rem(${i})" style="margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer">Remove</button></div></div></div>`).join("");
+  lines.innerHTML=CART.map((c,i)=>`<div class="line"><img src="${c.img}" alt=""/><div style="flex:1"><div style="font-weight:700;font-size:13px">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""} • Qty ${c.qty}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:13px">${money(c.price,c.currency)} × ${c.qty}</span><b>${money(c.price*c.qty,c.currency)}</b></div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="chg(${i},-1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">−</button><button onclick="chg(${i},1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">+</button><button onclick="rem(${i})" style="margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer">Remove</button></div></div></div>`).join("");
   const sub=CART.reduce((s,c)=>s+c.price*c.qty,0), cur=CART[0]?.currency||"INR", ship=sub>999?0:79, discount=0, total=sub+ship-discount;
   tot.innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub,cur)}</b></div><div class="row"><span>Shipping</span><span>${ship?money(ship,cur):"Free"}</span></div>${discount?`<div class="row"><span>Discount</span><span>- ${money(discount,cur)}</span></div>`:""}<div class="row total"><span>Total</span><span>${money(total,cur)}</span></div>`;
   payTotal.textContent=money(total,cur);
@@ -176,44 +307,6 @@ window.chg=(i,d)=>{CART[i].qty+=d; if(CART[i].qty<=0) CART.splice(i,1); localSto
 window.rem=(i)=>{CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render()};
 function applyCoupon(){const c=document.getElementById('coupon').value.trim(); if(!c) return toast("Enter coupon"); toast("Coupon '"+c+"' applied (demo) — 0% off")}
 document.querySelectorAll('.pay label').forEach(l=>l.addEventListener('click',()=>{document.querySelectorAll('.pay label').forEach(x=>x.classList.remove('active')); l.classList.add('active'); l.querySelector('input').checked=true}));
-async function placeOrder(){
-  if(!CART.length) return toast("Bag empty");
-  const email=document.getElementById('email').value.trim(), phone=document.getElementById('phone').value.trim();
-  const fn=document.getElementById('firstName').value.trim(), ln=document.getElementById('lastName').value.trim();
-  const street=document.getElementById('street').value.trim(), city=document.getElementById('city').value.trim(), state=document.getElementById('state').value.trim(), postal=document.getElementById('postal').value.trim();
-  if(!email||!phone||!fn||!ln||!street||!city||!postal) return toast("Please fill all required fields");
-  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Processing…";
-  const lines=CART.map(c=>({quantity:c.qty, variantId:c.variantId}));
-  try{
-    const mutation=`mutation Create($lines:[CheckoutLineInput!]!, $email:String, $addr:AddressInput){
-      checkoutCreate(input:{ lines:$lines, email:$email, shippingAddress:$addr, billingAddress:$addr }){
-        checkout{ id token }
-        errors{ field message code }
-      }
-    }`;
-    const addr={firstName:fn, lastName:ln, streetAddress1:street, city, postalCode:postal, country:"IN", countryArea:state, phone};
-    const data=await gql(mutation,{lines, email, addr});
-    const errs=data?.checkoutCreate?.errors;
-    if(errs?.length) throw new Error(errs.map(e=>e.message).join(", "));
-    const chk=data?.checkoutCreate?.checkout;
-    if(chk){ document.getElementById('succId').textContent="Checkout ID: "+chk.id+" • Token: "+chk.token.slice(0,16)+"…"; showSuccess(); CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); render(); btn.textContent="Placed ✓"; return; }
-    throw new Error("No checkout returned");
-  }catch(e){
-    console.warn(e);
-    // graceful demo fallback: treat as success when stock insufficient, etc.
-    if(String(e.message).toLowerCase().includes("stock") || String(e.message).toLowerCase().includes("insufficient") || e.message.includes("Could not add")){
-      document.getElementById('succId').textContent="Demo order (Saleor stock 0) — "+e.message.slice(0,80);
-      showSuccess();
-      CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); render();
-      toast("Stock issue — demo order confirmed");
-    } else {
-      toast("Saleor: "+e.message.slice(0,90));
-      btn.disabled=false; btn.innerHTML=`Place Order — <span id="payTotal">${document.getElementById('payTotal').textContent}</span>`;
-    }
-  } finally {
-    setTimeout(()=>{btn.disabled=false; btn.innerHTML=`Place Order — <span id="payTotal">${document.getElementById('payTotal').textContent}</span>`}, 1200);
-  }
-}
 function showSuccess(){document.getElementById('success').classList.add('open')}
 function closeSucc(){document.getElementById('success').classList.remove('open')}
 (function(){
@@ -232,7 +325,9 @@ function closeSucc(){document.getElementById('success').classList.remove('open')
   nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
   window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
 })();
-render();
+if(IS_LOCAL){document.getElementById('localLoginBox').classList.add('show'); document.getElementById('localAddrBox').classList.add('show');}
+try{if(TOKEN){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
+refreshAcct(); render();
 </script>
 </body>
 </html>

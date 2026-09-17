@@ -69,6 +69,33 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .variants{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .opt{border:1px solid var(--line);padding:9px 14px;border-radius:999px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
 .opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.sizes-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px}
+.sizes-label .hint{text-transform:none;letter-spacing:0;font-weight:500;color:var(--accent)}
+.sizes{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.size-chip{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer}
+.size-chip:hover{border-color:var(--accent)}
+.size-chip.sel{background:var(--primary);color:#fff;border-color:var(--primary)}
+.chart-link{background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px 0;margin:2px 0 6px}
+.chart-modal{display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px}
+.chart-modal.open{display:flex}
+.chart-bg{position:absolute;inset:0;background:rgba(20,12,30,.6);backdrop-filter:blur(3px)}
+.chart-card{position:relative;background:#fff;border-radius:20px;max-width:720px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;background:var(--sage);font-size:14px;font-weight:700;position:sticky;top:0}
+.chart-head span{font-weight:500;color:var(--muted);font-size:12px}
+.chart-close{width:32px;height:32px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;line-height:1}
+.chart-scroll{overflow:auto}
+table.chart{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+table.chart th,table.chart td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+table.chart th{background:var(--cream);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+table.chart td:first-child,table.chart th:first-child{text-align:left;font-weight:700}
+.chart-note{padding:10px 16px;font-size:11px;color:var(--muted)}
+.chart-img{display:block;width:100%;max-height:280px;object-fit:contain;background:var(--cream);border-bottom:1px solid var(--line)}
+table.chart tr.sel td{background:var(--blush);font-weight:700}
+.chart-sec{margin:12px 16px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chart-sec.sel{border:2px solid var(--accent);box-shadow:0 8px 24px rgba(231,0,128,.18)}
+.chart-sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;background:var(--cream);font-size:13px;font-weight:700}
+.chart-sec-head .cur{font-size:11px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:3px 10px}
+.chart-sec-head small{font-weight:500;color:var(--muted)}
 .qty{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px}
 .qty button{width:30px;height:30px;border-radius:999px;border:none;background:var(--sage);cursor:pointer;font-size:16px}
 .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
@@ -117,7 +144,7 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="index.html#collections">Collections</a></nav>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="index.html#collections">Collections</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
     <div class="spacer"></div>
     <div class="nav-backdrop" id="navBackdrop"></div>
     <a class="icon-btn" href="checkout.html" id="cartBtn" aria-label="cart">🛒<span class="badge" id="cartCount">0</span></a>
@@ -136,25 +163,23 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
     <div class="rating">★★★★★ <span> (Pan India • by Ammi Enterprises)</span> • <span id="pSku">—</span></div>
     <div class="price" id="pPrice">—</div>
     <div id="variantWrap"><div class="variants" id="variants"></div></div>
+    <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
     <div style="display:flex;gap:12px;align-items:center;margin:10px 0">
       <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
       <span style="font-size:12px;color:var(--muted)">Quantity</span>
-      <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">Stock: live via Saleor</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">In stock • COD available</span>
     </div>
+    <div class="sizes-label">Select size <span class="hint" id="sizeHint">— pick a variant first</span></div>
+    <div class="sizes" id="sizes"></div>
     <div class="actions">
-      <button class="btn-primary" id="addBtn">Add to Bag — <span id="addPrice">—</span></button>
+      <button class="btn-primary" id="addBtn">Add to Bag <span id="addPrice">—</span></button>
       <button class="btn-ghost" onclick="buyNow()">Buy Now</button>
       <button class="btn-ghost" id="wishBtn">♡ Wishlist</button>
     </div>
-    <p class="desc" id="pDesc">Fetching from Saleor GraphQL…</p>
-    <div class="meta-grid">
-      <div class="meta"><b>Fabric</b><span>Premium Cotton Blend / Moss Crepe / Rayon</span></div>
-      <div class="meta"><b>Closure</b><span>Button • Easy Wash</span></div>
-      <div class="meta"><b>Sleeve</b><span>Short / Full • Regular Fit</span></div>
-      <div class="meta"><b>Ideal</b><span>Festive • Party • Casual</span></div>
-    </div>
+    <p class="desc" id="pDesc">Fetching product details…</p>
+    <div class="meta-grid" id="attrGrid"></div>
     <div class="trust"><span>✓ Free shipping over ₹999</span><span>COD Available</span><span>7-Day Returns</span><span>Manufacturer: Ammi Enterprises</span></div>
-    <p style="font-size:12px;color:var(--muted);margin-top:12px">Sold by Ammi Enterprises, A-7 Kasturchand Mill Compound, Mumbai – 400028 • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a> • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a><br/>API: <a href="https://ammikids.themanagemate.com/graphql/" target="_blank" style="text-decoration:underline">ammikids.themanagemate.com/graphql/</a></p>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px">Sold by Ammi Enterprises, A-7 Kasturchand Mill Compound, Mumbai – 400028 • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a> • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a></p>
   </div>
 </section>
 
@@ -170,9 +195,16 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Ammi Enterprises</h4><a href="https://www.ammienterprises.in/products.htm" target="_blank">Products</a><br/><a href="https://www.ammienterprises.in/about-us.htm" target="_blank">About Us</a></div>
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Help</h4><a href="tel:+917021946362">Send Email</a><br/><a href="https://api.whatsapp.com/send?phone=917021946362" target="_blank">WhatsApp</a></div>
   </div>
-  <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#c0006b • #e70080 • Saleor</span></div>
+  <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#c0006b • #e70080 • Mumbai 400028</span></div>
 </footer>
 
+<!-- size chart popup -->
+<div class="chart-modal" id="chartModal" aria-hidden="true"><div class="chart-bg" onclick="closeChart()"></div>
+  <div class="chart-card"><div class="chart-head"><span id="chartTitle">Size chart</span><span id="chartMeta">in inches</span><button class="chart-close" onclick="closeChart()" aria-label="Close">✕</button></div>
+  <img class="chart-img" id="chartImg" alt="Size Chart" style="display:none"/>
+  <div id="chartTables"></div>
+  <div class="chart-note" id="chartNote"></div></div>
+</div>
 <!-- mini cart drawer -->
 <div class="drawer" id="drawer"><div class="drawer-bg" id="drawerBg"></div>
   <div class="drawer-panel"><div class="drawer-head"><b>Your bag</b><button id="closeDrawer">✕</button></div><div class="drawer-body" id="cartBody"></div><div class="draw-foot" id="cartFoot"></div></div>
@@ -181,7 +213,9 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 <div class="lightbox" id="lightbox" onclick="closeLb()"><button class="lb-close" onclick="closeLb()">✕</button><img id="lbImg" src="" alt="Zoomed product"/></div>
 <script>
 const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
-let PRODUCT=null, VARIANT=null, QTY=1;
+let PRODUCT=null, VARIANT=null, QTY=1, SIZECHART=null, SIZE=null;
+const SECTION_FOR_TYPE={"Kurti Set":"Kurti Set","Ladies Kurti Set":"Kurti Set Ladies","Cord Set":"Cord Set","Ladies Cord Set":"Cord Set Ladies","Hanger Set":"Hanger Set","Frock":"Frock Full Sleeves","Mini Frock":"Mini Frock Full Sleeves"};
+async function loadSizeCharts(){if(SIZECHART) return SIZECHART; try{const r=await fetch("products/values.json"); if(!r.ok) throw 0; SIZECHART=await r.json();}catch(e){SIZECHART={sections:{}};} return SIZECHART;}
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]"), WISH=JSON.parse(localStorage.getItem("ak_wish")||"[]");
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
@@ -191,8 +225,8 @@ function getSlug(){const u=new URL(location.href);return u.searchParams.get('slu
 async function load(){
   const slug=getSlug();
   document.getElementById('crumbName').textContent=slug;
-  const q=`query P($slug:String!){ product(slug:$slug){ id name slug description media{url} thumbnail{url} category{name slug} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
-  const d=await gql(q,{slug});
+  const q=`query P($slug:String!){ product(slug:$slug){ id name slug description media{url alt} thumbnail{url} category{name slug} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
+  const [d]=await Promise.all([gql(q,{slug}), loadSizeCharts()]);
   PRODUCT=d?.product;
   if(!PRODUCT){document.getElementById('pName').textContent="Product not found"; document.getElementById('pDesc').textContent="Try going back to shop."; return;}
   localStorage.setItem('ak_last_slug', slug);
@@ -210,14 +244,18 @@ async function load(){
   document.getElementById('pDesc').textContent=PRODUCT.plain;
   document.getElementById('pPrice').innerHTML=`${price?money(price.amount,price.currency):"—"} ${und && price && und.amount>price.amount?`<s>${money(und.amount,price.currency)}</s> <span style="color:var(--accent);font-size:12px">${Math.round((1-price.amount/und.amount)*100)}% OFF</span>`:""} `;
   document.getElementById('addPrice').textContent=price?money(price.amount,price.currency):"—";
-  // images
-  const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean);
+  // images (exclude Size Chart media from gallery + thumbs)
+  const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean).filter(m=>!/size.?chart/i.test(m.alt||""));
+  PRODUCT._sizeChartImg=(PRODUCT.media||[]).find(m=>/size.?chart/i.test(m.alt||""))?.url||null;
   const urls=media.map(m=>m.url);
   document.getElementById('mainImg').src=urls[0]||"";
   document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" onclick="setImg('${u}',this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
-  // variants
+  // variants + sizes + size-chart values
   const vwrap=document.getElementById('variants');
-  if(PRODUCT.variants?.length){ vwrap.innerHTML=PRODUCT.variants.map((v,i)=>`<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="pick('${v.id}')">${v.sku||v.name} • ${v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):""}</button>`).join(""); VARIANT=PRODUCT.variants[0]; } else { vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"}
+  function sizeOf(v){const a=(v.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="size"); return (a?.values||[]).map(y=>y.name).filter(Boolean)}
+  PRODUCT.variants?.forEach(v=>{v._sizes=sizeOf(v)});
+  if(PRODUCT.variants?.length){ vwrap.innerHTML=PRODUCT.variants.map((v,i)=>{const nm=v.name||v.sku||("Variant "+(i+1)); return `<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="pick('${v.id}')">${nm} • ${v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):""}</button>`}).join(""); VARIANT=PRODUCT.variants[0]; } else { vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"}
+  renderSizes(); renderAttrs();
   updateWish();
   // related
   const rel=(d?.products?.edges||[]).filter(e=>e.node.slug!==slug).slice(0,4);
@@ -228,15 +266,62 @@ function openLb(){const i=document.getElementById('lbImg'); i.src=document.getEl
 function closeLb(){document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('mainImg').onclick=openLb;
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
-function pick(id){document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug}
+function pick(id){document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
+function selSize(el){SIZE=el.dataset.s; document.querySelectorAll('#sizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('sizeHint').textContent="— "+SIZE;}
+function renderAttrs(){
+  const grid=document.getElementById('attrGrid'); if(!grid) return;
+  const seen=new Set(), cards=[];
+  (PRODUCT.attributes||[]).forEach(a=>{const n=a.attribute?.name||""; const vals=(a.values||[]).map(v=>v.name).filter(Boolean); if(!n||!vals.length||seen.has(n.toLowerCase())) return; seen.add(n.toLowerCase()); cards.push(`<div class="meta"><b>${n}</b><span>${vals.join(", ")}</span></div>`);});
+  (VARIANT?.attributes||[]).forEach(a=>{const n=a.attribute?.name||""; const vals=(a.values||[]).map(v=>v.name).filter(Boolean); if(!n||!vals.length||seen.has(n.toLowerCase())) return; seen.add(n.toLowerCase()); cards.push(`<div class="meta"><b>${n}</b><span>${vals.join(", ")}</span></div>`);});
+  grid.innerHTML=cards.length?cards.join(""):`<div class="meta"><b>Details</b><span>Premium kidswear by Ammi Enterprises</span></div>`;
+}
+function renderSizes(){
+  const box=document.getElementById('sizes'), hint=document.getElementById('sizeHint');
+  const list=VARIANT?._sizes||[];
+  if(!list.length){box.innerHTML="<span style='font-size:12px;color:var(--muted)'>No sizes in this variant</span>"; if(hint) hint.textContent=""; fillChart(); return;}
+  if(hint) hint.textContent=SIZE?("— "+SIZE):("— pick one of "+list.length);
+  box.innerHTML=list.map(s=>`<button class="size-chip ${SIZE===s?'sel':''}" data-s="${s}" onclick="selSize(this)">${s}</button>`).join("");
+  fillChart();
+}
+function chartRows(){
+  const sel=VARIANT?._sizes||[];
+  const all=[]; PRODUCT.variants.forEach(v=>(v._sizes||[]).forEach(s=>{if(!all.includes(s)) all.push(s)}));
+  const ptype=PRODUCT.productType?.name||"";
+  const secKey=SECTION_FOR_TYPE[ptype]||Object.keys(SIZECHART.sections||{}).find(k=>k.toLowerCase().includes(ptype.toLowerCase()))||"";
+  const rows=((SIZECHART.sections||{})[secKey]||[]).filter(r=>sel.includes(r.size));
+  const showRows=rows.length?rows:((SIZECHART.sections||{})[secKey]||[]).filter(r=>all.includes(r.size));
+  return {secKey, showRows};
+}
+function fillChart(){
+  const host=document.getElementById('chartTables'), note=document.getElementById('chartNote'), img=document.getElementById('chartImg');
+  if(PRODUCT?._sizeChartImg){img.src=PRODUCT._sizeChartImg; img.style.display="block";} else {img.removeAttribute("src"); img.style.display="none";}
+  const ptype=PRODUCT?.productType?.name||"";
+  const secKey=SECTION_FOR_TYPE[ptype]||Object.keys(SIZECHART.sections||{}).find(k=>k.toLowerCase().includes(ptype.toLowerCase()))||"";
+  const secRows=(SIZECHART.sections||{})[secKey]||[];
+  if(!secKey||!secRows.length||!PRODUCT?.variants?.length){host.innerHTML=""; note.textContent="No size chart found."; return;}
+  document.getElementById('chartTitle').textContent=`Size chart — ${secKey} (${PRODUCT.variants.length} variants)`;
+  const mcols=["length","shoulder","chest","hip","sleeves","pant_length","pant_waist"].filter(c=>secRows.some(r=>r[c]!==undefined));
+  const pretty=c=>({size:"Size",length:"Length",shoulder:"Shoulder",chest:"Chest",hip:"Hip",sleeves:"Sleeve Length",pant_length:"Pant Length",pant_waist:"Pant Waist"}[c]||c);
+  const rows=[];
+  PRODUCT.variants.forEach(v=>{(v._sizes||[]).forEach(s=>{const m=secRows.find(r=>r.size===s); if(m) rows.push({v, m});});});
+  const cols=["size",...mcols];
+  host.innerHTML=`<div class="chart-scroll"><table class="chart"><tr>${cols.map(c=>`<th>${pretty(c)}</th>`).join("")}</tr>${rows.map(({v,m})=>{
+    const isSel=VARIANT&&v.id===VARIANT.id;
+    return `<tr class="${isSel?'sel':''}"><td>${m.size}</td>${mcols.map(c=>`<td>${m[c]??"—"}</td>`).join("")}</tr>`;
+  }).join("")}</table></div>`;
+  note.textContent=`${rows.length} sizes across ${PRODUCT.variants.length} variants • selected variant highlighted • all measurements in inches.`;
+}
+function openChart(){fillChart(); document.getElementById('chartModal').classList.add('open'); document.getElementById('chartModal').setAttribute('aria-hidden','false')}
+function closeChart(){document.getElementById('chartModal').classList.remove('open'); document.getElementById('chartModal').setAttribute('aria-hidden','true')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeChart()});
 function updateWish(){const b=document.getElementById('wishBtn');const on=WISH.includes(PRODUCT?.id); b.textContent= on?"♥ Wishlisted":"♡ Wishlist"; b.style.borderColor=on?"var(--accent)":"var(--line)"; b.style.color=on?"var(--accent)":"inherit"}
 document.getElementById('wishBtn').onclick=()=>{const i=WISH.indexOf(PRODUCT.id); if(i>=0) WISH.splice(i,1); else WISH.push(PRODUCT.id); localStorage.setItem("ak_wish",JSON.stringify(WISH)); updateWish(); toast(i>=0?"Removed from wishlist":"Added to wishlist ♥")};
 document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.getElementById('qVal').textContent=QTY; refreshAdd()};
 document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
-document.getElementById('addBtn').onclick=()=>{const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid); if(ex) ex.qty+=QTY; else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added to bag"); openDrawer()};
+document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex) ex.qty+=QTY; else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
 function buyNow(){document.getElementById('addBtn').click(); location.href="checkout.html"}
-function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999 • COD Available</div>`}
+function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999 • COD Available</div>`}
 window.rem=(i)=>{CART.splice(i,1);save()}
 function openDrawer(){document.getElementById('drawer').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open')}
@@ -258,6 +343,7 @@ document.getElementById('cartBtn').onclick=(e)=>{e.preventDefault(); openDrawer(
   nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
   window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
 })();
+try{if(localStorage.getItem("ak_token")){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 load(); save();
 </script>
 </body>

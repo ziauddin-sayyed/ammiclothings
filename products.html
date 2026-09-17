@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>All Products — Ammi Kids by Ammi Enterprises</title>
+<meta name="description" content="Shop all kidswear & ladies wear by Ammi Enterprises. Search and filter by category, fabric, size and more."/>
+<link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#c0006b;--primary-dark:#c0006b;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--blush:#fef0f7;--blush-deep:#f7cbd1;--mauve:var(--accent);--ink:#1E1E1E;--muted:#7A6E6A;--sage:#f3f0f7;--line:#efe6f0;--shadow-sm:0 8px 30px rgba(108,67,140,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{font:inherit}
+.announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}
+.header{position:sticky;top:0;z-index:40;background:rgba(255,249,242,.8);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+.header-inner{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:24px;position:relative;justify-content:space-between}
+.logo{position:absolute;left:50%;transform:translateX(-50%);font-family:"Cormorant Garamond",serif;font-weight:700;font-size:26px;letter-spacing:.08em}
+.logo img{height:46px;border-radius:8px;padding:4px 6px}
+.nav{display:flex;gap:26px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#4A3F3B}
+.nav a:hover{color:var(--accent)}
+.spacer{flex:1}
+.page{max-width:1280px;margin:0 auto;padding:22px 20px 10px}
+.page h1{font-family:"Cormorant Garamond",serif;font-size:36px;margin:0}
+.page p.sub{color:var(--muted);font-size:14px;margin:6px 0 0}
+.searchbar{display:flex;gap:10px;margin:18px 0 20px}
+.searchbar input{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:13px 18px;font-size:14px;outline:none}
+.searchbar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,67,140,.1)}
+.count{align-self:center;font-size:13px;color:var(--muted);white-space:nowrap}
+.filterbtn{display:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:12px 18px;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:14px}
+.shop{display:grid;grid-template-columns:250px 1fr;gap:22px;align-items:start}
+.side{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;position:sticky;top:86px;max-height:calc(100vh - 110px);overflow:auto}
+.side h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.side h3:first-child{margin-top:0}
+.catopt{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 10px;border-radius:12px;cursor:pointer}
+.catopt:hover{background:var(--sage)}
+.catopt input{accent-color:var(--primary)}
+.catopt small{margin-left:auto;color:var(--muted);font-weight:500}
+.side select{width:100%;border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px}
+.side select.has{border-color:var(--primary);background:var(--blush)}
+.clearbtn{border:none;background:none;color:var(--primary);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;padding:8px 0;display:none}
+.clearbtn.show{display:block}
+.backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.4);z-index:44}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:1100px){.products{grid-template-columns:repeat(2,1fr)}}
+.card{background:#fff;border-radius:22px;overflow:hidden;border:1px solid #F6EDE6;display:flex;flex-direction:column;transition:.25s;position:relative}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm)}
+.card-img{aspect-ratio:4/4.8;background:var(--sage);position:relative;overflow:hidden;cursor:pointer}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.badge-new{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 8px;border-radius:999px}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card-cat{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mauve);font-weight:700}
+.card-title{font-family:"Cormorant Garamond",serif;font-size:17px;margin:0}
+.card-price{display:flex;gap:8px;align-items:baseline}
+.card-price b{font-size:15px}
+.card-attr{font-size:11px;color:var(--muted)}
+.btn-view{margin-top:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;text-align:center;display:block}
+.btn-view:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.empty{grid-column:1/-1;text-align:center;padding:34px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)}
+.footer{background:var(--primary-dark);color:#fff;margin-top:56px;padding:42px 20px 24px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+@media(max-width:900px){
+  .shop{grid-template-columns:1fr}
+  .filterbtn{display:block}
+  .side{position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);z-index:45;border-radius:0;max-height:none;transform:translateX(-105%);transition:.3s;box-shadow:20px 0 60px rgba(0,0,0,.2)}
+  .side.open{transform:none}
+  .backdrop.open{display:block}
+}
+</style>
+</head>
+<body>
+<div class="announce">Ammi Enterprises • Est. 2003 • Mumbai</div>
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
+    <nav class="nav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
+    <div class="spacer"></div>
+    <a href="checkout.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">🛒 Bag</a>
+  </div>
+</header>
+
+<div class="page">
+  <h1>All Products</h1>
+  <p class="sub">Search the catalogue, filter from the side pane.</p>
+  <div class="searchbar"><input id="q" placeholder="Search name, fabric, size, category…" autocomplete="off"/><span class="count" id="count"></span></div>
+  <button class="filterbtn" onclick="toggleSide(true)">☰ Filters</button>
+  <div class="shop">
+    <aside class="side" id="side">
+      <h3>Category</h3><div id="catList"></div>
+      <h3>Attributes</h3><div id="attrList"></div>
+      <button class="clearbtn" id="clearBtn" onclick="clearAll()">Clear all filters</button>
+    </aside>
+    <div>
+      <div class="products" id="grid"></div>
+    </div>
+  </div>
+</div>
+<div class="backdrop" id="backdrop" onclick="toggleSide(false)"></div>
+
+<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028</span></div></footer>
+<script>
+const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+let PRODUCTS=[], CATEGORIES=[], CAT="all", AF={};
+function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})}); const j=await r.json(); if(j.errors) console.warn(j.errors); return j.data}
+function valsOf(p,name){const out=[]; (p.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(v=>{if(v.name&&!out.includes(v.name)) out.push(v.name)})}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(x=>{if(x.name&&!out.includes(x.name)) out.push(x.name)})})); return out}
+function hayOf(p){const t=[p.name,p.category?.name,(p.category?.slug||"").replace(/-/g," ")]; (p.attributes||[]).forEach(a=>(a.values||[]).forEach(v=>t.push(v.name))); (p.variants||[]).forEach(v=>{t.push(v.sku,v.name); (v.attributes||[]).forEach(a=>(a.values||[]).forEach(x=>t.push(x.name)))}); return t.filter(Boolean).join(" ").toLowerCase()}
+function toggleSide(open){document.getElementById('side').classList.toggle('open',open); document.getElementById('backdrop').classList.toggle('open',open)}
+async function load(){
+  try{if(localStorage.getItem("ak_token")) document.getElementById('ordersLink').style.display="";}catch(e){}
+  const u=new URL(location.href); const q0=u.searchParams.get('q')||"", c0=u.searchParams.get('cat')||"all";
+  if(q0) document.getElementById('q').value=q0; CAT=c0;
+  const d=await gql(`query{products(first:50){edges{node{id name slug thumbnail{url} media{url} pricing{priceRange{start{gross{amount currency}}}} category{name slug} attributes{attribute{name} values{name}} variants{id sku name attributes{attribute{name} values{name}}}}}} categories(first:20){edges{node{name slug}}}}`);
+  PRODUCTS=(d?.products?.edges||[]).map(e=>e.node);
+  CATEGORIES=(d?.categories?.edges||[]).map(e=>e.node).filter(c=>c.slug&&c.slug!=="default-category");
+  buildSide(); render();
+}
+function buildSide(){
+  const counts={}; PRODUCTS.forEach(p=>{const s=p.category?.slug||"none"; counts[s]=(counts[s]||0)+1});
+  document.getElementById('catList').innerHTML=`<label class="catopt"><input type="radio" name="cat" value="all" ${CAT==="all"?"checked":""} onchange="setCat(this)"/> All <small>${PRODUCTS.length}</small></label>`
+    +CATEGORIES.map(c=>`<label class="catopt"><input type="radio" name="cat" value="${c.slug}" ${CAT===c.slug?"checked":""} onchange="setCat(this)"/> ${c.name} <small>${counts[c.slug]||0}</small></label>`).join("");
+  const names=[];
+  PRODUCTS.forEach(p=>{(p.attributes||[]).forEach(a=>{const n=a.attribute?.name; if(n&&(a.values||[]).length&&!names.includes(n)) names.push(n)}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if(a.attribute?.name==="Size"&&!names.includes("Size")) names.push("Size")}))});
+  names.sort((a,b)=>a==="Size"?1:b==="Size"?-1:a.localeCompare(b));
+  AF={};
+  document.getElementById('attrList').innerHTML=names.map(n=>{
+    const vals=[]; PRODUCTS.forEach(p=>valsOf(p,n).forEach(v=>{if(!vals.includes(v)) vals.push(v)}));
+    if(!vals.length) return "";
+    AF[n]="";
+    return `<select data-attr="${n}" onchange="setAttr(this)"><option value="">${n}: All</option>${vals.map(v=>`<option value="${v}">${v}</option>`).join("")}</select>`;
+  }).join("");
+}
+function setCat(el){CAT=el.value; syncClear(); render(); toggleSide(false)}
+function setAttr(el){AF[el.dataset.attr]=el.value; el.classList.toggle('has',!!el.value); syncClear(); render()}
+function syncClear(){const on=CAT!=="all"||Object.values(AF).some(Boolean)||document.getElementById('q').value.trim(); document.getElementById('clearBtn').classList.toggle('show',!!on)}
+function clearAll(){CAT="all"; Object.keys(AF).forEach(k=>AF[k]=""); document.getElementById('q').value=""; document.querySelectorAll('#attrList select').forEach(s=>{s.value=""; s.classList.remove('has')}); const r=document.querySelector('input[name="cat"][value="all"]'); if(r) r.checked=true; syncClear(); render()}
+function filtered(){
+  const s=document.getElementById('q').value.trim().toLowerCase();
+  return PRODUCTS.filter(p=>{
+    if(CAT!=="all"&&(p.category?.slug!==CAT)) return false;
+    if(s&&!s.split(/\s+/).every(w=>hayOf(p).includes(w))) return false;
+    return Object.entries(AF).every(([n,v])=>!v||valsOf(p,n).includes(v));
+  });
+}
+function render(){
+  const list=filtered();
+  document.getElementById('count').textContent=list.length+" of "+PRODUCTS.length;
+  const g=document.getElementById('grid');
+  if(!list.length){g.innerHTML=`<div class="empty">No styles match. Try clearing search or filters.</div>`; return;}
+  g.innerHTML=list.map(p=>{
+    const price=p.pricing?.priceRange?.start?.gross;
+    const img=p.thumbnail?.url||p.media?.[0]?.url||"";
+    const fab=(valsOf(p,"Fabric")[0]||"");
+    return `<article class="card">
+      <div class="card-img" onclick="location.href='product.html?slug=${p.slug}'">${img?`<img loading="lazy" src="${img}" alt="${p.name}"/>`:""}<span class="badge-new">${p.category?.name||'Ammikids'}</span></div>
+      <div class="card-body"><div class="card-cat">${p.category?.name||'Kidswear'}</div>
+      <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
+      ${fab?`<div class="card-attr">${fab}</div>`:""}
+      <div class="card-price"><b>${price?money(price.amount,price.currency):'—'}</b></div>
+      <a class="btn-view" href="product.html?slug=${p.slug}">View →</a></div>
+    </article>`}).join("");
+}
+document.getElementById('q').addEventListener('input',()=>{syncClear(); render()});
+load();
+</script>
+</body>
+</html>

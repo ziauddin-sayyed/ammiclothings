@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ammikids — by Ammi Enterprises | Little Couture, Big Dreams</title>
-<meta name="description" content="Ammikids by Ammi Enterprises (Est. 2003, Mumbai) – Manufacturer & wholesaler of kids wear & ladies wear. Fancy kidswear boutique powered by Saleor. A-7 Kasturchand Mill Compound, Mumbai."/>
+<meta name="description" content="Ammikids by Ammi Enterprises (Est. 2003, Mumbai) – Manufacturer & wholesaler of kids wear & ladies wear. Fancy kidswear boutique. A-7 Kasturchand Mill Compound, Mumbai."/>
 <link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -151,6 +151,13 @@ button{font:inherit}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
 .chip{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.afilters{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;align-items:end}
+.afilter{display:flex;flex-direction:column;gap:4px}
+.afilter label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.afilter select{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;max-width:170px}
+.afilter select.has{border-color:var(--primary);background:var(--blush)}
+.afclear{border:none;background:none;color:var(--primary);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;padding:9px 4px;display:none}
+.afclear.show{display:block}
 .products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 @media(max-width:1100px){.products{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){.products{grid-template-columns:repeat(2,1fr)} .cat-grid{grid-template-columns:1fr} .hero{padding:0} .hero-visual{min-height:260px;border-radius:0} .hero-visual .owl-item .item{height:260px}}
@@ -265,10 +272,11 @@ button{font:inherit}
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="nav" id="mainNav">
       <a href="index.html#shop">Shop</a>
-      <a href="product.html">Product</a>
-      
-      
-      
+      <a href="products.html">Products</a>
+      <a href="orders.html" id="ordersLink" style="display:none">My Orders</a>
+
+
+
       <a href="#contact">Contact</a>
     </nav>
     <div class="spacer"></div>
@@ -302,14 +310,13 @@ button{font:inherit}
   <div class="section-head">
     <div>
       <h2>Bestsellers</h2>
-      <p>Live from our Saleor boutique — handpicked, limited runs. Tap to peek inside.</p>
+      <p>Fresh from our boutique — handpicked, limited runs. Tap to peek inside.</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <span style="font-size:12px;color:var(--muted)">Powered by Saleor</span>
+      <span style="font-size:12px;color:var(--muted)">Handpicked • Limited runs</span>
       <span style="width:8px;height:8px;background:#2ECC71;border-radius:999px;box-shadow:0 0 0 6px rgba(46,204,113,.15)"></span>
     </div>
   </div>
-  <div class="filters" id="filters"></div>
   <div class="products" id="products"></div>
   <div id="status" style="text-align:center;padding:22px;color:var(--muted);font-size:13px"></div>
 </section>
@@ -377,7 +384,7 @@ button{font:inherit}
   <div class="footer-inner">
     <div>
       <div class="brand-foot"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi Enterprises"/><br/>AMMI<i>kids</i></div>
-      <p style="color:#fff;line-height:1.6;margin:10px 0">By <b>Ammi Enterprises</b> — Leading Manufacturer & Supplier of Ladies Salwar Kurti Set, Kids Co Ord Set & One Piece Dress.<br/>Retail storefront powered by Saleor: <a href="https://ammikids.themanagemate.com/graphql/" target="_blank" style="color:#fff;text-decoration:underline">GraphQL →</a></p>
+      <p style="color:#fff;line-height:1.6;margin:10px 0">By <b>Ammi Enterprises</b> — Leading Manufacturer & Supplier of Ladies Salwar Kurti Set, Kids Co Ord Set & One Piece Dress.</p>
       <p style="color:#fff;font-size:12px;margin-top:12px"><b style="color:#fff">A-7, Ground Floor, Kasturchand Mill Compound,</b><br/>Near Professional Courier, M.C. Jawale Marg, Mumbai - 400028, Maharashtra, India<br/>📞 <a href="tel:+917021946362" style="color:#fff">+91 70219 46362</a> • ✉️ <a href="tel:+917021946362" style="color:#fff">+91 70219 46362</a><br/>🌐 <a href="https://www.ammienterprises.in" target="_blank" style="color:#fff">www.ammienterprises.in</a> • GST • Pan India • Upto 10 Employees • Founder: Aqueel Yusuf Khan</p>
       <p style="margin-top:10px"><a href="https://api.whatsapp.com/send?phone=917021946362&text=Hello%21+I+found+your+website+ammikids+and+am+interested+in+your+products." target="_blank" class="btn-primary" style="background:#25D366;padding:10px 14px;font-size:12px">WhatsApp Us →</a></p>
     </div>
@@ -388,7 +395,7 @@ button{font:inherit}
       <a href="https://www.ammienterprises.in/kids-co-ord-set.htm" target="_blank">Kids Co Ord Set</a><br/>
       <a href="https://www.ammienterprises.in/kids-frock.htm" target="_blank">Kids Frock</a><br/>
       <a href="https://www.ammienterprises.in/kids-night-suit.htm" target="_blank">Kids Night Suit</a><br/>
-      <a href="#shop">Live Shop (Saleor)</a>
+      <a href="#shop">Live Shop</a>
     </div>
     <div>
       <h4>Girls & Ladies Wear</h4>
@@ -405,13 +412,12 @@ button{font:inherit}
       <a href="https://www.ammienterprises.in/contact-us.htm" target="_blank">Contact Us</a><br/>
       <a href="https://www.ammienterprises.in/testimonials.htm" target="_blank">Testimonials</a><br/>
       <a href="tel:+917021946362">Send Email</a><br/>
-      <a href="https://ammikids.themanagemate.com/graphql/" target="_blank">Saleor GraphQL</a><br/>
       <a href="https://www.ammienterprises.in/sitemap.htm" target="_blank">Sitemap</a>
     </div>
   </div>
   <div class="legal">
     <span>© 2026 Ammi Enterprises • All Rights Reserved. Developed retail by Ammikids • <a href="https://www.ammienterprises.in" target="_blank">ammienterprises.in</a></span>
-    <span>Theme: #c0006b • #e70080 • Saleor Headless • Mumbai 400028</span>
+    <span>Theme: #c0006b • #e70080 • Mumbai 400028</span>
   </div>
 </footer>
 
@@ -444,7 +450,7 @@ button{font:inherit}
         <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
         <button class="btn-primary" style="flex:1;justify-content:center" id="mAdd">Add to bag — <span id="mAddPrice">₹432</span></button>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-top:10px">Secure checkout via Saleor • Stock managed live • COD available</p>
+       <p style="font-size:12px;color:var(--muted);margin-top:10px">Secure checkout • COD available</p>
     </div>
   </div>
 </div>
@@ -456,6 +462,7 @@ const GRAPHQL = "https://ammikids.themanagemate.com/graphql/";
 let PRODUCTS = [];
 let CATEGORIES = [];
 let FILTER = "all";
+let AFILTERS = {};
 let WISH = JSON.parse(localStorage.getItem("ak_wish")||"[]");
 let CART = JSON.parse(localStorage.getItem("ak_cart")||"[]");
 let ACTIVE = null;
@@ -478,7 +485,7 @@ function renderWishCount(){
   el.style.display = n? "grid":"none"; el.textContent=n;
 }
 
-// GraphQL
+// store API
 async function gql(query, variables={}){
   const r = await fetch(GRAPHQL, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({query,variables})});
   const j = await r.json();
@@ -487,23 +494,28 @@ async function gql(query, variables={}){
 }
 async function loadProducts(){
   const q = `query {
-    products(first: 24){
-      edges{ node{
-        id name slug description
-        thumbnail{ url alt }
-        media{ url }
-        pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } }
-        category{ name slug }
-        variants{ id sku name pricing{ price{ gross{ amount currency } } } }
-      }}
-      totalCount
+    collection(slug:"bestsellers", channel:"in"){
+      name
+      products(first: 24){
+        edges{ node{
+          id name slug description
+          thumbnail{ url alt }
+          media{ url }
+          pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } }
+          category{ name slug }
+          attributes{ attribute{ name } values{ name } }
+          variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } }
+        }}
+        totalCount
+      }
     }
     categories(first:10){ edges{ node{ name slug backgroundImage{ url alt } } } }
   }`;
   const d = await gql(q);
-  PRODUCTS = (d?.products?.edges||[]).map(e=>e.node);
+  PRODUCTS = (d?.collection?.products?.edges||[]).map(e=>e.node);
   CATEGORIES = (d?.categories?.edges||[]).map(e=>e.node).filter(c=>c.slug && c.slug!=="default-category");
   renderCategories();
+  renderAttrFilters();
   // enrich description JSON blocks
   PRODUCTS.forEach(p=>{
     try{
@@ -521,21 +533,23 @@ async function loadProducts(){
     const hImg=document.getElementById('heroFloatImg'); if(hImg) hImg.src = PRODUCTS[0].thumbnail?.url || hImg.src;
   }
   renderProducts();
-  document.getElementById('status').textContent = PRODUCTS.length ? `Showing ${PRODUCTS.length} styles • Live from Saleor` : `No products found — API returned empty. Check channel config.`;
+  document.getElementById('status').textContent = PRODUCTS.length ? `Showing ${PRODUCTS.length} bestsellers` : `Bestsellers coming soon — please check back.`;
 }
 
 function renderCategories(){
   if(!CATEGORIES.length){ CATEGORIES = (PRODUCTS.map(p=>p.category).filter(Boolean)).filter((v,i,a)=>a.findIndex(x=>x.slug===v.slug)===i); }
   const filters = document.getElementById('filters');
-  const chips = `<button class="chip active" data-filter="all">All</button>`
-    + CATEGORIES.map((c,i)=>`<button class="chip" data-filter="${c.slug}">${c.name}</button>`).join("")
-    + `<button class="chip" data-filter="wishlist" style="margin-left:auto">♥ Wishlist</button>`;
-  filters.innerHTML = chips;
-  filters.addEventListener('click', e=>{
-    const b=e.target.closest('.chip'); if(!b) return;
-    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-    b.classList.add('active'); FILTER=b.dataset.filter; renderProducts();
-  });
+  if(filters){
+    const chips = `<button class="chip active" data-filter="all">All</button>`
+      + CATEGORIES.map((c,i)=>`<button class="chip" data-filter="${c.slug}">${c.name}</button>`).join("")
+      + `<button class="chip" data-filter="wishlist" style="margin-left:auto">♥ Wishlist</button>`;
+    filters.innerHTML = chips;
+    filters.addEventListener('click', e=>{
+      const b=e.target.closest('.chip'); if(!b) return;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      b.classList.add('active'); FILTER=b.dataset.filter; renderProducts();
+    });
+  }
   const grid = document.getElementById('catGrid');
   const imgFallbacks = ["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1522771930-78848d9293e4?q=80&w=800&auto=format&fit=crop","https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?q=80&w=800&auto=format&fit=crop"];
   if(grid){
@@ -550,24 +564,44 @@ function renderCategories(){
     grid.querySelectorAll('.cat-card').forEach(c=>c.addEventListener('click', e=>{
       e.preventDefault();
       FILTER=c.dataset.cat; document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active', x.dataset.filter===FILTER));
-      document.getElementById('shop').scrollIntoView({behavior:'smooth'}); renderProducts();
+      location.href='products.html?cat='+encodeURIComponent(FILTER);
     }));
   }
 }
 
+function pAttrValues(p,name){const out=[]; (p.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(v=>{if(v.name&&!out.includes(v.name)) out.push(v.name)})}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(x=>{if(x.name&&!out.includes(x.name)) out.push(x.name)})})); return out}
+function pSearchText(p){const t=[p.name,p.category?.name,(p.category?.slug||"").replace(/-/g," ")]; (p.attributes||[]).forEach(a=>(a.values||[]).forEach(v=>t.push(v.name))); (p.variants||[]).forEach(v=>{t.push(v.sku,v.name); (v.attributes||[]).forEach(a=>(a.values||[]).forEach(x=>t.push(x.name)))}); return t.filter(Boolean).join(" ").toLowerCase()}
+function renderAttrFilters(){
+  const box=document.getElementById('afilters'); if(!box) return;
+  const names=[];
+  PRODUCTS.forEach(p=>{(p.attributes||[]).forEach(a=>{const n=a.attribute?.name; if(n&&!(a.values||[]).length) return; if(n&&!names.includes(n)) names.push(n)}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{const n=a.attribute?.name; if(n==="Size"&&!names.includes(n)) names.push(n)}))});
+  names.sort((a,b)=>a==="Size"?1:b==="Size"?-1:a.localeCompare(b));
+  AFILTERS={};
+  box.innerHTML=names.map(n=>{
+    const vals=[]; PRODUCTS.forEach(p=>pAttrValues(p,n).forEach(v=>{if(!vals.includes(v)) vals.push(v)}));
+    if(!vals.length) return "";
+    AFILTERS[n]="";
+    return `<div class="afilter"><label>${n}</label><select data-attr="${n}" onchange="setAttrFilter(this)"><option value="">All ${n}</option>${vals.map(v=>`<option value="${v}">${v}</option>`).join("")}</select></div>`;
+  }).join("")+`<button class="afclear" id="afClear" onclick="clearAttrFilters()">Clear filters</button>`;
+}
+function setAttrFilter(el){AFILTERS[el.dataset.attr]=el.value; el.classList.toggle('has',!!el.value); syncClear(); renderProducts()}
+function syncClear(){const on=Object.values(AFILTERS).some(Boolean); const b=document.getElementById('afClear'); if(b) b.classList.toggle('show',on)}
+function clearAttrFilters(){Object.keys(AFILTERS).forEach(k=>AFILTERS[k]=""); document.querySelectorAll('#afilters select').forEach(s=>{s.value=""; s.classList.remove('has')}); syncClear(); renderProducts()}
 function filtered(){
   const s = document.getElementById('search').value.trim().toLowerCase();
   return PRODUCTS.filter(p=>{
-    const matchSearch = !s || p.name.toLowerCase().includes(s) || (p.category?.name||"").toLowerCase().includes(s);
+    const hay=pSearchText(p);
+    const matchSearch = !s || s.split(/\s+/).every(w=>hay.includes(w));
     const matchCat = FILTER==="all" ? true : FILTER==="wishlist" ? WISH.includes(p.id) : (p.category?.slug===FILTER);
-    return matchSearch && matchCat;
+    const matchAttr = Object.entries(AFILTERS).every(([n,v])=>!v||pAttrValues(p,n).includes(v));
+    return matchSearch && matchCat && matchAttr;
   });
 }
 function renderProducts(){
   const list = filtered();
   const wrap = document.getElementById('products');
   if(!list.length){
-    wrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)">No styles match your filter. Try “All” or clear search.</div>`;
+    wrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)">No bestsellers match your search. Try clearing search or <a href="products.html" style="color:var(--primary);text-decoration:underline">browse all products →</a></div>`;
     return;
   }
   wrap.innerHTML = list.map(p=>{
@@ -636,7 +670,7 @@ function renderCart(){
       <img src="${c.img}" alt=""/>
       <div style="flex:1">
         <div style="font-weight:700;font-size:13px">${c.name}</div>
-        <div style="font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">${c.sku}</div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">${c.sku}${c.size?` • Size ${c.size}`:""}</div>
         <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div class="qty"><button onclick="changeQty(${i},-1)">−</button><span style="min-width:22px;text-align:center">${c.qty}</span><button onclick="changeQty(${i},1)">+</button></div>
           <b>${money(c.price*c.qty, c.currency)}</b>
@@ -654,8 +688,8 @@ function renderCart(){
     <div class="row"><span>Shipping</span><span>${shipping?money(shipping,cur):'Free'}</span></div>
     <div class="row total"><span>Total</span><span>${money(total, cur)}</span></div>
     <a href="checkout.html" class="btn-primary" style="width:100%;justify-content:center;margin-top:12px;display:flex">Go to Checkout • ${money(total,cur)}</a>
-    <button class="btn-ghost" style="width:100%;margin-top:8px;border-radius:999px;padding:10px" onclick="checkout()">Quick Saleor Checkout (demo)</button>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0">Secure via Saleor • <a href="checkout.html" style="color:var(--primary);text-decoration:underline">Full checkout page →</a></p>
+    <button class="btn-ghost" style="width:100%;margin-top:8px;border-radius:999px;padding:10px" onclick="checkout()">Quick Checkout</button>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0">Secure checkout • <a href="checkout.html" style="color:var(--primary);text-decoration:underline">Full checkout page →</a></p>
   `;
 }
 function changeQty(i,d){
@@ -666,9 +700,9 @@ function changeQty(i,d){
 function removeLine(i){ CART.splice(i,1); save(); renderCart(); }
 
 async function checkout(){
-  // Attempt Saleor checkoutCreate (may fail if stock 0 — graceful fallback)
+  // Attempt checkout (may fail if stock 0 — graceful fallback)
   const lines = CART.map(c=>({quantity:c.qty, variantId:c.variantId}));
-  toast("Creating Saleor checkout…");
+  toast("Creating checkout…");
   try{
     const data = await gql(`mutation Checkout($lines:[CheckoutLineInput!]!){
       checkoutCreate(input:{ lines:$lines }){
@@ -758,7 +792,7 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
   `).join("");
   renderCartCount(); renderWishCount(); renderCart();
   try{ await loadProducts(); }catch(e){
-    document.getElementById('status').textContent = "Couldn’t reach Saleor GraphQL. Showing demo fallback.";
+    document.getElementById('status').textContent = "Couldn’t reach the store. Showing demo collection.";
     // fallback demo products if API unreachable
     if(!PRODUCTS.length){
       PRODUCTS = [
@@ -790,6 +824,8 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
 })();
 // expose for inline handlers
 window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.closeDrawer=closeDrawer; window.checkout=checkout;
+// show My Orders only when logged in
+try{if(localStorage.getItem("ak_token")){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
