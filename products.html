@@ -35,6 +35,12 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .catopt:hover{background:var(--sage)}
 .catopt input{accent-color:var(--primary)}
 .catopt small{margin-left:auto;color:var(--muted);font-weight:500}
+.cat-toggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 10px;border-radius:12px;cursor:pointer;user-select:none;color:#4A3F3B}
+.cat-toggle:hover{background:var(--sage)}
+.cat-toggle .arrow{font-size:10px;transition:transform .2s;width:14px;text-align:center}
+.cat-toggle .arrow.open{transform:rotate(90deg)}
+.cat-children{display:none;padding-left:16px}
+.cat-children.open{display:block}
 .side select{width:100%;border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px}
 .side select.has{border-color:var(--primary);background:var(--blush)}
 .clearbtn{border:none;background:none;color:var(--primary);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;padding:8px 0;display:none}
@@ -46,6 +52,10 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm)}
 .card-img{aspect-ratio:4/4.8;background:var(--sage);position:relative;overflow:hidden;cursor:pointer}
 .card-img img{width:100%;height:100%;object-fit:cover}
+.card-thumbs{display:flex;gap:4px;padding:6px;background:#fff;overflow-x:auto;scrollbar-width:none}
+.card-thumbs::-webkit-scrollbar{display:none}
+.card-thumbs img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer;flex-shrink:0;opacity:.7;transition:.2s}
+.card-thumbs img:hover,.card-thumbs img.active{border-color:var(--primary);opacity:1}
 .card-body{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card-cat{display:inline-block;align-self:flex-start;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 10px;border-radius:999px}
 .card-title{font-family:"Cormorant Garamond",serif;font-size:17px;margin:0}
@@ -98,25 +108,84 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 <footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028</span></div></footer>
 <script>
 const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
-let PRODUCTS=[], CATEGORIES=[], CAT="all", AF={};
+let PRODUCTS=[], CATEGORIES=[], CATS=new Set(), AF={}, CAT_TREE={};
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+function imgSmall(u,s=256){if(!u)return"";return u.replace(/thumbnail_\d+/gi,"thumbnail_"+s)}
 async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})}); const j=await r.json(); if(j.errors) console.warn(j.errors); return j.data}
 function valsOf(p,name){const out=[]; (p.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(v=>{if(v.name&&!out.includes(v.name)) out.push(v.name)})}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(x=>{if(x.name&&!out.includes(x.name)) out.push(x.name)})})); return out}
 function hayOf(p){const t=[p.name,p.category?.name,(p.category?.slug||"").replace(/-/g," ")]; (p.attributes||[]).forEach(a=>(a.values||[]).forEach(v=>t.push(v.name))); (p.variants||[]).forEach(v=>{t.push(v.sku,v.name); (v.attributes||[]).forEach(a=>(a.values||[]).forEach(x=>t.push(x.name)))}); return t.filter(Boolean).join(" ").toLowerCase()}
 function toggleSide(open){document.getElementById('side').classList.toggle('open',open); document.getElementById('backdrop').classList.toggle('open',open)}
 async function load(){
   try{if(localStorage.getItem("ak_token")) document.getElementById('ordersLink').style.display="";}catch(e){}
-  const u=new URL(location.href); const q0=u.searchParams.get('q')||"", c0=u.searchParams.get('cat')||"all";
-  if(q0) document.getElementById('q').value=q0; CAT=c0;
-  const d=await gql(`query{products(first:50){edges{node{id name slug thumbnail{url} media{url} pricing{priceRange{start{gross{amount currency}}}} category{name slug} attributes{attribute{name} values{name}} variants{id sku name attributes{attribute{name} values{name}}}}}} categories(first:20){edges{node{name slug}}}}`);
+  const u=new URL(location.href); const q0=u.searchParams.get('q')||"", c0=u.searchParams.get('cat')||"";
+  if(q0) document.getElementById('q').value=q0;
+  CATS=new Set(c0?c0.split(",").filter(Boolean):[]);
+  const d=await gql(`query{products(first:50){edges{node{id name slug thumbnail{url} media{url alt type} pricing{priceRange{start{gross{amount currency}}}} category{name slug} attributes{attribute{name} values{name}} variants{id sku name attributes{attribute{name} values{name}}}}}} categories(first:50){edges{node{name slug parent{name slug parent{name slug}}}}}}`);
   PRODUCTS=(d?.products?.edges||[]).map(e=>e.node);
   CATEGORIES=(d?.categories?.edges||[]).map(e=>e.node).filter(c=>c.slug&&c.slug!=="default-category");
   buildSide(); render();
 }
 function buildSide(){
   const counts={}; PRODUCTS.forEach(p=>{const s=p.category?.slug||"none"; counts[s]=(counts[s]||0)+1});
-  document.getElementById('catList').innerHTML=`<label class="catopt"><input type="radio" name="cat" value="all" ${CAT==="all"?"checked":""} onchange="setCat(this)"/> All <small>${PRODUCTS.length}</small></label>`
-    +CATEGORIES.map(c=>`<label class="catopt"><input type="radio" name="cat" value="${c.slug}" ${CAT===c.slug?"checked":""} onchange="setCat(this)"/> ${c.name} <small>${counts[c.slug]||0}</small></label>`).join("");
+  const tree={};
+  CATEGORIES.forEach(c=>{
+    const p1=c.parent, p2=p1?.parent;
+    if(!tree[c.slug]) tree[c.slug]={name:c.name,slug:c.slug,parent:null,children:[],count:counts[c.slug]||0};
+    else {tree[c.slug].name=c.name; tree[c.slug].count=counts[c.slug]||0;}
+    if(p1){
+      if(!tree[p1.slug]) tree[p1.slug]={name:p1.name,slug:p1.slug,parent:null,children:[],count:counts[p1.slug]||0};
+      else tree[p1.slug].name=p1.name;
+      tree[c.slug].parent=p1.slug;
+      if(!tree[p1.slug].children.includes(c.slug)) tree[p1.slug].children.push(c.slug);
+      if(p2){
+        if(!tree[p2.slug]) tree[p2.slug]={name:p2.name,slug:p2.slug,parent:null,children:[],count:counts[p2.slug]||0};
+        else tree[p2.slug].name=p2.name;
+        tree[p1.slug].parent=p2.slug;
+        if(!tree[p2.slug].children.includes(p1.slug)) tree[p2.slug].children.push(p1.slug);
+      }
+    }
+  });
+  CAT_TREE=tree;
+  const topLevel=Object.values(tree).filter(c=>!c.parent);
+  const leafNodes=Object.values(tree).filter(c=>!c.children.length&&c.parent);
+  function catCount(slug){const c=tree[slug]; if(!c) return counts[slug]||0; if(!c.children.length) return c.count; return c.children.reduce((s,ch)=>s+catCount(ch),0)}
+  function allChildrenSelected(slug){const c=tree[slug]; if(!c) return CATS.has(slug); if(!c.children.length) return CATS.has(slug); return c.children.every(ch=>allChildrenSelected(ch))}
+  function hasSelectedDescendant(slug){const c=tree[slug]; if(!c) return false; return CATS.has(slug)||c.children.some(ch=>hasSelectedDescendant(ch))}
+  let html=`<label class="catopt"><input type="checkbox" ${CATS.size===0?"checked":""} onchange="toggleAllCats(this.checked)"/> All <small>${PRODUCTS.length}</small></label>`;
+  topLevel.sort((a,b)=>a.name.localeCompare(b.name));
+  topLevel.forEach(cat=>{
+    const kids=cat.children.map(s=>tree[s]).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name));
+    if(kids.length){
+      const allSel=allChildrenSelected(cat.slug);
+      const isOpen=CATS.has(cat.slug)||hasSelectedDescendant(cat.slug);
+      html+=`<div class="cat-toggle" onclick="toggleCatGroup(this)"><span class="arrow${isOpen?" open":""}">▶</span> <input type="checkbox" ${allSel?"checked":""} onclick="event.stopPropagation();toggleParentCats('${cat.slug}',this.checked)"/> ${cat.name} <small style="margin-left:auto;color:var(--muted);font-weight:500">${catCount(cat.slug)}</small></div>`;
+      html+=`<div class="cat-children${isOpen?" open":""}" data-group="${cat.slug}">`;
+      kids.forEach(kid=>{
+        const grandkids=kid.children.map(s=>tree[s]).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name));
+        if(grandkids.length){
+          const gSel=allChildrenSelected(kid.slug);
+          const gOpen=CATS.has(kid.slug)||hasSelectedDescendant(kid.slug);
+          html+=`<div class="cat-toggle" onclick="toggleCatGroup(this)"><span class="arrow${gOpen?" open":""}">▶</span> <input type="checkbox" ${gSel?"checked":""} onclick="event.stopPropagation();toggleParentCats('${kid.slug}',this.checked)"/> ${kid.name} <small style="margin-left:auto;color:var(--muted);font-weight:500">${catCount(kid.slug)}</small></div>`;
+          html+=`<div class="cat-children${gOpen?" open":""}" data-group="${kid.slug}">`;
+          grandkids.forEach(g=>html+=`<label class="catopt"><input type="checkbox" value="${g.slug}" ${CATS.has(g.slug)?"checked":""} onchange="toggleCat('${g.slug}',this.checked)"/> ${g.name} <small>${counts[g.slug]||0}</small></label>`);
+          html+=`</div>`;
+        } else {
+          html+=`<label class="catopt"><input type="checkbox" value="${kid.slug}" ${CATS.has(kid.slug)?"checked":""} onchange="toggleCat('${kid.slug}',this.checked)"/> ${kid.name} <small>${counts[kid.slug]||0}</small></label>`;
+        }
+      });
+      html+=`</div>`;
+    } else {
+      html+=`<label class="catopt"><input type="checkbox" value="${cat.slug}" ${CATS.has(cat.slug)?"checked":""} onchange="toggleCat('${cat.slug}',this.checked)"/> ${cat.name} <small>${counts[cat.slug]||0}</small></label>`;
+    }
+  });
+  const orphanLeafs=leafNodes.filter(c=>!topLevel.some(t=>t.slug===c.slug));
+  if(orphanLeafs.length){
+    html+=`<div class="cat-toggle" onclick="toggleCatGroup(this)"><span class="arrow">▶</span> Other Categories</div>`;
+    html+=`<div class="cat-children">`;
+    orphanLeafs.forEach(c=>html+=`<label class="catopt"><input type="checkbox" value="${c.slug}" ${CATS.has(c.slug)?"checked":""} onchange="toggleCat('${c.slug}',this.checked)"/> ${c.name} <small>${counts[c.slug]||0}</small></label>`);
+    html+=`</div>`;
+  }
+  document.getElementById('catList').innerHTML=html;
   const names=[];
   PRODUCTS.forEach(p=>{(p.attributes||[]).forEach(a=>{const n=a.attribute?.name; if(n&&(a.values||[]).length&&!names.includes(n)) names.push(n)}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if(a.attribute?.name==="Size"&&!names.includes("Size")) names.push("Size")}))});
   names.sort((a,b)=>a==="Size"?1:b==="Size"?-1:a.localeCompare(b));
@@ -128,16 +197,25 @@ function buildSide(){
     return `<select data-attr="${n}" onchange="setAttr(this)"><option value="">${n}: All</option>${vals.map(v=>`<option value="${v}">${v}</option>`).join("")}</select>`;
   }).join("");
 }
-function setCat(el){CAT=el.value; syncClear(); render(); toggleSide(false)}
+function toggleCatGroup(el){
+  const arrow=el.querySelector('.arrow');
+  const group=el.nextElementSibling;
+  if(!group) return;
+  group.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+function toggleCat(slug,checked){if(checked) CATS.add(slug); else CATS.delete(slug); syncClear(); buildSide(); render(); if(CATS.size>0) toggleSide(false)}
+function toggleParentCats(slug,checked){const c=CAT_TREE[slug]; if(c&&c.children.length){c.children.forEach(ch=>{if(checked)CATS.add(ch);else CATS.delete(ch); const gc=CAT_TREE[ch]; if(gc&&gc.children.length)gc.children.forEach(g=>{if(checked)CATS.add(g);else CATS.delete(g)})}); if(checked)CATS.add(slug);else CATS.delete(slug)} else {if(checked)CATS.add(slug);else CATS.delete(slug)} syncClear(); buildSide(); render(); if(CATS.size>0) toggleSide(false)}
+function toggleAllCats(checked){if(checked)CATS.clear(); syncClear(); buildSide(); render()}
 function setAttr(el){AF[el.dataset.attr]=el.value; el.classList.toggle('has',!!el.value); syncClear(); render()}
-function syncClear(){const on=CAT!=="all"||Object.values(AF).some(Boolean)||document.getElementById('q').value.trim(); document.getElementById('clearBtn').classList.toggle('show',!!on)}
-function clearAll(){CAT="all"; Object.keys(AF).forEach(k=>AF[k]=""); document.getElementById('q').value=""; document.querySelectorAll('#attrList select').forEach(s=>{s.value=""; s.classList.remove('has')}); const r=document.querySelector('input[name="cat"][value="all"]'); if(r) r.checked=true; syncClear(); render()}
+function syncClear(){const on=CATS.size>0||Object.values(AF).some(Boolean)||document.getElementById('q').value.trim(); document.getElementById('clearBtn').classList.toggle('show',!!on)}
+function clearAll(){CATS.clear(); Object.keys(AF).forEach(k=>AF[k]=""); document.getElementById('q').value=""; document.querySelectorAll('#attrList select').forEach(s=>{s.value=""; s.classList.remove('has')}); syncClear(); buildSide(); render()}
 function nameKey(n){return (n||"").trim().toLowerCase()}
 function groupItems(list){const m=new Map(); list.forEach(p=>{const k=nameKey(p.name)||p.id; if(!m.has(k)) m.set(k,[]); m.get(k).push(p)}); return [...m.entries()].map(([k,items])=>({key:k,name:items[0].name,rep:items[0],items,colours:[...new Set(items.flatMap(p=>valsOf(p,"Color")))]}))}
 function filtered(){
   const s=document.getElementById('q').value.trim().toLowerCase();
   return groupItems(PRODUCTS).filter(g=>{
-    if(CAT!=="all"&&!g.items.some(p=>p.category?.slug===CAT)) return false;
+    if(CATS.size>0&&!g.items.some(p=>CATS.has(p.category?.slug))) return false;
     if(s&&!s.split(/\s+/).every(w=>g.items.some(p=>hayOf(p).includes(w)))) return false;
     return Object.entries(AF).every(([n,v])=>!v||g.items.some(p=>valsOf(p,n).includes(v)));
   });
@@ -151,10 +229,13 @@ function render(){
   g.innerHTML=list.map(gr=>{
     const p=gr.rep;
     const price=p.pricing?.priceRange?.start?.gross;
-    const img=p.thumbnail?.url||p.media?.[0]?.url||"";
+    const images=(p.media||[]).filter(m=>m&&m.url);
+    const img=imgSmall(p.thumbnail?.url)||images[0]?.url||"";
     const fab=(valsOf(p,"Fabric")[0]||"");
+    const thumbs=images.slice(1,5);
     return `<article class="card">
-      <div class="card-img" onclick="location.href='product.html?slug=${p.slug}'">${img?`<img loading="lazy" src="${img}" alt="${p.name}"/>`:""}</div>
+      <div class="card-img" onclick="location.href='product.html?slug=${p.slug}'">${img?`<img loading="lazy" src="${img}" alt="${images[0]?.alt||p.name}"/>`:""}</div>
+      ${thumbs.length?`<div class="card-thumbs">${thumbs.map(m=>`<img loading="lazy" src="${m.url}" alt="${m.alt||p.name}" onerror="this.style.display='none'" onclick="event.stopPropagation();this.closest('.card-img').querySelector('img').src='${m.url}'"/>`).join("")}</div>`:""}
       <div class="card-body"><div class="card-cat">${p.category?.name||'Kidswear'}</div>
       <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
       ${fab?`<div class="card-attr">${fab}</div>`:""}

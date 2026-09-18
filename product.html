@@ -164,19 +164,19 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
     <div class="price" id="pPrice">—</div>
     <div id="colorWrap"><div class="sizes-label">Colour <span class="hint" id="colorHint"></span></div><div class="variants" id="colors"></div></div>
     <div id="variantWrap"><div class="variants" id="variants"></div></div>
-    <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
+    <div class="sizes-label">Select size <span class="hint" id="sizeHint">— pick a variant first</span></div>
+    <div class="sizes" id="sizes"></div>
     <div style="display:flex;gap:12px;align-items:center;margin:10px 0">
       <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
       <span style="font-size:12px;color:var(--muted)">Quantity</span>
       <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">In stock</span>
     </div>
-    <div class="sizes-label">Select size <span class="hint" id="sizeHint">— pick a variant first</span></div>
-    <div class="sizes" id="sizes"></div>
     <div class="actions">
       <button class="btn-primary" id="addBtn">Add to Bag <span id="addPrice">—</span></button>
       <button class="btn-ghost" onclick="buyNow()">Buy Now</button>
       <button class="btn-ghost" id="wishBtn">♡ Wishlist</button>
     </div>
+    <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
     <p class="desc" id="pDesc">Fetching product details…</p>
     <div class="meta-grid" id="attrGrid"></div>
     <div class="trust"><span>✓ Free shipping over ₹999</span><span>7-Day Returns</span><span>Manufacturer: Ammi Enterprises</span></div>
