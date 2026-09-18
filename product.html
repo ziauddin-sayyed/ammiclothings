@@ -69,8 +69,8 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .variants{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .opt{border:1px solid var(--line);padding:9px 14px;border-radius:999px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
 .opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.sizes-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px}
-.sizes-label .hint{text-transform:none;letter-spacing:0;font-weight:500;color:var(--accent)}
+.sizes-label{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--primary);font-weight:800;margin:14px 0 8px;background:var(--blush);border:2px solid var(--accent);padding:10px 14px;border-radius:14px}
+.sizes-label .hint{text-transform:none;letter-spacing:0;font-weight:600;color:var(--accent-dark)}
 .sizes{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
 .size-chip{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer}
 .size-chip:hover{border-color:var(--accent)}
@@ -162,12 +162,13 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
     <h1 id="pName">Loading product…</h1>
     <div class="rating">★★★★★ <span> (Pan India • by Ammi Enterprises)</span> • <span id="pSku">—</span></div>
     <div class="price" id="pPrice">—</div>
+    <div id="colorWrap"><div class="sizes-label">Colour <span class="hint" id="colorHint"></span></div><div class="variants" id="colors"></div></div>
     <div id="variantWrap"><div class="variants" id="variants"></div></div>
     <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
     <div style="display:flex;gap:12px;align-items:center;margin:10px 0">
       <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
       <span style="font-size:12px;color:var(--muted)">Quantity</span>
-      <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">In stock • COD available</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="stockNote">In stock</span>
     </div>
     <div class="sizes-label">Select size <span class="hint" id="sizeHint">— pick a variant first</span></div>
     <div class="sizes" id="sizes"></div>
@@ -178,7 +179,7 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
     </div>
     <p class="desc" id="pDesc">Fetching product details…</p>
     <div class="meta-grid" id="attrGrid"></div>
-    <div class="trust"><span>✓ Free shipping over ₹999</span><span>COD Available</span><span>7-Day Returns</span><span>Manufacturer: Ammi Enterprises</span></div>
+    <div class="trust"><span>✓ Free shipping over ₹999</span><span>7-Day Returns</span><span>Manufacturer: Ammi Enterprises</span></div>
     <p style="font-size:12px;color:var(--muted);margin-top:12px">Sold by Ammi Enterprises, A-7 Kasturchand Mill Compound, Mumbai – 400028 • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a> • <a href="tel:+917021946362" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a></p>
   </div>
 </section>
@@ -225,7 +226,7 @@ function getSlug(){const u=new URL(location.href);return u.searchParams.get('slu
 async function load(){
   const slug=getSlug();
   document.getElementById('crumbName').textContent=slug;
-  const q=`query P($slug:String!){ product(slug:$slug){ id name slug description media{url alt} thumbnail{url} category{name slug} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
+  const q=`query P($slug:String!){ product(slug:$slug, channel:"in"){ id name slug description media{url alt} thumbnail{url} category{name slug parent{name slug parent{name slug}}} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
   const [d]=await Promise.all([gql(q,{slug}), loadSizeCharts()]);
   PRODUCT=d?.product;
   if(!PRODUCT){document.getElementById('pName').textContent="Product not found"; document.getElementById('pDesc').textContent="Try going back to shop."; return;}
@@ -246,7 +247,6 @@ async function load(){
   document.getElementById('addPrice').textContent=price?money(price.amount,price.currency):"—";
   // images (exclude Size Chart media from gallery + thumbs)
   const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean).filter(m=>!/size.?chart/i.test(m.alt||""));
-  PRODUCT._sizeChartImg=(PRODUCT.media||[]).find(m=>/size.?chart/i.test(m.alt||""))?.url||null;
   const urls=media.map(m=>m.url);
   document.getElementById('mainImg').src=urls[0]||"";
   document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" onclick="setImg('${u}',this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
@@ -255,7 +255,7 @@ async function load(){
   function sizeOf(v){const a=(v.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="size"); return (a?.values||[]).map(y=>y.name).filter(Boolean)}
   PRODUCT.variants?.forEach(v=>{v._sizes=sizeOf(v)});
   if(PRODUCT.variants?.length){ vwrap.innerHTML=PRODUCT.variants.map((v,i)=>{const nm=v.name||v.sku||("Variant "+(i+1)); return `<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="pick('${v.id}')">${nm} • ${v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):""}</button>`}).join(""); VARIANT=PRODUCT.variants[0]; } else { vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"}
-  renderSizes(); renderAttrs();
+  renderSizes(); renderAttrs(); loadSiblings();
   updateWish();
   // related
   const rel=(d?.products?.edges||[]).filter(e=>e.node.slug!==slug).slice(0,4);
@@ -266,7 +266,21 @@ function openLb(){const i=document.getElementById('lbImg'); i.src=document.getEl
 function closeLb(){document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('mainImg').onclick=openLb;
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
-function pick(id){document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
+function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
+async function loadSiblings(){
+  const wrap=document.getElementById('colorWrap'), box=document.getElementById('colors');
+  try{
+    const d=await gql(`query{products(first:100){edges{node{id name slug thumbnail{url} attributes{attribute{name} values{name}}}}}}`);
+    const all=(d?.products?.edges||[]).map(e=>e.node);
+    const key=(PRODUCT.name||"").trim().toLowerCase();
+    const sibs=all.filter(p=>(p.name||"").trim().toLowerCase()===key);
+    if(sibs.length<2){wrap.style.display="none"; return;}
+    const colOf=p=>{const a=(p.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="color"); const v=(a?.values||[]).map(y=>y.name).filter(Boolean); return v.join(", ")||p.name};
+    wrap.style.display="";
+    document.getElementById('colorHint').textContent="— "+sibs.length+" colours";
+    box.innerHTML=sibs.map(p=>`<button class="opt ${p.id===PRODUCT.id?'active':''}" style="display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:8px;border-radius:14px" onclick="location.href='product.html?slug=${p.slug}'">${p.thumbnail?.url?`<img src="${p.thumbnail.url}" alt="${colOf(p)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover"/>`:""}<span>${colOf(p)}</span></button>`).join("");
+  }catch(e){wrap.style.display="none"}
+}
 function selSize(el){SIZE=el.dataset.s; document.querySelectorAll('#sizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('sizeHint').textContent="— "+SIZE;}
 function renderAttrs(){
   const grid=document.getElementById('attrGrid'); if(!grid) return;
@@ -293,8 +307,8 @@ function chartRows(){
   return {secKey, showRows};
 }
 function fillChart(){
-  const host=document.getElementById('chartTables'), note=document.getElementById('chartNote'), img=document.getElementById('chartImg');
-  if(PRODUCT?._sizeChartImg){img.src=PRODUCT._sizeChartImg; img.style.display="block";} else {img.removeAttribute("src"); img.style.display="none";}
+  const host=document.getElementById('chartTables'), note=document.getElementById('chartNote');
+  setChartImg();
   const ptype=PRODUCT?.productType?.name||"";
   const secKey=SECTION_FOR_TYPE[ptype]||Object.keys(SIZECHART.sections||{}).find(k=>k.toLowerCase().includes(ptype.toLowerCase()))||"";
   const secRows=(SIZECHART.sections||{})[secKey]||[];
@@ -311,6 +325,23 @@ function fillChart(){
   }).join("")}</table></div>`;
   note.textContent=`${rows.length} sizes across ${PRODUCT.variants.length} variants • selected variant highlighted • all measurements in inches.`;
 }
+function setChartImg(){
+  const img=document.getElementById('chartImg');
+  const urls=[];
+  const sc=(PRODUCT?.attributes||[]).find(a=>(a.attribute?.name||"").toLowerCase()==="size chart type");
+  (sc?.values||[]).forEach(v=>{if(v.name) urls.push("images/size_charts_graph/"+v.name)});
+  const seen=new Set(), slugs=[];
+  let c=PRODUCT?.category;
+  while(c&&slugs.length<4){if(c.slug&&!seen.has(c.slug)){seen.add(c.slug); slugs.push(c.slug)} c=c.parent}
+  slugs.forEach(s=>{const b=s.replace(/^ladies-wear-/,""); if(b!==s&&!seen.has(b)){seen.add(b); slugs.push(b)}});
+  slugs.forEach(s=>urls.push("images/category_graph/"+s+".jpeg"));
+  let i=0;
+  img.onerror=()=>{i++; if(i<urls.length){img.src=urls[i]} else {img.removeAttribute("src"); img.style.display="none"}};
+  img.onload=()=>{img.style.display="block"};
+  if(!urls.length){img.removeAttribute("src"); img.style.display="none"; return}
+  img.alt="Size chart — "+(PRODUCT?.category?.name||"");
+  img.src=urls[0];
+}
 function openChart(){fillChart(); document.getElementById('chartModal').classList.add('open'); document.getElementById('chartModal').setAttribute('aria-hidden','false')}
 function closeChart(){document.getElementById('chartModal').classList.remove('open'); document.getElementById('chartModal').setAttribute('aria-hidden','true')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeChart()});
@@ -321,7 +352,7 @@ document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVa
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
 document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex) ex.qty+=QTY; else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
 function buyNow(){document.getElementById('addBtn').click(); location.href="checkout.html"}
-function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999 • COD Available</div>`}
+function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999</div>`}
 window.rem=(i)=>{CART.splice(i,1);save()}
 function openDrawer(){document.getElementById('drawer').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open')}

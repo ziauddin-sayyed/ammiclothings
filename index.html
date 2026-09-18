@@ -449,7 +449,7 @@ button{font:inherit}
         <div class="qty"><button id="qMinus">−</button><span id="qVal" style="min-width:22px;text-align:center">1</span><button id="qPlus">+</button></div>
         <button class="btn-primary" style="flex:1;justify-content:center" id="mAdd">Add to bag — <span id="mAddPrice">₹432</span></button>
       </div>
-       <p style="font-size:12px;color:var(--muted);margin-top:10px">Secure checkout • COD available</p>
+       <p style="font-size:12px;color:var(--muted);margin-top:10px">Secure checkout • Free shipping over ₹999</p>
     </div>
   </div>
 </div>
@@ -532,7 +532,6 @@ async function loadProducts(){
     const hImg=document.getElementById('heroFloatImg'); if(hImg) hImg.src = PRODUCTS[0].thumbnail?.url || hImg.src;
   }
   renderProducts();
-  document.getElementById('status').textContent = PRODUCTS.length ? `Showing ${PRODUCTS.length} bestsellers` : `Bestsellers coming soon — please check back.`;
 }
 
 function renderCategories(){
@@ -586,24 +585,27 @@ function renderAttrFilters(){
 function setAttrFilter(el){AFILTERS[el.dataset.attr]=el.value; el.classList.toggle('has',!!el.value); syncClear(); renderProducts()}
 function syncClear(){const on=Object.values(AFILTERS).some(Boolean); const b=document.getElementById('afClear'); if(b) b.classList.toggle('show',on)}
 function clearAttrFilters(){Object.keys(AFILTERS).forEach(k=>AFILTERS[k]=""); document.querySelectorAll('#afilters select').forEach(s=>{s.value=""; s.classList.remove('has')}); syncClear(); renderProducts()}
+function nameKey(n){return (n||"").trim().toLowerCase()}
+function groupItems(list){const m=new Map(); list.forEach(p=>{const k=nameKey(p.name)||p.id; if(!m.has(k)) m.set(k,[]); m.get(k).push(p)}); return [...m.entries()].map(([k,items])=>({key:k,name:items[0].name,rep:items[0],items,colours:[...new Set(items.flatMap(p=>pAttrValues(p,"Color")))]}))}
 function filtered(){
   const s = document.getElementById('search').value.trim().toLowerCase();
-  return PRODUCTS.filter(p=>{
-    const hay=pSearchText(p);
-    const matchSearch = !s || s.split(/\s+/).every(w=>hay.includes(w));
-    const matchCat = FILTER==="all" ? true : FILTER==="wishlist" ? WISH.includes(p.id) : (p.category?.slug===FILTER);
-    const matchAttr = Object.entries(AFILTERS).every(([n,v])=>!v||pAttrValues(p,n).includes(v));
+  return groupItems(PRODUCTS).filter(g=>{
+    const matchSearch = !s || s.split(/\s+/).every(w=>g.items.some(p=>pSearchText(p).includes(w)));
+    const matchCat = FILTER==="all" ? true : FILTER==="wishlist" ? g.items.some(p=>WISH.includes(p.id)) : g.items.some(p=>p.category?.slug===FILTER);
+    const matchAttr = Object.entries(AFILTERS).every(([n,v])=>!v||g.items.some(p=>pAttrValues(p,n).includes(v)));
     return matchSearch && matchCat && matchAttr;
   });
 }
 function renderProducts(){
   const list = filtered();
   const wrap = document.getElementById('products');
+  document.getElementById('status').textContent = list.length ? `Showing ${list.length} bestseller${list.length>1?"s":""}` : ``;
   if(!list.length){
     wrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)">No bestsellers match your search. Try clearing search or <a href="products.html" style="color:var(--primary);text-decoration:underline">browse all products →</a></div>`;
     return;
   }
-  wrap.innerHTML = list.map(p=>{
+  wrap.innerHTML = list.map(g=>{
+    const p=g.rep;
     const price = p.pricing?.priceRange?.start?.gross;
     const und = p.pricing?.priceRangeUndiscounted?.start?.gross;
     const hasSale = und && und.amount>price.amount;
@@ -619,6 +621,7 @@ function renderProducts(){
       <div class="card-body">
         <div class="card-cat">${p.category?.name||'Kidswear'}</div>
         <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
+        ${g.colours.length>1?`<div style="font-size:11px;color:var(--muted)">${g.colours.length} colours: ${g.colours.join(" • ")}</div>`:""}
         <div class="card-price"><b>${price?money(price.amount, price.currency):'—'}</b>${hasSale?`<s>${money(und.amount, und.currency)}</s>`:''}</div>
         <div class="card-actions">
           <button class="btn-sm" onclick="openModal('${p.id}')">Quick view</button>

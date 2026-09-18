@@ -132,20 +132,24 @@ function setCat(el){CAT=el.value; syncClear(); render(); toggleSide(false)}
 function setAttr(el){AF[el.dataset.attr]=el.value; el.classList.toggle('has',!!el.value); syncClear(); render()}
 function syncClear(){const on=CAT!=="all"||Object.values(AF).some(Boolean)||document.getElementById('q').value.trim(); document.getElementById('clearBtn').classList.toggle('show',!!on)}
 function clearAll(){CAT="all"; Object.keys(AF).forEach(k=>AF[k]=""); document.getElementById('q').value=""; document.querySelectorAll('#attrList select').forEach(s=>{s.value=""; s.classList.remove('has')}); const r=document.querySelector('input[name="cat"][value="all"]'); if(r) r.checked=true; syncClear(); render()}
+function nameKey(n){return (n||"").trim().toLowerCase()}
+function groupItems(list){const m=new Map(); list.forEach(p=>{const k=nameKey(p.name)||p.id; if(!m.has(k)) m.set(k,[]); m.get(k).push(p)}); return [...m.entries()].map(([k,items])=>({key:k,name:items[0].name,rep:items[0],items,colours:[...new Set(items.flatMap(p=>valsOf(p,"Color")))]}))}
 function filtered(){
   const s=document.getElementById('q').value.trim().toLowerCase();
-  return PRODUCTS.filter(p=>{
-    if(CAT!=="all"&&(p.category?.slug!==CAT)) return false;
-    if(s&&!s.split(/\s+/).every(w=>hayOf(p).includes(w))) return false;
-    return Object.entries(AF).every(([n,v])=>!v||valsOf(p,n).includes(v));
+  return groupItems(PRODUCTS).filter(g=>{
+    if(CAT!=="all"&&!g.items.some(p=>p.category?.slug===CAT)) return false;
+    if(s&&!s.split(/\s+/).every(w=>g.items.some(p=>hayOf(p).includes(w)))) return false;
+    return Object.entries(AF).every(([n,v])=>!v||g.items.some(p=>valsOf(p,n).includes(v)));
   });
 }
 function render(){
   const list=filtered();
-  document.getElementById('count').textContent=list.length+" of "+PRODUCTS.length;
+  const nGroups=groupItems(PRODUCTS).length;
+  document.getElementById('count').textContent=list.length+" of "+nGroups;
   const g=document.getElementById('grid');
   if(!list.length){g.innerHTML=`<div class="empty">No styles match. Try clearing search or filters.</div>`; return;}
-  g.innerHTML=list.map(p=>{
+  g.innerHTML=list.map(gr=>{
+    const p=gr.rep;
     const price=p.pricing?.priceRange?.start?.gross;
     const img=p.thumbnail?.url||p.media?.[0]?.url||"";
     const fab=(valsOf(p,"Fabric")[0]||"");
@@ -154,6 +158,7 @@ function render(){
       <div class="card-body"><div class="card-cat">${p.category?.name||'Kidswear'}</div>
       <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
       ${fab?`<div class="card-attr">${fab}</div>`:""}
+      ${gr.colours.length>1?`<div class="card-attr">${gr.colours.length} colours: ${gr.colours.join(" • ")}</div>`:""}
       <div class="card-price"><b>${price?money(price.amount,price.currency):'—'}</b></div>
       <a class="btn-view" href="product.html?slug=${p.slug}">View →</a></div>
     </article>`}).join("");
