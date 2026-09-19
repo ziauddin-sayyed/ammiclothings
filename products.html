@@ -18,6 +18,13 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .logo img{height:46px;border-radius:8px;padding:4px 6px}
 .nav{display:flex;gap:26px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#4A3F3B}
 .nav a:hover{color:var(--accent)}
+.hamburger{display:none;width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;flex-shrink:0}
+.hamburger span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);z-index:39}
+.nav-backdrop.open{display:block}
 .spacer{flex:1}
 .page{max-width:1280px;margin:0 auto;padding:22px 20px 10px}
 .page h1{font-family:"Cormorant Garamond",serif;font-size:36px;margin:0}
@@ -68,6 +75,13 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .footer{background:var(--primary-dark);color:#fff;margin-top:56px;padding:42px 20px 24px}
 .footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
 @media(max-width:900px){
+  .header-inner{gap:12px;padding:10px 12px}
+  .logo{font-size:19px}
+  .logo img{height:34px}
+  .hamburger{display:flex}
+  .nav{display:none}
+  .nav.open{display:flex;position:fixed;top:62px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;flex-direction:column;z-index:45;gap:0}
+  .nav.open a{padding:14px 8px;font-size:14px}
   .shop{grid-template-columns:1fr}
   .filterbtn{display:block}
   .side{position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);z-index:45;border-radius:0;max-height:none;transform:translateX(-105%);transition:.3s;box-shadow:20px 0 60px rgba(0,0,0,.2)}
@@ -81,8 +95,10 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 <header class="header">
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
-    <nav class="nav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
+    <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="profile.html" id="ordersLink" style="display:none">Profile</a></nav>
     <div class="spacer"></div>
+    <div class="nav-backdrop" id="navBackdrop"></div>
     <a href="checkout.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">🛒 Bag</a>
   </div>
 </header>
@@ -106,8 +122,9 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 <div class="backdrop" id="backdrop" onclick="toggleSide(false)"></div>
 
 <footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028</span></div></footer>
+<script src="config.js"></script>
 <script>
-const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+const GRAPHQL = window.APP_CONFIG.GRAPHQL;
 let PRODUCTS=[], CATEGORIES=[], CATS=new Set(), AF={}, CAT_TREE={};
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
 function imgSmall(u,s=256){if(!u)return"";return u.replace(/thumbnail_\d+/gi,"thumbnail_"+s)}
@@ -115,6 +132,14 @@ async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"
 function valsOf(p,name){const out=[]; (p.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(v=>{if(v.name&&!out.includes(v.name)) out.push(v.name)})}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(x=>{if(x.name&&!out.includes(x.name)) out.push(x.name)})})); return out}
 function hayOf(p){const t=[p.name,p.category?.name,(p.category?.slug||"").replace(/-/g," ")]; (p.attributes||[]).forEach(a=>(a.values||[]).forEach(v=>t.push(v.name))); (p.variants||[]).forEach(v=>{t.push(v.sku,v.name); (v.attributes||[]).forEach(a=>(a.values||[]).forEach(x=>t.push(x.name)))}); return t.filter(Boolean).join(" ").toLowerCase()}
 function toggleSide(open){document.getElementById('side').classList.toggle('open',open); document.getElementById('backdrop').classList.toggle('open',open)}
+(function(){
+  const btn=document.getElementById('hamBtn'), nav=document.getElementById('mainNav'), backdrop=document.getElementById('navBackdrop');
+  if(!btn||!nav) return;
+  function toggle(force){const on=force??!nav.classList.contains('open'); nav.classList.toggle('open',on); btn.classList.toggle('open',on); btn.setAttribute('aria-expanded',on); backdrop.classList.toggle('open',on); document.body.style.overflow=on?'hidden':'';}
+  btn.addEventListener('click',()=>toggle()); backdrop.addEventListener('click',()=>toggle(false));
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>toggle(false)));
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)toggle(false);});
+})();
 async function load(){
   try{if(localStorage.getItem("ak_token")) document.getElementById('ordersLink').style.display="";}catch(e){}
   const u=new URL(location.href); const q0=u.searchParams.get('q')||"", c0=u.searchParams.get('cat')||"";

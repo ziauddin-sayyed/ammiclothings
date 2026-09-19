@@ -144,7 +144,7 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="index.html#collections">Collections</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="index.html#collections">Collections</a><a href="profile.html" id="ordersLink" style="display:none">Profile</a></nav>
     <div class="spacer"></div>
     <div class="nav-backdrop" id="navBackdrop"></div>
     <a class="icon-btn" href="checkout.html" id="cartBtn" aria-label="cart">🛒<span class="badge" id="cartCount">0</span></a>
@@ -212,8 +212,9 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 </div>
 <div class="toast" id="toast"></div>
 <div class="lightbox" id="lightbox" onclick="closeLb()"><button class="lb-close" onclick="closeLb()">✕</button><img id="lbImg" src="" alt="Zoomed product"/></div>
+<script src="config.js"></script>
 <script>
-const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
+const GRAPHQL = window.APP_CONFIG.GRAPHQL;
 let PRODUCT=null, VARIANT=null, QTY=1, SIZECHART=null, SIZE=null;
 const SECTION_FOR_TYPE={"Kurti Set":"Kurti Set","Ladies Kurti Set":"Kurti Set Ladies","Cord Set":"Cord Set","Ladies Cord Set":"Cord Set Ladies","Hanger Set":"Hanger Set","Frock":"Frock Full Sleeves","Mini Frock":"Mini Frock Full Sleeves"};
 async function loadSizeCharts(){if(SIZECHART) return SIZECHART; try{const r=await fetch("products/values.json"); if(!r.ok) throw 0; SIZECHART=await r.json();}catch(e){SIZECHART={sections:{}};} return SIZECHART;}

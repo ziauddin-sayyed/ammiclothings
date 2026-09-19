@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--primary:#c0006b;--primary-dark:#c0006b;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--blush:#fef0f7;--line:#efe6f0;--muted:#7A6E6A;--ink:#1E1E1E;--sage:#f3f0f7;--card:#fff;--radius:20px}
-*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",sans-serif;background:var(--cream);color:var(--ink)}
+*{box-sizing:border-box}html,body{overflow-x:hidden}body{margin:0;font-family:"Plus Jakarta Sans",sans-serif;background:var(--cream);color:var(--ink)}
 a{color:inherit;text-decoration:none}
 .announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}
 .announce b{color:var(--yellow)}
@@ -39,6 +39,10 @@ a{color:inherit;text-decoration:none}
 .steps span.on{background:var(--primary);color:#fff;border-color:var(--primary)}
 .steps span.done{background:#fff;color:var(--primary);border-color:var(--accent)}
 .wrap{max-width:1280px;margin:10px auto;padding:0 20px;display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+.wrap>div{min-width:0}
+.field{min-width:0}
+.field input,.field select,.field textarea{max-width:100%}
+.shipopts label span,.line div{overflow-wrap:anywhere}
 @media(max-width:980px){.wrap{grid-template-columns:1fr}}
 .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px}
 .card h2{font-family:"Cormorant Garamond",serif;margin:0 0 12px;font-size:22px}
@@ -49,9 +53,6 @@ a{color:inherit;text-decoration:none}
 .field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
 .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:12px;padding:12px 12px;font-size:14px;outline:none;background:#fff}
 .field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,67,140,.1)}
-.pay{display:flex;flex-direction:column;gap:10px}
-.pay label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}
-.pay label.active{border-color:var(--primary);background:rgba(108,67,140,.05)}
 .summary{position:sticky;top:90px}
 .lines{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
 .line{display:flex;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--cream)}
@@ -61,6 +62,9 @@ a{color:inherit;text-decoration:none}
 .row.total{font-weight:800;font-size:18px}
 .btn-primary{width:100%;background:#fff;color:var(--primary);border:none;padding:15px 18px;border-radius:999px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:10px;display:inline-flex;justify-content:center;align-items:center;gap:8px}
 .btn-primary:hover{background:var(--accent-dark)} .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+#placeBtn:hover{color:#000}
+#placeBtn{border:2px solid var(--primary);outline:none}
+#placeBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px}
 .note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 .tabs{display:flex;gap:8px;margin:0 0 14px}
@@ -83,6 +87,37 @@ a{color:inherit;text-decoration:none}
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:20px;z-index:60}
 .modal.open{display:grid}.modal-bg{position:absolute;inset:0;background:rgba(20,14,14,.5);backdrop-filter:blur(6px)}
 .modal-card{position:relative;background:#fff;border-radius:24px;padding:28px;max-width:520px;width:100%;text-align:center}
+.pp-head{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+.pp-badge{background:#5f259f;color:#fff;font-weight:800;font-size:12px;letter-spacing:.08em;padding:4px 10px;border-radius:999px}
+.pp-amt{font-size:28px;font-weight:800;margin:6px 0}
+.pp-status{font-size:13px;color:var(--muted);background:var(--sage);border-radius:12px;padding:10px 12px;margin:10px 0;word-break:break-word}
+.pp-status.ok{background:#e9f9ef;color:#0d7a3f}
+.pp-status.err{background:#fdecec;color:#b3261e}
+.pp-btnrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pp-btnrow .btn-ghost,.pp-btnrow .btn-primary{margin-top:0;flex:1;min-width:140px}
+.pp-paybtn{background:#5f259f!important;color:#fff!important}
+.pp-paybtn:hover{background:#4a1d7d!important}
+.pp-meta{font-size:11px;color:var(--muted);margin-top:8px;word-break:break-all}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ---- mobile / responsive fixes ---- */
+@media(max-width:980px){.summary{position:static}}
+@media(max-width:640px){
+  .announce{font-size:10px;letter-spacing:.08em;padding:8px 10px}
+  .header-inner{padding:10px 12px;gap:10px}
+  .logo{position:static;transform:none;font-size:19px}
+  .logo img{height:34px}
+  .header-inner>a:last-child{font-size:11px!important;padding:7px 10px!important;white-space:nowrap}
+  .steps{padding:10px 12px;font-size:12px;overflow-x:auto;white-space:nowrap}
+  .wrap{padding:0 12px;gap:14px}
+  .card{padding:16px;border-radius:16px}
+  .modal{padding:12px}
+  .modal-card{padding:20px 16px;border-radius:18px;max-height:92vh;overflow:auto}
+  .pp-btnrow .btn-ghost,.pp-btnrow .btn-primary{min-width:0}
+  .pp-amt{font-size:22px}
+  .shipopts label{font-size:13px;padding:10px}
+  .btn-primary{padding:14px 12px}
+}
 </style>
 </head>
 <body>
@@ -91,7 +126,7 @@ a{color:inherit;text-decoration:none}
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt=""/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="orders.html" id="ordersLink" style="display:none">My Orders</a></nav>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="profile.html" id="ordersLink" style="display:none">Profile</a></nav>
     <div style="flex:1"></div>
     <div class="nav-backdrop" id="navBackdrop"></div>
     <a href="index.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">← Continue Shopping</a>
@@ -104,85 +139,60 @@ a{color:inherit;text-decoration:none}
     <div class="card" id="accountCard">
       <h2>Account</h2>
       <div id="loggedOut">
-        <div class="tabs"><button id="tabLogin" class="on" onclick="acctTab('login')">Log in</button><button id="tabReg" onclick="acctTab('reg')">Register</button></div>
-        <div id="paneLogin">
-          <div class="grid2">
-            <div class="field"><label>Email *</label><input type="email" id="liEmail" placeholder="you@example.com"/></div>
-            <div class="field"><label>Password *</label><input type="password" id="liPass" placeholder="••••••••"/></div>
-          </div>
-          <button class="btn-ghost" onclick="doLogin()">Log in</button>
+        <div class="field"><label>Phone Number *</label><input id="otpPhone" inputmode="numeric" maxlength="13" placeholder="10-digit mobile number"/></div>
+        <button class="btn-ghost" id="otpSendBtn" onclick="sendOtp()">Send OTP on WhatsApp</button>
+        <div id="otpBox" style="display:none;margin-top:12px">
+          <div class="field"><label>Enter OTP *</label><input id="otpCode" inputmode="numeric" maxlength="6" placeholder="6-digit OTP"/></div>
+          <button class="btn-ghost" id="otpVerifyBtn" onclick="verifyOtp()">Verify & Login</button>
+          <p class="note" id="otpTimer"></p>
+          <p class="note"><a href="#" onclick="sendOtp(true);return false;" style="color:var(--primary);text-decoration:underline">Resend OTP</a></p>
         </div>
-        <div id="paneReg" style="display:none">
-          <div class="grid2">
-            <div class="field"><label>First name *</label><input id="rgFirst" placeholder="Aqueel"/></div>
-            <div class="field"><label>Last name *</label><input id="rgLast" placeholder="Khan"/></div>
-          </div>
-          <div class="grid2" style="margin-top:12px">
-            <div class="field"><label>Email *</label><input type="email" id="rgEmail" placeholder="you@example.com"/></div>
-            <div class="field"><label>Password *</label><input type="password" id="rgPass" placeholder="Min 8 characters"/></div>
-          </div>
-          <button class="btn-ghost" onclick="doRegister()">Create account</button>
-          <p class="note">New accounts need email confirmation before first login.</p>
-        </div>
-        <div class="localbox" id="localLoginBox">🧪 <b>Local testing</b> — demo login:<br/><button onclick="fillDummyLogin()">Fill demo login</button><span style="font-size:11px">localtest@example.com / local1234</span></div>
+        <div class="localbox" id="localLoginBox">🧪 <b>Local testing</b> — test number <b>3333333333</b>, OTP <b>123456</b></div>
+        <p class="note">Login with your phone number to continue checkout.</p>
       </div>
       <div id="loggedIn" style="display:none"><div class="accthi">👋 Hi, <b id="acctName">—</b><span style="color:var(--muted);font-size:12px" id="acctEmail"></span><button class="btn-ghost" style="width:auto;margin:0 0 0 auto;padding:8px 16px" onclick="doLogout()">Log out</button></div></div>
     </div>
-    <div class="card" style="margin-top:14px">
-      <h2>Contact & Shipping</h2>
-      <p style="font-size:12px;color:var(--muted);margin:0 0 12px">COD & online payments supported • Secure checkout</p>
+    <div class="card" id="shipCard" style="margin-top:14px">
+      <h2>Shipping Details</h2>
       <form id="form">
-        <h3>Contact</h3>
-        <div class="grid2">
-          <div class="field"><label>Email *</label><input required type="email" id="email" placeholder="you@example.com"/></div>
-          <div class="field"><label>Phone *</label><input required id="phone" placeholder="+91 70219 46362"/></div>
-        </div>
         <h3>Shipping address</h3>
-        <div class="grid2">
-          <div class="field"><label>First name *</label><input required id="firstName" placeholder="Aqueel"/></div>
-          <div class="field"><label>Last name *</label><input required id="lastName" placeholder="Khan"/></div>
+        <div id="addrBook" style="display:none">
+          <div class="shipopts" id="addrOpts"><p class="note" style="text-align:left;margin:0">Loading saved addresses…</p></div>
+          <button type="button" class="btn-ghost" style="width:auto;padding:10px 18px;margin-top:10px" onclick="openAddrModal(event)">+ New Address</button>
         </div>
-        <div class="field" style="margin-top:12px"><label>Street address *</label><input required id="street" placeholder="A-7, Kasturchand Mill Compound, M.C. Jawale Marg"/></div>
-        <div class="grid2" style="margin-top:12px">
-          <div class="field"><label>City *</label><input required id="city" value="Mumbai"/></div>
-          <div class="field"><label>State *</label><input required id="state" value="Maharashtra"/></div>
+        <div id="guestAddr">
+          <div class="grid2">
+            <div class="field"><label>First name *</label><input required id="firstName" placeholder="Aqueel"/></div>
+            <div class="field"><label>Last name *</label><input required id="lastName" placeholder="Khan"/></div>
+          </div>
+          <div class="field" style="margin-top:12px"><label>Phone *</label><input required id="phone" placeholder="+91 70219 46362"/></div>
+          <div class="field" style="margin-top:12px"><label>Street address *</label><input required id="street" placeholder="A-7, Kasturchand Mill Compound, M.C. Jawale Marg"/></div>
+          <div class="grid2" style="margin-top:12px">
+            <div class="field"><label>City *</label><input required id="city" value="Mumbai"/></div>
+            <div class="field"><label>State / Country Area *</label><input required id="state" value="Maharashtra"/></div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div class="field"><label>Zipcode *</label><input required id="postal" value="400028"/></div>
+            <div class="field"><label>Country</label><select id="country"><option value="IN" selected>India (IN)</option></select></div>
+          </div>
         </div>
-        <div class="grid2" style="margin-top:12px">
-          <div class="field"><label>Postal code *</label><input required id="postal" value="400028"/></div>
-          <div class="field"><label>Country</label><select id="country"><option value="IN" selected>India (IN)</option></select></div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Order notes (optional)</label><textarea id="notes" rows="2" placeholder="Delivery instructions..."></textarea></div>
-        <div class="localbox" id="localAddrBox">🧪 <b>Local testing</b><br/><button onclick="fillDummyAddr()">Fill dummy address</button></div>
+        <div class="localbox" id="localAddrBox">🧪 <b>Local testing</b><br/><button type="button" onclick="fillDummyAddr()">Fill dummy address</button></div>
 
         <h3>Delivery method</h3>
-        <div class="shipopts" id="shipOpts"><p class="note" style="text-align:left;margin:0">Delivery options load when you place the order — or tap below.</p></div>
-        <button class="btn-ghost" style="width:auto;padding:10px 18px" onclick="loadShipOpts(true)">Check delivery options</button>
-
-        <h3>Payment</h3>
-        <div class="pay">
-          <label class="active"><input type="radio" name="pay" value="cod" checked/> <span><b>Cash on Delivery (COD)</b> — Pay on delivery</span></label>
-          <label><input type="radio" name="pay" value="dummy"/> <span><b>Online Payment</b> — UPI / card (demo)</span></label>
-          <label><input type="radio" name="pay" value="upi"/> <span><b>UPI / Card</b> — demo</span></label>
-        </div>
-        <p class="note">By placing order you agree to Ammi Enterprises terms. Manufacturer & Wholesaler since 2003.</p>
+        <div class="shipopts" id="shipOpts"><p class="note" style="text-align:left;margin:0">Select an address to see delivery options.</p></div>
       </form>
-    </div>
-
-    <div class="card" style="margin-top:14px;display:flex;gap:14px;align-items:center">
-      <img src="images/logo.png" alt="" style="height:46px;background:#fff;border-radius:8px;padding:4px 8px"/>
-      <div style="font-size:12px;color:var(--muted)"><b style="color:var(--ink)">Ammi Enterprises</b> • Founder Aqueel Yusuf Khan • Pan India • Upto 10 Employees<br/>A-7, Ground Floor, Kasturchand Mill Compound, Mumbai • +91 70219 46362 • +91 70219 46362 • <a href="https://www.ammienterprises.in" target="_blank" style="color:var(--primary);text-decoration:underline">www.ammienterprises.in</a></div>
     </div>
   </div>
 
-  <div class="summary">
+  <div class="summary" id="summaryCol">
     <div class="card">
       <h2>Order summary <span class="badge" id="countBadge">0 items</span></h2>
       <div class="lines" id="lines"></div>
-      <div style="display:flex;gap:8px;margin-top:10px"><input id="coupon" placeholder="Coupon code" style="flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px"/><button class="btn-ghost" style="width:auto;padding:10px 16px" onclick="applyCoupon()">Apply</button></div>
+      <div style="display:flex;gap:8px;margin-top:10px"><input id="coupon" placeholder="Coupon code" style="flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px"/><button class="btn-ghost" id="promoBtn" style="width:auto;padding:10px 16px" onclick="applyCoupon()">Apply</button></div>
+      <div class="note" id="promoMsg" style="display:none"></div>
       <div class="tot" id="totals"></div>
-      <button class="btn-primary" id="placeBtn" onclick="placeOrder()">Place Order — <span id="payTotal">—</span></button>
-      <button class="btn-ghost" onclick="location.href='index.html#shop'">← Back to shop</button>
-      <p class="note" id="orderNote">Your order will be confirmed on this page; the bag is cleared after a successful order.</p>
+      <div class="field" style="margin-top:10px"><label>Order notes (optional)</label><textarea id="notes" rows="2" placeholder="Delivery instructions..." style="border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;outline:none;background:#fff;font-family:inherit;resize:vertical"></textarea></div>
+      <button class="btn-primary" id="placeBtn" onclick="placeOrder()">Pay : <span id="payTotal">—</span></button>
       <p class="note">Need help? WhatsApp <a href="https://api.whatsapp.com/send?phone=917021946362" target="_blank" style="color:var(--primary);text-decoration:underline">+91 70219 46362</a></p>
     </div>
   </div>
@@ -190,38 +200,180 @@ a{color:inherit;text-decoration:none}
 
 <footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises — All Rights Reserved • Ammikids Retail</span><span>Theme #c0006b • #e70080 • Mumbai 400028</span></div></footer>
 
+<div class="modal" id="addrModal"><div class="modal-bg" onclick="closeAddrModal()"></div><div class="modal-card" style="text-align:left">
+  <div class="pp-head"><b style="font-size:18px">+ New Address</b></div>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 10px;text-align:center">Saved to your account and selected for this checkout</p>
+  <div class="grid2">
+    <div class="field"><label>First name *</label><input id="naFirst" placeholder="Aqueel"/></div>
+    <div class="field"><label>Last name *</label><input id="naLast" placeholder="Khan"/></div>
+  </div>
+  <div class="field" style="margin-top:12px"><label>Phone *</label><input id="naPhone" placeholder="+91 70219 46362"/></div>
+  <div class="field" style="margin-top:12px"><label>Street address *</label><input id="naStreet" placeholder="A-7, Kasturchand Mill Compound"/></div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="field"><label>City *</label><input id="naCity" value="Mumbai"/></div>
+    <div class="field"><label>Country Area (State) *</label><input id="naState" value="Maharashtra"/></div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="field"><label>Zipcode *</label><input id="naPostal" value="400028"/></div>
+    <div class="field"><label>Country *</label><select id="naCountry"><option value="IN" selected>India (IN)</option><option value="US">United States (US)</option><option value="GB">United Kingdom (GB)</option><option value="AE">UAE (AE)</option><option value="SA">Saudi Arabia (SA)</option></select></div>
+  </div>
+  <div class="pp-status" id="addrStatus" style="display:none"></div>
+  <div class="pp-btnrow">
+    <button class="btn-primary pp-paybtn" id="addrSaveBtn" style="text-decoration:none;border:none;cursor:pointer" onclick="saveNewAddress()">Save Address</button>
+  </div>
+  <div class="pp-btnrow">
+    <button class="btn-ghost" style="flex:1" onclick="closeAddrModal()">Cancel</button>
+  </div>
+</div></div>
+<div class="modal" id="phonepeModal"><div class="modal-bg" onclick="closePhonepePopup(false)"></div><div class="modal-card" style="text-align:left">
+  <div class="pp-head"><span class="pp-badge">PhonePe</span><b style="font-size:18px">Complete your payment</b></div>
+  <p style="font-size:12px;color:var(--muted);margin:0;text-align:center">UPI • Cards • Netbanking • Secure PhonePe popup</p>
+  <div style="text-align:center" class="pp-amt" id="ppAmt">—</div>
+  <div class="pp-status" id="ppStatus">Preparing PhonePe order…</div>
+  <div class="pp-btnrow">
+    <a id="ppPayLink" href="#" target="_blank" rel="noopener" class="btn-primary pp-paybtn" style="text-decoration:none;display:none">Pay with PhonePe →</a>
+  </div>
+  <div class="pp-btnrow" id="ppRetryRow" style="display:none">
+    <button class="btn-ghost" onclick="retryPhonepe()">↻ Try Again — New Payment</button>
+  </div>
+  <div class="pp-btnrow">
+    <button class="btn-ghost" style="flex:1" onclick="checkPhonepeStatus(true)">Check Status</button>
+    <button class="btn-ghost" style="flex:1" onclick="closePhonepePopup(true)">Cancel</button>
+  </div>
+  <div class="pp-meta" id="ppMeta"></div>
+  <p class="note">After paying on PhonePe you return here and the order confirms automatically. Sandbox test: use PhonePe test credentials. Keep this popup open until the order is placed.</p>
+</div></div>
 <div class="modal" id="success"><div class="modal-bg" onclick="closeSucc()"></div><div class="modal-card">
   <div style="font-size:40px">🎉</div>
   <h2 style="font-family:'Cormorant Garamond',serif;margin:8px 0">Order confirmed!</h2>
   <p style="color:var(--muted)">Thank you for shopping with <b>Ammi Kids by Ammi Enterprises</b>.<br/>Your bag has been cleared. A confirmation has been simulated.</p>
   <p style="font-size:12px;background:var(--sage);padding:10px;border-radius:12px" id="succId">Checkout ID: —</p>
   <a href="index.html" class="btn-primary" style="text-decoration:none">Back to Store</a>
-  <a href="orders.html" id="succOrders" class="btn-ghost" style="text-decoration:none;display:none">View My Orders →</a>
+  <a href="profile.html" id="succOrders" class="btn-ghost" style="text-decoration:none;display:none">View Profile →</a>
   <p style="font-size:11px;color:var(--muted);margin-top:8px">Questions? +91 70219 46362 • +91 70219 46362</p>
 </div></div>
 <div class="toast" id="toast"></div>
+<script src="config.js"></script>
 <script>
-const GRAPHQL="https://ammikids.themanagemate.com/graphql/";
-const CHANNEL="in", DUMMY_GATEWAY="mirumee.payments.dummy";
-const IS_LOCAL=["localhost","127.0.0.1",""].includes(location.hostname);
+const GRAPHQL=window.APP_CONFIG.GRAPHQL, PHONEPE_BASE=window.APP_CONFIG.PHONEPE_BASE;
+const IS_LOCAL=window.APP_CONFIG.IS_LOCAL, CHANNEL=window.APP_CONFIG.CHANNEL;
+let PHONEPE_PENDING=JSON.parse(localStorage.getItem("ak_phonepe_pending")||"null");
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]");
 let USER=JSON.parse(localStorage.getItem("ak_user")||"null"), TOKEN=localStorage.getItem("ak_token")||null;
-let CHECKOUT=null, CHECKOUT_KEY="", SHIPMETHOD=null;
+let CHECKOUT=null, CHECKOUT_KEY="", SHIPMETHOD=null, SHIP_PRICE=null, SHIP_CACHE=[];
+let PROMO_CODE=null, PROMO_DISCOUNT=0, LAST_TOTAL_TXT="—";
+let ADDR_LIST=[], SELECTED_ADDR=null;
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
 async function gql(q,v={},token=null){const h={"Content-Type":"application/json"}; if(token) h["Authorization"]="Bearer "+token; const r=await fetch(GRAPHQL,{method:"POST",headers:h,body:JSON.stringify({query:q,variables:v})});const j=await r.json(); if(j.errors) throw new Error(j.errors[0]?.message||"Checkout error"); return j.data}
 /* ---------- account ---------- */
-function acctTab(w){document.getElementById('tabLogin').classList.toggle('on',w==='login'); document.getElementById('tabReg').classList.toggle('on',w==='reg'); document.getElementById('paneLogin').style.display=w==='login'?"":"none"; document.getElementById('paneReg').style.display=w==='reg'?"":"none"}
-function refreshAcct(){const on=!!(USER&&TOKEN); document.getElementById('loggedOut').style.display=on?"none":""; document.getElementById('loggedIn').style.display=on?"":"none"; if(on){document.getElementById('acctName').textContent=USER.firstName||USER.email; document.getElementById('acctEmail').textContent="("+USER.email+")";}}
-async function doLogin(){const e=document.getElementById('liEmail').value.trim(), p=document.getElementById('liPass').value; if(!e||!p) return toast("Enter email + password"); try{const d=await gql(`mutation($e:String!,$p:String!){tokenCreate(email:$e,password:$p){token refreshToken user{id email firstName lastName} errors{message}}}` ,{e,p}); const errs=d.tokenCreate.errors; if(errs?.length) throw new Error(errs.map(x=>x.message).join(", ")); if(!d.tokenCreate.token) throw new Error("Login failed"); TOKEN=d.tokenCreate.token; USER=d.tokenCreate.user; localStorage.setItem("ak_token",TOKEN); localStorage.setItem("ak_user",JSON.stringify(USER)); if(document.getElementById('email')&&!document.getElementById('email').value) document.getElementById('email').value=USER.email; CHECKOUT=null; refreshAcct(); toast("Logged in ✓");}catch(err){toast(err.message.slice(0,120))}}
-async function doRegister(){const f=document.getElementById('rgFirst').value.trim(), l=document.getElementById('rgLast').value.trim(), e=document.getElementById('rgEmail').value.trim(), p=document.getElementById('rgPass').value; if(!f||!e||!p) return toast("Fill name, email + password"); if(p.length<8) return toast("Password needs 8+ characters"); try{const d=await gql(`mutation($i:AccountRegisterInput!){accountRegister(input:$i){user{email} requiresConfirmation errors{field message}}}`,
- {i:{firstName:f,lastName:l,email:e,password:p,channel:CHANNEL,redirectUrl:location.origin+"/"}}); if(d.accountRegister.errors?.length) throw new Error(d.accountRegister.errors.map(x=>x.message).join(", ")); toast(d.accountRegister.requiresConfirmation?"Account created — confirm via email, then log in":"Account created — please log in"); acctTab('login'); document.getElementById('liEmail').value=e;}catch(err){toast(err.message.slice(0,140))}}
-function doLogout(){USER=null; TOKEN=null; CHECKOUT=null; localStorage.removeItem("ak_token"); localStorage.removeItem("ak_user"); refreshAcct(); toast("Logged out")}
-function fillDummyLogin(){document.getElementById('liEmail').value="localtest@example.com"; document.getElementById('liPass').value="local1234"; toast("Demo login filled — tap Log in")}
-function fillDummyAddr(){document.getElementById('email').value="dummy.user@example.com"; document.getElementById('phone').value="+917021946362"; document.getElementById('firstName').value="Dummy"; document.getElementById('lastName').value="User"; document.getElementById('street').value="A-7, Kasturchand Mill Compound"; document.getElementById('city').value="Mumbai"; document.getElementById('state').value="Maharashtra"; document.getElementById('postal').value="400028"; toast("Dummy address filled")}
+/* ---------- phone OTP account (WhatsApp) ---------- */
+let _otpTimerInt=null;
+function normPhone(){const d=(document.getElementById('otpPhone').value||"").replace(/\D/g,""); return d.length>10?d.slice(-10):d;}
+async function apiPost(path,body){const r=await fetch(window.APP_CONFIG.API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}); let j={}; try{j=await r.json();}catch(e){} if(!r.ok) throw new Error((j&&j.error)||("Request failed ("+r.status+")")); return j;}
+function startOtpTimer(){clearInterval(_otpTimerInt); let s=30; const el=document.getElementById('otpTimer'); el.textContent=`Resend available in ${s}s`; _otpTimerInt=setInterval(()=>{s--; if(s<=0){clearInterval(_otpTimerInt); el.textContent="";} else el.textContent=`Resend available in ${s}s`;},1000);}
+async function sendOtp(){
+  const phone=normPhone();
+  if(!/^[6-9]\d{9}$/.test(phone)) return toast("Enter a valid 10-digit mobile number");
+  const btn=document.getElementById('otpSendBtn'); btn.disabled=true; btn.textContent="Sending OTP…";
+  try{
+    let j;
+    try{ j=await apiPost("/auth/send-whatsapp-otp/",{phone}); }
+    catch(e){ j=/\(404\)/.test(e.message)?await apiPost("/auth/send-otp/",{phone}):Promise.reject(e); }
+    document.getElementById('otpBox').style.display="";
+    toast(j.new_otp===false?"OTP re-sent — use the previous code":"OTP sent on WhatsApp ✓");
+    startOtpTimer();
+    document.getElementById('otpCode').focus();
+  }catch(e){ toast((e.message||"Could not send OTP").slice(0,140)); }
+  finally{ btn.disabled=false; btn.textContent="Send OTP on WhatsApp"; }
+}
+async function verifyOtp(){
+  const phone=normPhone(), code=(document.getElementById('otpCode').value||"").replace(/\D/g,"");
+  if(!/^[6-9]\d{9}$/.test(phone)) return toast("Enter a valid 10-digit mobile number");
+  if(code.length!==6) return toast("Enter the 6-digit OTP");
+  const btn=document.getElementById('otpVerifyBtn'); btn.disabled=true; btn.innerHTML=`<span class="spin"></span> Verifying…`;
+  try{
+    const j=await apiPost("/auth/verify-otp/",{phone,code});
+    if(!j.access_token) throw new Error("Login failed — try again");
+    TOKEN=j.access_token; localStorage.setItem("ak_token",TOKEN);
+    if(j.refresh_token) localStorage.setItem("ak_refresh",j.refresh_token);
+    const me=await gql(`{me{id email firstName lastName}}`,{},TOKEN);
+    if(!me?.me) throw new Error("Login failed — try again");
+    USER=me.me; localStorage.setItem("ak_user",JSON.stringify(USER));
+    CHECKOUT=null; refreshAcct(); toast("Logged in ✓");
+  }catch(e){ toast((e.message||"Invalid OTP").slice(0,140)); }
+  finally{ btn.disabled=false; btn.textContent="Verify & Login"; }
+}
+function refreshAcct(){const on=!!(USER&&TOKEN); document.getElementById('loggedOut').style.display=on?"none":""; document.getElementById('loggedIn').style.display=on?"":"none"; document.getElementById('shipCard').style.display=on?"":"none"; document.getElementById('summaryCol').style.display=on?"":"none"; if(on){document.getElementById('acctName').textContent=USER.firstName||USER.email; document.getElementById('acctEmail').textContent="("+USER.email+")"; document.getElementById('addrBook').style.display=""; document.getElementById('guestAddr').style.display="none"; loadAddresses();}else{document.getElementById('addrBook').style.display="none"; document.getElementById('guestAddr').style.display=""; ADDR_LIST=[]; SELECTED_ADDR=null;}}
+function doLogout(){USER=null; TOKEN=null; CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0; ADDR_LIST=[]; SELECTED_ADDR=null; localStorage.removeItem("ak_token"); localStorage.removeItem("ak_refresh"); localStorage.removeItem("ak_user"); updatePromoUI(); document.getElementById('coupon').value=""; refreshAcct(); render(); toast("Logged out")}
+function fillDummyAddr(){const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v;}; set('phone',"+917021946362"); set('firstName',"Dummy"); set('lastName',"User"); set('street',"A-7, Kasturchand Mill Compound"); set('city',"Mumbai"); set('state',"Maharashtra"); set('postal',"400028"); toast("Dummy address filled"); refreshDelivery(true);}
+/* ---------- address book ---------- */
+async function loadAddresses(){
+  const box=document.getElementById('addrOpts');
+  if(!(USER&&TOKEN)) return;
+  try{
+    const d=await gql(`{me{email addresses{id firstName lastName streetAddress1 city postalCode country{code} countryArea phone isDefaultShippingAddress}}}`,{},TOKEN);
+    ADDR_LIST=d?.me?.addresses||[];
+    if(!ADDR_LIST.length){ box.innerHTML=`<p class="note" style="text-align:left;margin:0">No saved addresses yet — tap + New Address.</p>`; SELECTED_ADDR=null; return; }
+    const di=ADDR_LIST.findIndex(a=>a.isDefaultShippingAddress);
+    const sel=di>=0?di:0;
+    renderAddrBook(sel);
+    refreshDelivery(true);
+  }catch(e){ console.warn("addresses:",e.message); box.innerHTML=`<p class="note" style="text-align:left;margin:0">Couldn't load addresses — use + New Address.</p>`; }
+}
+function renderAddrBook(selIdx){
+  const box=document.getElementById('addrOpts');
+  SELECTED_ADDR=ADDR_LIST[selIdx]||null;
+  box.innerHTML=ADDR_LIST.map((a,i)=>{
+    const code=(a.country&&a.country.code)||"IN";
+    return `<label class="${i===selIdx?'on':''}"><input type="radio" name="addr" value="${i}" ${i===selIdx?'checked':''} onchange="pickAddr(${i})"/> <span style="flex:1"><b>${a.firstName} ${a.lastName}</b>${a.isDefaultShippingAddress?' <span class="badge">Default</span>':''}<br/><span style="font-size:12px;color:var(--muted)">${a.streetAddress1}, ${a.city}, ${a.countryArea||""} ${a.postalCode} (${code})${a.phone?" • "+a.phone:""}</span></span></label>`;
+  }).join("");
+}
+function pickAddr(i){ SELECTED_ADDR=ADDR_LIST[i]||null; document.querySelectorAll('#addrOpts label').forEach((l,j)=>l.classList.toggle('on',j===i)); CHECKOUT=null; SHIP_PRICE=null; SHIP_CACHE=[]; refreshDelivery(true); }
+function openAddrModal(e){ if(e) e.preventDefault(); const st=document.getElementById('addrStatus'); st.style.display="none"; document.getElementById('addrModal').classList.add('open'); const cp=(USER&&TOKEN&&SELECTED_ADDR?.phone)||document.getElementById('phone')?.value||""; if(cp&&!document.getElementById('naPhone').value) document.getElementById('naPhone').value=cp; }
+function closeAddrModal(){ document.getElementById('addrModal').classList.remove('open'); }
+async function saveNewAddress(){
+  const v=id=>document.getElementById(id).value.trim();
+  const input={firstName:v('naFirst'),lastName:v('naLast'),streetAddress1:v('naStreet'),city:v('naCity'),postalCode:v('naPostal'),country:v('naCountry')||"IN",countryArea:v('naState'),phone:v('naPhone')||SELECTED_ADDR?.phone||document.getElementById('phone')?.value.trim()||""};
+  const st=document.getElementById('addrStatus'); st.style.display=""; st.className="pp-status";
+  if(!input.firstName||!input.lastName||!input.streetAddress1||!input.city||!input.postalCode||!input.countryArea){ st.classList.add("err"); st.textContent="Please fill all required fields."; return; }
+  const btn=document.getElementById('addrSaveBtn'); btn.disabled=true; btn.innerHTML=`<span class="spin"></span> Saving…`;
+  try{
+    if(USER&&TOKEN){
+      const d=await gql(`mutation($in:AddressInput!){accountAddressCreate(input:$in){address{id firstName lastName streetAddress1 city postalCode country{code} countryArea phone isDefaultShippingAddress} errors{field message code}}}`,
+        {in:input},TOKEN);
+      if(d.accountAddressCreate.errors?.length) throw new Error(d.accountAddressCreate.errors.map(e=>e.message).join(", "));
+      const na=d.accountAddressCreate.address;
+      ADDR_LIST.push(na);
+      if(ADDR_LIST.length===1){ try{ await gql(`mutation($id:ID!,$t:AddressTypeEnum!){accountSetDefaultAddress(id:$id,type:$t){user{defaultShippingAddress{id}} accountErrors{field message code}}}`,{id:na.id,t:"SHIPPING"},TOKEN); na.isDefaultShippingAddress=true; }catch(e){ console.warn("set default:",e.message); } }
+      renderAddrBook(ADDR_LIST.length-1);
+      const cp=document.getElementById('phone'); if(cp&&!cp.value&&na.phone) cp.value=na.phone;
+    }else{
+      SELECTED_ADDR={...input,country:{code:input.country},isDefaultShippingAddress:true};
+    }
+    CHECKOUT=null; SHIP_PRICE=null; SHIP_CACHE=[]; closeAddrModal(); toast("Address saved ✓"); refreshDelivery(true);
+  }catch(e){ st.classList.add("err"); st.textContent="❌ "+e.message.slice(0,200); }
+  finally{ btn.disabled=false; btn.textContent="Save Address"; }
+}
 /* ---------- checkout flow ---------- */
-function formAddr(){return {firstName:document.getElementById('firstName').value.trim(),lastName:document.getElementById('lastName').value.trim(),streetAddress1:document.getElementById('street').value.trim(),city:document.getElementById('city').value.trim(),postalCode:document.getElementById('postal').value.trim(),country:"IN",countryArea:document.getElementById('state').value.trim(),phone:document.getElementById('phone').value.trim()}}
-function validForm(){const email=document.getElementById('email').value.trim(), a=formAddr(); if(!email||!a.phone||!a.firstName||!a.lastName||!a.streetAddress1||!a.city||!a.postalCode) {toast("Please fill all required fields"); return null;} return {email, addr:a}}
+function checkoutEmail(addrPhone){
+  let e=(USER&&USER.email)||"";
+  // Backend phone-users have pseudo emails like 7208649034@phoneuser (no TLD)
+  // which Saleor rejects — normalize to 7208649034@phoneuser.in
+  const m=e.match(/^(\+?\d+)@phoneuser$/i);
+  if(m) e=m[1].replace(/^\+/,"")+"@phoneuser.in";
+  if(e && /.+@.+\..+/.test(e)) return e;
+  const digits=(addrPhone||"").replace(/\D/g,"").slice(-10);
+  return digits?`${digits}@phoneuser.in`:"guest@phoneuser.in";
+}
+function formAddr(){
+  if(USER&&TOKEN&&SELECTED_ADDR){
+    const s=SELECTED_ADDR, code=(s.country&&s.country.code)||s.country||"IN";
+    return {firstName:s.firstName,lastName:s.lastName,streetAddress1:s.streetAddress1,city:s.city,postalCode:s.postalCode,country:code,countryArea:s.countryArea||"",phone:(s.phone||"").trim()};
+  }
+  return {firstName:document.getElementById('firstName').value.trim(),lastName:document.getElementById('lastName').value.trim(),streetAddress1:document.getElementById('street').value.trim(),city:document.getElementById('city').value.trim(),postalCode:document.getElementById('postal').value.trim(),country:document.getElementById('country')?.value||"IN",countryArea:document.getElementById('state').value.trim(),phone:document.getElementById('phone').value.trim()};
+}
+function validForm(silent){const a=formAddr(); const email=checkoutEmail(a.phone); if(USER&&TOKEN&&!SELECTED_ADDR){if(!silent) toast("Please select or add a shipping address"); return null;} if(!a.phone||!a.firstName||!a.lastName||!a.streetAddress1||!a.city||!a.postalCode) {if(!silent) toast("Please fill phone + full address"); return null;} return {email, addr:a}}
 function sizeNote(){return CART.map(c=>`${c.sku} x${c.qty}${c.size?` in Size ${c.size}`:""}`).join("; ")}
 async function ensureCheckout(email,addr){
   const key=JSON.stringify([CART,email,addr]);
@@ -237,7 +389,18 @@ async function ensureCheckout(email,addr){
     {id:CHECKOUT.id,n:note});}catch(e){console.warn("note skipped:",e.message)}
   if(USER&&TOKEN){try{await gql(`mutation($cid:ID!,$uid:ID!){checkoutCustomerAttach(checkoutId:$cid,customerId:$uid){checkout{id} errors{field message}}}`,
     {cid:CHECKOUT.id,uid:USER.id},TOKEN);}catch(e){console.warn("attach skipped:",e.message)}}
+  if(PROMO_CODE){try{await applyPromoToCheckout(CHECKOUT.id,PROMO_CODE);}catch(e){console.warn("promo re-apply:",e.message); PROMO_CODE=null; PROMO_DISCOUNT=0; updatePromoUI();}}
   return CHECKOUT;
+}
+async function applyPromoToCheckout(checkoutId,code){
+  const d=await gql(`mutation($id:ID!,$code:String!){checkoutAddPromoCode(id:$id,promoCode:$code){checkout{id discount{amount currency} voucherCode} errors{field message code}}}`,
+    {id:checkoutId,code});
+  if(d.checkoutAddPromoCode.errors?.length) throw new Error(d.checkoutAddPromoCode.errors.map(e=>e.message).join(", "));
+  const co=d.checkoutAddPromoCode.checkout;
+  PROMO_CODE=co.voucherCode||code.toUpperCase();
+  PROMO_DISCOUNT=co.discount?co.discount.amount:0;
+  updatePromoUI();
+  return co;
 }
 async function fetchShipMethods(){
   const d=await gql(`{checkout(id:"${CHECKOUT.id}"){shippingMethods{id name price{amount currency}} totalPrice{gross{amount currency}}}}`.replace("${CHECKOUT.id}",CHECKOUT.id));
@@ -245,68 +408,253 @@ async function fetchShipMethods(){
 }
 function renderShipMethods(methods,total){
   const box=document.getElementById('shipOpts');
-  if(!methods?.length){box.innerHTML=`<p class="note" style="text-align:left;margin:0">No delivery options for this address.</p>`; return;}
-  if(!SHIPMETHOD||!methods.some(m=>m.id===SHIPMETHOD)) SHIPMETHOD=methods[0].id;
+  if(!methods?.length){SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; box.innerHTML=`<p class="note" style="text-align:left;margin:0">Delivery is not available in your area.</p>`; render(); return false;}
+  SHIP_CACHE=methods;
+  const sorted=[...methods].sort((a,b)=>a.price.amount-b.price.amount);
+  if(!SHIPMETHOD||!methods.some(m=>m.id===SHIPMETHOD)) SHIPMETHOD=sorted[0].id;
+  const sel=methods.find(m=>m.id===SHIPMETHOD);
+  SHIP_PRICE=sel?{amount:sel.price.amount,currency:sel.price.currency}:null;
   box.innerHTML=methods.map(m=>`<label class="${m.id===SHIPMETHOD?'on':''}"><input type="radio" name="ship" value="${m.id}" ${m.id===SHIPMETHOD?'checked':''} onchange="pickShip('${m.id}')"/> <span style="flex:1"><b>${m.name}</b></span><b>${money(m.price.amount,m.price.currency)}</b></label>`).join("");
+  render();
+  return true;
 }
-function pickShip(id){SHIPMETHOD=id; document.querySelectorAll('#shipOpts label').forEach(l=>l.classList.toggle('on',l.querySelector('input').value===id))}
-async function loadShipOpts(manual){
-  const f=validForm(); if(!f) return;
-  if(!CART.length) return toast("Bag empty");
-  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Loading delivery…";
+function pickShip(id){SHIPMETHOD=id; document.querySelectorAll('#shipOpts label').forEach(l=>l.classList.toggle('on',l.querySelector('input').value===id)); const m=SHIP_CACHE.find(x=>x.id===id); if(m){SHIP_PRICE={amount:m.price.amount,currency:m.price.currency}; render();} persistShipMethod();}
+async function persistShipMethod(){
+  if(!CHECKOUT||!SHIPMETHOD) return;
   try{
-    await ensureCheckout(f.email,f.addr);
-    const c=await fetchShipMethods();
-    renderShipMethods(c.shippingMethods,c.totalPrice);
-    toast(c.shippingMethods.length?"Delivery options loaded":"No delivery options");
-  }catch(e){toast(e.message.slice(0,140))}finally{btn.disabled=false; refreshPlaceBtn()}
+    await gql(`mutation($id:ID!,$m:ID!){checkoutDeliveryMethodUpdate(id:$id,deliveryMethodId:$m){checkout{id} errors{field message code}}}`,
+      {id:CHECKOUT.id,m:SHIPMETHOD}).then(d=>{if(d.checkoutDeliveryMethodUpdate.errors?.length) throw new Error(d.checkoutDeliveryMethodUpdate.errors.map(e=>e.message).join(", ")); return d;});
+  }catch(e){ console.warn("ship persist:",e.message); }
 }
-function refreshPlaceBtn(){const p=document.getElementById('payTotal'); document.getElementById('placeBtn').innerHTML=`Place Order — <span id="payTotal">${p?p.textContent:"—"}</span>`}
-async function placeOrder(){
-  if(!CART.length) return toast("Bag empty");
-  const f=validForm(); if(!f) return;
-  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Placing order…";
+/* Creates/refreshes checkout + delivery options whenever the address is
+   selected or edited. Cheapest method is auto-selected and saved. */
+async function refreshDelivery(silent){
+  const f=validForm(true); if(!f){ renderShipMethods([],null); return null; }
+  if(!CART.length) return null;
+  const box=document.getElementById('shipOpts');
   try{
     const co=await ensureCheckout(f.email,f.addr);
-    let info=await fetchShipMethods();
-    if(!info.shippingMethods?.length) throw new Error("No delivery methods for this address");
-    renderShipMethods(info.shippingMethods,info.totalPrice);
-    if(!SHIPMETHOD){toast("Delivery options loaded — tap Place Order again"); btn.disabled=false; refreshPlaceBtn(); document.getElementById('shipOpts').scrollIntoView({behavior:"smooth",block:"center"}); return;}
-    await gql(`mutation($id:ID!,$m:ID!){checkoutDeliveryMethodUpdate(id:$id,deliveryMethodId:$m){checkout{id totalPrice{gross{amount currency}}} errors{field message code}}}`,
-      {id:co.id,m:SHIPMETHOD}).then(d=>{if(d.checkoutDeliveryMethodUpdate.errors?.length) throw new Error(d.checkoutDeliveryMethodUpdate.errors.map(e=>e.message).join(", ")); return d;});
-    info=await fetchShipMethods();
-    const total=info.totalPrice.gross.amount, cur=info.totalPrice.gross.currency;
-    const pay=document.querySelector('input[name="pay"]:checked')?.value||"cod";
-    if(pay!=="cod"){
-      const pd=await gql(`mutation($id:ID!,$in:PaymentInput!){checkoutPaymentCreate(checkoutId:$id,input:$in){payment{id} errors{field message code}}}`,
-        {id:co.id,in:{gateway:DUMMY_GATEWAY,token:"charged",amount:total}});
-      if(pd.checkoutPaymentCreate.errors?.length) throw new Error(pd.checkoutPaymentCreate.errors.map(e=>e.message).join(", "));
+    const c=await fetchShipMethods();
+    if(!renderShipMethods(c.shippingMethods,c.totalPrice)){
+      if(!silent) toast("Delivery is not available in your area");
+      return null;
     }
-    const done=await gql(`mutation($id:ID!){checkoutComplete(id:$id){order{id number status total{gross{amount currency}}} errors{field message code}}}`,
-      {id:co.id});
-    if(done.checkoutComplete.errors?.length) throw new Error(done.checkoutComplete.errors.map(e=>e.message).join(", "));
-    const o=done.checkoutComplete.order;
-    document.getElementById('succId').textContent=`Order #${o.number} • ${money(o.total.gross.amount,o.total.gross.currency)} • ${pay==="cod"?"Cash on Delivery":"Paid online (demo)"} • ${o.status}`;
-    if(USER&&TOKEN){const s=document.getElementById('succOrders'); if(s) s.style.display="";}
-    showSuccess(); CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART)); CHECKOUT=null; SHIPMETHOD=null; render(); btn.textContent="Placed ✓";
+    await persistShipMethod();
+    const c2=await fetchShipMethods();
+    renderShipMethods(c2.shippingMethods,c2.totalPrice);
+    return {co, info:c2, f};
   }catch(e){
-    console.warn(e); toast(e.message.slice(0,150)); btn.disabled=false; refreshPlaceBtn();
+    console.warn(e);
+    if(!silent) toast((e.message||"Delivery failed").slice(0,140));
+    else box.innerHTML=`<p class="note" style="text-align:left;margin:0">${(e.message||"Could not load delivery options").slice(0,120)}</p>`;
+    return null;
   }
+}
+let _dT=null;
+function scheduleDeliveryRefresh(){clearTimeout(_dT); _dT=setTimeout(()=>{refreshDelivery(true);},800);}
+/* Shared pre-flight for Place Order: valid address -> checkout -> cheapest
+   shipping method saved -> totals incl. shipping. Throws when unavailable. */
+async function prepareCheckout(){
+  const f=validForm(); if(!f) throw new Error("invalid");
+  if(!CART.length) throw new Error("Bag empty");
+  const r=await refreshDelivery(false);
+  if(!r) throw new Error("unavailable");
+  const total=r.info.totalPrice.gross.amount, cur=r.info.totalPrice.gross.currency;
+  return {co:r.co, total, cur, f};
+}
+function refreshPlaceBtn(){const p=document.getElementById('payTotal'); const t=p?p.textContent:LAST_TOTAL_TXT; document.getElementById('placeBtn').innerHTML=`Pay : <span id="payTotal">${t}</span>`}
+async function placeOrder(){
+  if(!CART.length) return toast("Bag empty");
+  const btn=document.getElementById('placeBtn'); btn.disabled=true; btn.textContent="Preparing payment…";
+  try{
+    const p=await prepareCheckout();
+    btn.disabled=false; refreshPlaceBtn();
+    await startPhonepeFlow(p.co,p.total,p.cur,p.f);
+  }catch(e){
+    console.warn(e); btn.disabled=false; refreshPlaceBtn();
+  }
+}
+/* ---------- PhonePe (popup) ---------- */
+function ppSetStatus(msg,cls=""){const el=document.getElementById('ppStatus'); el.className="pp-status "+cls; el.innerHTML=msg;}
+function openPhonepePopup(){document.getElementById('phonepeModal').classList.add('open')}
+let PP_POLL=null, PP_COMPLETING=false, PP_LAST=null, _ppListeners=false;
+function closePhonepePopup(cancel){
+  stopPhonepePolling();
+  document.getElementById('phonepeModal').classList.remove('open');
+  if(cancel) toast("PhonePe cancelled — you can retry");
+}
+function startPhonepePolling(){stopPhonepePolling(); PP_POLL=setInterval(()=>{autoVerifyPhonepe(true);},4000);}
+function stopPhonepePolling(){if(PP_POLL){clearInterval(PP_POLL); PP_POLL=null;}}
+function armPhonepeReturnDetect(){
+  if(_ppListeners) return; _ppListeners=true;
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden) onCheckoutVisible();});
+  window.addEventListener("focus",()=>{onCheckoutVisible();});
+}
+function onCheckoutVisible(){
+  try{
+    const open=document.getElementById('phonepeModal')?.classList.contains('open');
+    if(open&&PHONEPE_PENDING?.merchantOrderId&&!PP_COMPLETING) autoVerifyPhonepe(true);
+  }catch(e){}
+}
+function ppRedirectUrl(){
+  try{
+    if(location.protocol.startsWith("http")) return location.origin+location.pathname+"?phonepe_return=1";
+  }catch(e){}
+  return "https://ammikidswear.com/checkout/success";
+}
+function ppMobile(addrPhone){
+  const raw=(addrPhone||"").replace(/\D/g,"");
+  return raw.length>=10?raw.slice(-10):"";
+}
+async function startPhonepeFlow(checkout,total,cur,form){
+  openPhonepePopup();
+  armPhonepeReturnDetect();
+  PP_LAST={co:checkout,total,cur,f:form};
+  document.getElementById('ppRetryRow').style.display="none";
+  document.getElementById('ppAmt').textContent=money(total,cur);
+  document.getElementById('ppPayLink').style.display="none";
+  document.getElementById('ppMeta').textContent="";
+  ppSetStatus(`<span class="spin" style="border-color:#5f259f;border-top-color:transparent"></span> Creating PhonePe order for ${money(total,cur)}…`);
+  try{
+    const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/create/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({checkoutId:checkout.id,redirectUrl:ppRedirectUrl(),mobileNumber:ppMobile(form?.addr?.phone)||undefined})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||("PhonePe create failed ("+r.status+")"));
+    if(!j.redirectUrl) throw new Error("PhonePe did not return redirectUrl");
+    PHONEPE_PENDING={merchantOrderId:j.merchantOrderId,checkoutId:checkout.id,amount:j.amount,amountInRupees:j.amountInRupees,createdAt:Date.now()};
+    localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING));
+    document.getElementById('ppPayLink').href=j.redirectUrl;
+    document.getElementById('ppPayLink').style.display="";
+    document.getElementById('ppMeta').textContent=`Merchant Order: ${j.merchantOrderId} • Expires: ${j.expireAt||"~20 min"}`;
+    ppSetStatus(`✅ PhonePe order created (${money(total,cur)}).<br/>Tap <b>Pay with PhonePe →</b> and complete the payment — this popup detects your return and places the order automatically.`,"ok");
+    window.open(j.redirectUrl,"_blank");
+    startPhonepePolling();
+  }catch(e){ console.warn(e); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"PhonePe failed").slice(0,140)); }
+}
+async function getPhonepeState(){
+  if(!PHONEPE_PENDING?.merchantOrderId) return null;
+  const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/status/?merchantOrderId="+encodeURIComponent(PHONEPE_PENDING.merchantOrderId));
+  const j=await r.json();
+  const st=(j.state||j?.phonepeResponse?.state||"UNKNOWN").toUpperCase();
+  document.getElementById('ppMeta').textContent=`Merchant Order: ${PHONEPE_PENDING.merchantOrderId} • State: ${st}`;
+  return {state:st, raw:j};
+}
+/* Auto-detect: called on popup return, tab focus, polling and Check Status.
+   Only completes when PhonePe reports COMPLETED; FAILED ends the attempt. */
+async function autoVerifyPhonepe(silent){
+  if(!PHONEPE_PENDING?.merchantOrderId||PP_COMPLETING) return null;
+  if(!silent) ppSetStatus("Checking payment status…");
+  let s;
+  try{ s=await getPhonepeState(); }
+  catch(e){ if(!silent) ppSetStatus("❌ Status check failed: "+e.message.slice(0,200),"err"); return null; }
+  if(!s) return null;
+  if(s.state==="COMPLETED"){ await completePhonepeOrder(); }
+  else if(s.state==="FAILED"){ showPhonepeFailed(); }
+  else if(!silent){ ppSetStatus(`State: <b>${s.state}</b> — complete the payment on PhonePe; this popup detects it automatically.`); }
+  return s;
+}
+async function checkPhonepeStatus(manual){ await autoVerifyPhonepe(!manual); }
+function showPhonepeFailed(){
+  stopPhonepePolling();
+  const mid=PHONEPE_PENDING?.merchantOrderId||"";
+  PHONEPE_PENDING=null; localStorage.removeItem("ak_phonepe_pending");
+  ppSetStatus(`❌ Payment <b>FAILED</b> (order ${mid}). No order was placed and the failed attempt cannot be reused.<br/>Tap <b>↻ Try Again</b> below for a fresh payment.`,"err");
+  document.getElementById('ppRetryRow').style.display="";
+  toast("PhonePe payment failed");
+}
+async function retryPhonepe(){
+  document.getElementById('ppRetryRow').style.display="none";
+  if(!PP_LAST){ toast("Tap Pay again to restart"); closePhonepePopup(false); return; }
+  await startPhonepeFlow(PP_LAST.co,PP_LAST.total,PP_LAST.cur,PP_LAST.f);
+}
+async function completePhonepeOrder(){
+  if(!PHONEPE_PENDING?.merchantOrderId) return;
+  PP_COMPLETING=true;
+  ppSetStatus(`<span class="spin" style="border-color:#5f259f;border-top-color:transparent"></span> Payment received — placing your order…`);
+  try{
+    const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/complete/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({merchantOrderId:PHONEPE_PENDING.merchantOrderId,checkoutId:PHONEPE_PENDING.checkoutId})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.message||j.error||("Order failed ("+r.status+") state="+(j.state||"unknown")));
+    const o=j.order||{};
+    document.getElementById('succId').textContent=`Order #${o.orderNumber||o.orderId||""} • PhonePe Paid • ${PHONEPE_PENDING.merchantOrderId}`;
+    if(USER&&TOKEN){const s=document.getElementById('succOrders'); if(s) s.style.display="";}
+    stopPhonepePolling(); closePhonepePopup(false); showSuccess();
+    CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART));
+    localStorage.removeItem("ak_phonepe_pending"); PHONEPE_PENDING=null;
+    CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0; updatePromoUI(); render();
+    document.getElementById('shipOpts').innerHTML=`<p class="note" style="text-align:left;margin:0">Select an address to see delivery options.</p>`;
+    ppSetStatus("✅ Order placed!","ok");
+  }catch(e){
+    console.warn(e);
+    if(/not completed/i.test(e.message||"")){ ppSetStatus("Payment is still processing — waiting for PhonePe confirmation…"); }
+    else{ ppSetStatus("❌ "+(e.message||"Order failed").slice(0,400),"err"); toast((e.message||"Order failed").slice(0,150)); }
+  }
+  finally{ PP_COMPLETING=false; }
+}
+function handlePhonepeReturn(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const mid=q.get("merchantOrderId")||q.get("merchantTransactionId")||q.get("transactionId");
+    if(mid) { PHONEPE_PENDING=PHONEPE_PENDING||{}; PHONEPE_PENDING.merchantOrderId=mid; localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING)); }
+    if(q.get("phonepe_return")==="1"||mid){
+      if(PHONEPE_PENDING?.merchantOrderId){
+        openPhonepePopup();
+        armPhonepeReturnDetect();
+        document.getElementById('ppMeta').textContent=`Merchant Order: ${PHONEPE_PENDING.merchantOrderId} • Returned from PhonePe`;
+        ppSetStatus("Back from PhonePe — verifying payment automatically…","ok");
+        history.replaceState(null,"",location.pathname);
+        autoVerifyPhonepe(false);
+      }
+    }
+  }catch(e){console.warn("phonepe return parse",e)}
 }
 function render(){
   const lines=document.getElementById('lines'), badge=document.getElementById('countBadge'), tot=document.getElementById('totals'), payTotal=document.getElementById('payTotal');
-  if(!CART.length){ lines.innerHTML=`<div class="empty">Your bag is empty. <a href="index.html#shop" style="color:var(--primary);text-decoration:underline">Go to shop →</a></div>`; badge.textContent="0 items"; tot.innerHTML=""; payTotal.textContent="—"; document.getElementById('placeBtn').disabled=true; return;}
+  if(!CART.length){ lines.innerHTML=`<div class="empty">Your bag is empty. <a href="index.html#shop" style="color:var(--primary);text-decoration:underline">Go to shop →</a></div>`; badge.textContent="0 items"; tot.innerHTML=""; LAST_TOTAL_TXT="—"; if(payTotal) payTotal.textContent="—"; document.getElementById('placeBtn').disabled=true; return;}
   document.getElementById('placeBtn').disabled=false;
   badge.textContent=CART.length+" items • "+CART.reduce((s,c)=>s+c.qty,0)+" pcs";
   lines.innerHTML=CART.map((c,i)=>`<div class="line"><img src="${c.img}" alt=""/><div style="flex:1"><div style="font-weight:700;font-size:13px">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""} • Qty ${c.qty}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:13px">${money(c.price,c.currency)} × ${c.qty}</span><b>${money(c.price*c.qty,c.currency)}</b></div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="chg(${i},-1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">−</button><button onclick="chg(${i},1)" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;cursor:pointer">+</button><button onclick="rem(${i})" style="margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer">Remove</button></div></div></div>`).join("");
-  const sub=CART.reduce((s,c)=>s+c.price*c.qty,0), cur=CART[0]?.currency||"INR", ship=sub>999?0:79, discount=0, total=sub+ship-discount;
-  tot.innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub,cur)}</b></div><div class="row"><span>Shipping</span><span>${ship?money(ship,cur):"Free"}</span></div>${discount?`<div class="row"><span>Discount</span><span>- ${money(discount,cur)}</span></div>`:""}<div class="row total"><span>Total</span><span>${money(total,cur)}</span></div>`;
-  payTotal.textContent=money(total,cur);
+  const sub=CART.reduce((s,c)=>s+c.price*c.qty,0), cur=CART[0]?.currency||"INR", ship=SHIP_PRICE?SHIP_PRICE.amount:(sub>999?0:79), sCur=SHIP_PRICE?.currency||cur, discount=PROMO_DISCOUNT||0, total=Math.max(0,sub+ship-discount);
+  tot.innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub,cur)}</b></div><div class="row"><span>Shipping</span><span>${ship?money(ship,sCur):"Free"}</span></div>${discount?`<div class="row"><span>Discount${PROMO_CODE?` (${PROMO_CODE})`:""}</span><span style="color:#0d7a3f">− ${money(discount,cur)}</span></div>`:""}<div class="row total"><span>Total</span><span>${money(total,cur)}</span></div>`;
+  LAST_TOTAL_TXT=money(total,cur);
+  if(payTotal) payTotal.textContent=LAST_TOTAL_TXT;
 }
-window.chg=(i,d)=>{CART[i].qty+=d; if(CART[i].qty<=0) CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render()};
-window.rem=(i)=>{CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render()};
-function applyCoupon(){const c=document.getElementById('coupon').value.trim(); if(!c) return toast("Enter coupon"); toast("Coupon '"+c+"' applied (demo) — 0% off")}
-document.querySelectorAll('.pay label').forEach(l=>l.addEventListener('click',()=>{document.querySelectorAll('.pay label').forEach(x=>x.classList.remove('active')); l.classList.add('active'); l.querySelector('input').checked=true}));
+window.chg=(i,d)=>{CART[i].qty+=d; if(CART[i].qty<=0) CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render(); scheduleDeliveryRefresh()};
+window.rem=(i)=>{CART.splice(i,1); localStorage.setItem("ak_cart",JSON.stringify(CART)); render(); scheduleDeliveryRefresh()};
+function updatePromoUI(){
+  const btn=document.getElementById('promoBtn'), msg=document.getElementById('promoMsg');
+  if(PROMO_CODE){btn.textContent="Remove"; msg.style.display=""; msg.innerHTML=`✅ <b>${PROMO_CODE}</b> applied — you save <b>${money(PROMO_DISCOUNT)}</b> <a href="#" onclick="removeCoupon();return false;" style="color:var(--primary);text-decoration:underline">remove</a>`;}
+  else{btn.textContent="Apply"; msg.style.display="none"; msg.innerHTML="";}
+}
+async function applyCoupon(){
+  if(PROMO_CODE){ await removeCoupon(); return; }
+  const inp=document.getElementById('coupon'), code=inp.value.trim();
+  if(!code) return toast("Enter coupon");
+  if(!CART.length) return toast("Bag empty");
+  const f=validForm(); if(!f) return;
+  const btn=document.getElementById('promoBtn'); btn.disabled=true; btn.textContent="…";
+  try{
+    const co=await ensureCheckout(f.email,f.addr);
+    await applyPromoToCheckout(co.id,code);
+    inp.value=PROMO_CODE;
+    await refreshDelivery(false);
+    render();
+    toast(`Coupon ${PROMO_CODE} applied ✓`);
+  }catch(e){ toast((e.message||"Invalid coupon").slice(0,140)); updatePromoUI(); }
+  finally{ btn.disabled=false; updatePromoUI(); }
+}
+async function removeCoupon(){
+  try{
+    if(CHECKOUT&&PROMO_CODE){
+      await gql(`mutation($id:ID!,$code:String!){checkoutRemovePromoCode(id:$id,promoCode:$code){checkout{id} errors{field message}}}`,
+        {id:CHECKOUT.id,code:PROMO_CODE}).then(d=>{if(d.checkoutRemovePromoCode.errors?.length) throw new Error(d.checkoutRemovePromoCode.errors.map(e=>e.message).join(", "));});
+    }
+  }catch(e){ console.warn("promo remove:",e.message); }
+  PROMO_CODE=null; PROMO_DISCOUNT=0;
+  document.getElementById('coupon').value="";
+  updatePromoUI(); render();
+  refreshDelivery(true);
+  toast("Coupon removed");
+}
 function showSuccess(){document.getElementById('success').classList.add('open')}
 function closeSucc(){document.getElementById('success').classList.remove('open')}
 (function(){
@@ -327,7 +675,9 @@ function closeSucc(){document.getElementById('success').classList.remove('open')
 })();
 if(IS_LOCAL){document.getElementById('localLoginBox').classList.add('show'); document.getElementById('localAddrBox').classList.add('show');}
 try{if(TOKEN){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
-refreshAcct(); render();
+refreshAcct(); render(); handlePhonepeReturn();
+["firstName","lastName","phone","street","city","state","postal","country"].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("change",scheduleDeliveryRefresh);});
+console.log("[checkout] GRAPHQL="+GRAPHQL+" PHONEPE_BASE="+PHONEPE_BASE);
 </script>
 </body>
 </html>

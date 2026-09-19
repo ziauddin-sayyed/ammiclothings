@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Profile — Ammi Kids by Ammi Enterprises</title>
+<link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#c0006b;--accent:#e70080;--accent-dark:#c0006b;--yellow:#f6ba22;--cream:#fdfcff;--blush:#fef0f7;--line:#efe6f0;--muted:#7A6E6A;--ink:#1E1E1E;--sage:#f3f0f7}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}
+.header{position:sticky;top:0;z-index:20;background:rgba(255,249,242,.8);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+.header-inner{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;position:relative;justify-content:space-between}
+.logo{position:absolute;left:50%;transform:translateX(-50%);font-family:"Cormorant Garamond",serif;font-weight:700;font-size:26px;letter-spacing:.08em}
+.logo img{height:46px;border-radius:8px;padding:4px 6px}
+.nav{display:flex;gap:22px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:#4A3F3B}
+.nav a:hover{color:var(--accent)}
+.hamburger{display:none;width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;flex-shrink:0}
+.hamburger span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);z-index:19}
+.nav-backdrop.open{display:block}
+@media(max-width:900px){
+  .header-inner{padding:10px 12px;gap:10px}
+  .logo{position:static;transform:none;font-size:19px}
+  .logo img{height:34px}
+  .hamburger{display:flex}
+  .nav{display:none}
+  .nav.open{display:flex;position:fixed;top:62px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;flex-direction:column;z-index:45;gap:0}
+  .nav.open a{padding:14px 8px;font-size:14px}
+  .header-inner>a:last-child{font-size:11px!important;padding:7px 10px!important;white-space:nowrap}
+}
+.wrap{max-width:860px;margin:22px auto;padding:0 20px}
+@media(max-width:640px){.wrap{padding:0 12px}.card{padding:16px!important}}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+.card h1{font-family:"Cormorant Garamond",serif;margin:0 0 6px;font-size:30px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 16px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.field input,.field select{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;outline:none;background:#fff;width:100%}
+.field input:focus{border-color:var(--primary)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.btn-primary{width:100%;background:#fff;color:var(--primary);border:none;padding:14px;border-radius:999px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:6px}
+.btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-sm{width:auto;padding:8px 18px;margin:0;font-size:12px}
+.tabs{display:flex;gap:8px;margin:14px 0}
+.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px;font-weight:700;cursor:pointer;font-size:13px}
+.tabs button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.order{border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;background:#fff}
+.order.current{border:2px solid var(--accent);box-shadow:0 8px 24px rgba(231,0,128,.15)}
+.ohead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ohead b{font-size:16px}
+.pill{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--sage);padding:5px 12px;border-radius:999px}
+.pill.cur{background:var(--accent);color:#fff}
+.oline{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:8px 0;border-top:1px dashed var(--line);margin-top:8px}
+.oline small{color:var(--muted)}
+.otot{display:flex;justify-content:space-between;font-weight:800;margin-top:8px;font-size:15px}
+.meta{font-size:12px;color:var(--muted);margin-top:6px}
+.accthi{display:flex;align-items:center;gap:10px;background:var(--sage);border-radius:14px;padding:12px;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
+.accthi b{color:var(--primary)}
+.addr{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px}
+.addr.def{border-color:var(--primary);background:rgba(192,0,107,.03)}
+.addr .who{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:11px;background:var(--sage);padding:4px 8px;border-radius:999px}
+.badge.def{background:var(--primary);color:#fff}
+.addrbtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.addrbtns button{flex:1;min-width:100px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-weight:700;cursor:pointer;font-size:12px}
+.addrbtns button.danger{color:#b3261e;border-color:#f3c1c1}
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:20px;z-index:60}
+.modal.open{display:grid}.modal-bg{position:absolute;inset:0;background:rgba(20,14,14,.5);backdrop-filter:blur(6px)}
+.modal-card{position:relative;background:#fff;border-radius:24px;padding:28px;max-width:520px;width:100%;text-align:left;max-height:92vh;overflow:auto}
+@media(max-width:640px){.modal{padding:12px}.modal-card{padding:20px 16px}}
+.pp-status{font-size:13px;color:var(--muted);background:var(--sage);border-radius:12px;padding:10px 12px;margin:10px 0}
+.pp-status.err{background:#fdecec;color:#b3261e}
+.pp-btnrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pp-btnrow .btn-ghost,.pp-btnrow .btn-primary{margin-top:0;flex:1;min-width:140px}
+@media(max-width:640px){.pp-btnrow .btn-ghost,.pp-btnrow .btn-primary{min-width:0}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--primary);color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.3s;z-index:50}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.footer{background:var(--primary);color:#fff;margin-top:40px;padding:28px 20px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="announce">Ammi Enterprises • Est. 2003 • Mumbai</div>
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
+    <button class="hamburger" id="hamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="profile.html">Profile</a></nav>
+    <div style="flex:1"></div>
+    <div class="nav-backdrop" id="navBackdrop"></div>
+    <a href="index.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">← Continue Shopping</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card" id="loginCard" style="display:none">
+    <h1>Profile</h1>
+    <p class="sub">Log in to see your orders and addresses.</p>
+    <div class="field"><label>Email *</label><input type="email" id="liEmail" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password *</label><input type="password" id="liPass" placeholder="••••••••"/></div>
+    <button class="btn-primary" onclick="doLogin()">Log in</button>
+    <p class="sub" style="margin:12px 0 0">New here? <a href="checkout.html" style="color:var(--primary);text-decoration:underline">Create an account at checkout →</a></p>
+  </div>
+
+  <div class="card" id="profileCard" style="display:none">
+    <h1>Profile</h1>
+    <div class="accthi">👋 Hi, <b id="acctName">—</b><span style="color:var(--muted);font-size:12px" id="acctEmail"></span><button class="btn-ghost btn-sm" style="margin-left:auto" onclick="doLogout()">Log out</button></div>
+    <div class="tabs"><button id="tabOrders" class="on" onclick="profTab('orders')">Orders</button><button id="tabAddrs" onclick="profTab('addrs')">Addresses</button></div>
+    <div id="paneOrders"><div id="orders"></div></div>
+    <div id="paneAddrs" style="display:none">
+      <div id="addrList"></div>
+      <button class="btn-ghost" style="width:auto;padding:10px 18px" onclick="openAddrModal()">+ New Address</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="addrModal"><div class="modal-bg" onclick="closeAddrModal()"></div><div class="modal-card">
+  <b style="font-size:18px" id="addrTitle">+ New Address</b>
+  <p class="sub" style="margin:4px 0 12px">Follows Saleor address standards</p>
+  <div class="grid2">
+    <div class="field"><label>First name *</label><input id="naFirst" placeholder="Aqueel"/></div>
+    <div class="field"><label>Last name *</label><input id="naLast" placeholder="Khan"/></div>
+  </div>
+  <div class="field"><label>Phone *</label><input id="naPhone" placeholder="+91 70219 46362"/></div>
+  <div class="field"><label>Street address *</label><input id="naStreet" placeholder="A-7, Kasturchand Mill Compound"/></div>
+  <div class="grid2">
+    <div class="field"><label>City *</label><input id="naCity" value="Mumbai"/></div>
+    <div class="field"><label>Country Area (State) *</label><input id="naState" value="Maharashtra"/></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Zipcode *</label><input id="naPostal" value="400028"/></div>
+    <div class="field"><label>Country *</label><select id="naCountry"><option value="IN" selected>India (IN)</option><option value="US">United States (US)</option><option value="GB">United Kingdom (GB)</option><option value="AE">UAE (AE)</option><option value="SA">Saudi Arabia (SA)</option></select></div>
+  </div>
+  <div class="pp-status" id="addrStatus" style="display:none"></div>
+  <div class="pp-btnrow">
+    <button class="btn-primary pp-paybtn" id="addrSaveBtn" style="background:#5f259f;color:#fff;border:none;cursor:pointer" onclick="saveAddress()">Save Address</button>
+  </div>
+  <div class="pp-btnrow">
+    <button class="btn-ghost" style="flex:1" onclick="closeAddrModal()">Cancel</button>
+  </div>
+</div></div>
+
+<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028</span></div></footer>
+<div class="toast" id="toast"></div>
+<script src="config.js"></script>
+<script>
+const GRAPHQL = window.APP_CONFIG.GRAPHQL;
+let USER=JSON.parse(localStorage.getItem("ak_user")||"null"), TOKEN=localStorage.getItem("ak_token")||null;
+let EDIT_ID=null, ADDR_CACHE=[];
+const ADDR_Q=`{me{email addresses{id firstName lastName streetAddress1 city postalCode country{code} countryArea phone isDefaultShippingAddress}}}`;
+function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function fmtDate(s){try{return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch(e){return s||""}}
+async function gql(q,v={},token=null){const h={"Content-Type":"application/json"}; if(token) h["Authorization"]="Bearer "+token; const r=await fetch(GRAPHQL,{method:"POST",headers:h,body:JSON.stringify({query:q,variables:v})}); const j=await r.json(); if(j.errors) throw new Error(j.errors[0]?.message||"Request failed"); return j.data}
+function profTab(w){document.getElementById('tabOrders').classList.toggle('on',w==='orders'); document.getElementById('tabAddrs').classList.toggle('on',w==='addrs'); document.getElementById('paneOrders').style.display=w==='orders'?"":"none"; document.getElementById('paneAddrs').style.display=w==='addrs'?"":"none"; if(w==='addrs') loadAddrs();}
+async function doLogin(){const e=document.getElementById('liEmail').value.trim(), p=document.getElementById('liPass').value; if(!e||!p) return toast("Enter email + password"); try{
+  const d=await gql(`mutation($e:String!,$p:String!){tokenCreate(email:$e,password:$p){token user{id email firstName lastName} errors{message}}}`,{e,p});
+  if(d.tokenCreate.errors?.length) throw new Error(d.tokenCreate.errors.map(x=>x.message).join(", ")); if(!d.tokenCreate.token) throw new Error("Login failed");
+  TOKEN=d.tokenCreate.token; USER=d.tokenCreate.user; localStorage.setItem("ak_token",TOKEN); localStorage.setItem("ak_user",JSON.stringify(USER)); toast("Logged in ✓"); boot();
+}catch(err){toast(err.message.slice(0,140))}}
+function doLogout(){USER=null; TOKEN=null; localStorage.removeItem("ak_token"); localStorage.removeItem("ak_user"); boot(); toast("Logged out")}
+async function boot(){
+  const logged=!!(USER&&TOKEN);
+  document.getElementById('loginCard').style.display=logged?"none":"";
+  document.getElementById('profileCard').style.display=logged?"":"none";
+  if(!logged) return;
+  document.getElementById('acctName').textContent=USER.firstName||USER.email;
+  document.getElementById('acctEmail').textContent="("+USER.email+")";
+  loadOrders();
+}
+async function loadOrders(){
+  const box=document.getElementById('orders'); box.innerHTML="<p class='sub'>Loading orders…</p>";
+  try{
+    const d=await gql(`{me{orders(first:20){edges{node{id number created status statusDisplay paymentStatusDisplay shippingMethodName customerNote total{gross{amount currency}} lines{quantity variant{sku name} totalPrice{gross{amount currency}}}}}}}}`,{},TOKEN);
+    if(!d.me){doLogout(); return;}
+    const edges=d.me.orders.edges;
+    if(!edges.length){box.innerHTML="<p class='sub'>No orders yet. <a href='index.html#shop' style='color:var(--primary);text-decoration:underline'>Start shopping →</a></p>"; return;}
+    box.innerHTML=edges.map((e,i)=>{const o=e.node; return `<div class="order ${i===0?'current':''}">
+      <div class="ohead"><b>Order #${o.number}</b><span class="pill ${i===0?'cur':''}">${o.statusDisplay}</span></div>
+      <div class="meta">${fmtDate(o.created)} • ${o.paymentStatusDisplay}${o.shippingMethodName?` • Delivery: ${o.shippingMethodName}`:""}</div>
+      ${o.lines.map(l=>`<div class="oline"><span><b>${l.variant.sku}</b> <small>${l.variant.name||""} × ${l.quantity}</small></span><b>${money(l.totalPrice.gross.amount,l.totalPrice.gross.currency)}</b></div>`).join("")}
+      <div class="otot"><span>Total</span><span>${money(o.total.gross.amount,o.total.gross.currency)}</span></div>
+    </div>`}).join("");
+  }catch(err){box.innerHTML="<p class='sub'>Couldn’t load orders: "+(err.message||"error").slice(0,120)+"</p>"}
+}
+async function loadAddrs(){
+  const box=document.getElementById('addrList'); box.innerHTML="<p class='sub'>Loading addresses…</p>";
+  try{
+    const d=await gql(ADDR_Q,{},TOKEN);
+    const list=d?.me?.addresses||[];
+    ADDR_CACHE=list;
+    if(!list.length){box.innerHTML="<p class='sub'>No saved addresses yet.</p>"; return;}
+    box.innerHTML=list.map((a,i)=>{const code=(a.country&&a.country.code)||"IN"; return `<div class="addr ${a.isDefaultShippingAddress?'def':''}">
+      <div class="who"><b>${a.firstName} ${a.lastName}</b>${a.isDefaultShippingAddress?'<span class="badge def">Default</span>':""}</div>
+      <div class="meta">${a.streetAddress1}, ${a.city}, ${a.countryArea||""} ${a.postalCode} (${code})${a.phone?`<br/>${a.phone}`:""}</div>
+      <div class="addrbtns">
+        ${a.isDefaultShippingAddress?"":`<button onclick="setDefault('${a.id}')">Set Default</button>`}
+        <button onclick="editAddrByIdx(${i})">Edit</button>
+        <button class="danger" onclick="delAddr('${a.id}')">Delete</button>
+      </div>
+    </div>`}).join("");
+  }catch(err){box.innerHTML="<p class='sub'>Couldn’t load addresses: "+(err.message||"error").slice(0,120)+"</p>"}
+}
+function openAddrModal(){EDIT_ID=null; document.getElementById('addrTitle').textContent="+ New Address"; ["naFirst","naLast","naPhone","naStreet","naCity","naPostal"].forEach(id=>document.getElementById(id).value=""); document.getElementById('naState').value="Maharashtra"; document.getElementById('naCity').value="Mumbai"; document.getElementById('naPostal').value="400028"; document.getElementById('naCountry').value="IN"; const st=document.getElementById('addrStatus'); st.style.display="none"; document.getElementById('addrModal').classList.add('open');}
+function editAddrByIdx(i){const a=ADDR_CACHE[i]; if(a) editAddr(a);}
+function editAddr(a){EDIT_ID=a.id; document.getElementById('addrTitle').textContent="Edit Address"; document.getElementById('naFirst').value=a.firstName||""; document.getElementById('naLast').value=a.lastName||""; document.getElementById('naPhone').value=a.phone||""; document.getElementById('naStreet').value=a.streetAddress1||""; document.getElementById('naCity').value=a.city||""; document.getElementById('naState').value=a.countryArea||""; document.getElementById('naPostal').value=a.postalCode||""; document.getElementById('naCountry').value=(a.country&&a.country.code)||"IN"; const st=document.getElementById('addrStatus'); st.style.display="none"; document.getElementById('addrModal').classList.add('open');}
+function closeAddrModal(){document.getElementById('addrModal').classList.remove('open');}
+async function saveAddress(){
+  const v=id=>document.getElementById(id).value.trim();
+  const input={firstName:v('naFirst'),lastName:v('naLast'),streetAddress1:v('naStreet'),city:v('naCity'),postalCode:v('naPostal'),country:v('naCountry')||"IN",countryArea:v('naState'),phone:v('naPhone')};
+  const st=document.getElementById('addrStatus'); st.style.display=""; st.className="pp-status";
+  if(!input.firstName||!input.lastName||!input.streetAddress1||!input.city||!input.postalCode||!input.countryArea){st.classList.add("err"); st.textContent="Please fill all required fields."; return;}
+  const btn=document.getElementById('addrSaveBtn'); btn.disabled=true; btn.innerHTML=`<span class="spin"></span> Saving…`;
+  try{
+    if(EDIT_ID){
+      const d=await gql(`mutation($id:ID!,$in:AddressInput!){accountAddressUpdate(id:$id,input:$in){address{id} accountErrors{field message code}}}`,{id:EDIT_ID,in:input},TOKEN);
+      if(d.accountAddressUpdate.accountErrors?.length) throw new Error(d.accountAddressUpdate.accountErrors.map(e=>e.message).join(", "));
+    }else{
+      const d=await gql(`mutation($in:AddressInput!){accountAddressCreate(input:$in){address{id} errors{field message code}}}`,{in:input},TOKEN);
+      if(d.accountAddressCreate.errors?.length) throw new Error(d.accountAddressCreate.errors.map(e=>e.message).join(", "));
+    }
+    closeAddrModal(); toast("Address saved ✓"); loadAddrs();
+  }catch(e){st.classList.add("err"); st.textContent="❌ "+e.message.slice(0,200);}
+  finally{btn.disabled=false; btn.textContent="Save Address";}
+}
+async function setDefault(id){
+  try{
+    const d=await gql(`mutation($id:ID!){accountSetDefaultAddress(id:$id,type:SHIPPING){user{id} accountErrors{field message code}}}`,{id},TOKEN);
+    if(d.accountSetDefaultAddress.accountErrors?.length) throw new Error(d.accountSetDefaultAddress.accountErrors.map(e=>e.message).join(", "));
+    toast("Default address updated ✓"); loadAddrs();
+  }catch(e){toast(e.message.slice(0,140))}
+}
+async function delAddr(id){
+  if(!confirm("Delete this address?")) return;
+  try{
+    const d=await gql(`mutation($id:ID!){accountAddressDelete(id:$id){address{id} accountErrors{field message code}}}`,{id},TOKEN);
+    if(d.accountAddressDelete.accountErrors?.length) throw new Error(d.accountAddressDelete.accountErrors.map(e=>e.message).join(", "));
+    toast("Address deleted"); loadAddrs();
+  }catch(e){toast(e.message.slice(0,140))}
+}
+(function(){
+  const btn=document.getElementById('hamBtn'), nav=document.getElementById('mainNav'), backdrop=document.getElementById('navBackdrop');
+  if(!btn||!nav) return;
+  function toggle(force){const on=force??!nav.classList.contains('open'); nav.classList.toggle('open',on); backdrop.classList.toggle('open',on); document.body.style.overflow=on?'hidden':'';}
+  btn.addEventListener('click',()=>toggle()); backdrop.addEventListener('click',()=>toggle(false));
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>toggle(false)));
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)toggle(false);});
+})();
+boot();
+</script>
+</body>
+</html>

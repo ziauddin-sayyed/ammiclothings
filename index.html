@@ -272,7 +272,7 @@ button{font:inherit}
     <nav class="nav" id="mainNav">
       <a href="index.html#shop">Shop</a>
       <a href="products.html">Products</a>
-      <a href="orders.html" id="ordersLink" style="display:none">My Orders</a>
+      <a href="profile.html" id="ordersLink" style="display:none">Profile</a>
 
 
 
@@ -456,8 +456,9 @@ button{font:inherit}
 
 <div class="toast" id="toast"></div>
 
+<script src="config.js"></script>
 <script>
-const GRAPHQL = "https://ammikids.themanagemate.com/graphql/";
+const GRAPHQL = window.APP_CONFIG.GRAPHQL;
 let PRODUCTS = [];
 let CATEGORIES = [];
 let FILTER = "all";
@@ -825,7 +826,7 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
 })();
 // expose for inline handlers
 window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.closeDrawer=closeDrawer; window.checkout=checkout;
-// show My Orders only when logged in
+// show Profile only when logged in
 try{if(localStorage.getItem("ak_token")){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
