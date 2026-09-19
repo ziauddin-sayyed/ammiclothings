@@ -233,6 +233,10 @@ a{color:inherit;text-decoration:none}
   <div class="pp-btnrow">
     <a id="ppPayLink" href="#" target="_blank" rel="noopener" class="btn-primary pp-paybtn" style="text-decoration:none;display:none">Pay with PhonePe →</a>
   </div>
+  <div id="ppFrameWrap" style="display:none;margin-top:12px">
+    <iframe id="ppFrame" title="PhonePe payment" style="width:100%;height:clamp(420px,60vh,540px);border:1px solid var(--line);border-radius:14px;background:#fff"></iframe>
+    <p class="note">If the payment page doesn't load here, <a id="ppNewTab" href="#" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline">open it in a new tab →</a></p>
+  </div>
   <div class="pp-btnrow" id="ppRetryRow" style="display:none">
     <button class="btn-ghost" onclick="retryPhonepe()">↻ Try Again — New Payment</button>
   </div>
@@ -480,9 +484,17 @@ function openPhonepePopup(){document.getElementById('phonepeModal').classList.ad
 let PP_POLL=null, PP_COMPLETING=false, PP_LAST=null, _ppListeners=false;
 function closePhonepePopup(cancel){
   stopPhonepePolling();
+  hidePhonepeFrame();
   document.getElementById('phonepeModal').classList.remove('open');
   if(cancel) toast("PhonePe cancelled — you can retry");
 }
+function hidePhonepeFrame(){
+  try{
+    document.getElementById('ppFrameWrap').style.display="none";
+    document.getElementById('ppFrame').src="about:blank";
+  }catch(e){}
+}
+function isDesktopWide(){try{return window.matchMedia&&window.matchMedia("(min-width: 861px)").matches;}catch(e){return true;}}
 function startPhonepePolling(){stopPhonepePolling(); PP_POLL=setInterval(()=>{autoVerifyPhonepe(true);},4000);}
 function stopPhonepePolling(){if(PP_POLL){clearInterval(PP_POLL); PP_POLL=null;}}
 function armPhonepeReturnDetect(){
@@ -510,6 +522,7 @@ async function startPhonepeFlow(checkout,total,cur,form){
   openPhonepePopup();
   armPhonepeReturnDetect();
   PP_LAST={co:checkout,total,cur,f:form};
+  hidePhonepeFrame();
   document.getElementById('ppRetryRow').style.display="none";
   document.getElementById('ppAmt').textContent=money(total,cur);
   document.getElementById('ppPayLink').style.display="none";
@@ -522,13 +535,20 @@ async function startPhonepeFlow(checkout,total,cur,form){
     if(!j.redirectUrl) throw new Error("PhonePe did not return redirectUrl");
     PHONEPE_PENDING={merchantOrderId:j.merchantOrderId,checkoutId:checkout.id,amount:j.amount,amountInRupees:j.amountInRupees,createdAt:Date.now()};
     localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING));
-    document.getElementById('ppPayLink').href=j.redirectUrl;
-    document.getElementById('ppPayLink').style.display="";
     document.getElementById('ppMeta').textContent=`Merchant Order: ${j.merchantOrderId} • Expires: ${j.expireAt||"~20 min"}`;
-    ppSetStatus(`✅ PhonePe order created (${money(total,cur)}).<br/>Tap <b>Pay with PhonePe →</b> and complete the payment — this popup detects your return and places the order automatically.`,"ok");
-    window.open(j.redirectUrl,"_blank");
+    if(isDesktopWide()){
+      document.getElementById('ppFrame').src=j.redirectUrl;
+      document.getElementById('ppNewTab').href=j.redirectUrl;
+      document.getElementById('ppFrameWrap').style.display="";
+      ppSetStatus(`✅ Pay securely below (${money(total,cur)}). This popup closes automatically on success or failure — no need to tap anything.`,"ok");
+    }else{
+      document.getElementById('ppPayLink').href=j.redirectUrl;
+      document.getElementById('ppPayLink').style.display="";
+      ppSetStatus(`✅ PhonePe order created (${money(total,cur)}).<br/>Tap <b>Pay with PhonePe →</b> and complete the payment — this popup detects your return and places the order automatically.`,"ok");
+      window.open(j.redirectUrl,"_blank");
+    }
     startPhonepePolling();
-  }catch(e){ console.warn(e); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"PhonePe failed").slice(0,140)); }
+  }catch(e){ console.warn(e); hidePhonepeFrame(); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"PhonePe failed").slice(0,140)); }
 }
 async function getPhonepeState(){
   if(!PHONEPE_PENDING?.merchantOrderId) return null;
@@ -555,6 +575,7 @@ async function autoVerifyPhonepe(silent){
 async function checkPhonepeStatus(manual){ await autoVerifyPhonepe(!manual); }
 function showPhonepeFailed(){
   stopPhonepePolling();
+  hidePhonepeFrame();
   const mid=PHONEPE_PENDING?.merchantOrderId||"";
   PHONEPE_PENDING=null; localStorage.removeItem("ak_phonepe_pending");
   ppSetStatus(`❌ Payment <b>FAILED</b> (order ${mid}). No order was placed and the failed attempt cannot be reused.<br/>Tap <b>↻ Try Again</b> below for a fresh payment.`,"err");
@@ -575,14 +596,13 @@ async function completePhonepeOrder(){
     const j=await r.json();
     if(!r.ok) throw new Error(j.message||j.error||("Order failed ("+r.status+") state="+(j.state||"unknown")));
     const o=j.order||{};
-    document.getElementById('succId').textContent=`Order #${o.orderNumber||o.orderId||""} • PhonePe Paid • ${PHONEPE_PENDING.merchantOrderId}`;
-    if(USER&&TOKEN){const s=document.getElementById('succOrders'); if(s) s.style.display="";}
-    stopPhonepePolling(); closePhonepePopup(false); showSuccess();
+    const orderInfo={number:o.orderNumber||o.orderId||"", amountTxt:(typeof LAST_TOTAL_TXT!=="undefined"&&LAST_TOTAL_TXT!=="—")?LAST_TOTAL_TXT:"", merchantOrderId:PHONEPE_PENDING.merchantOrderId, ts:Date.now()};
+    stopPhonepePolling();
     CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART));
     localStorage.removeItem("ak_phonepe_pending"); PHONEPE_PENDING=null;
-    CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0; updatePromoUI(); render();
-    document.getElementById('shipOpts').innerHTML=`<p class="note" style="text-align:left;margin:0">Select an address to see delivery options.</p>`;
-    ppSetStatus("✅ Order placed!","ok");
+    CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0;
+    try{ sessionStorage.setItem("ak_order_success",JSON.stringify(orderInfo)); }catch(e){}
+    location.href="payment-success.html";
   }catch(e){
     console.warn(e);
     if(/not completed/i.test(e.message||"")){ ppSetStatus("Payment is still processing — waiting for PhonePe confirmation…"); }

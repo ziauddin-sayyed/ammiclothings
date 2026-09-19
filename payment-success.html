@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Payment Successful — Ammi Kids by Ammi Enterprises</title>
+<link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+// Guard: block direct visits without a placed order.
+try{
+  if(!sessionStorage.getItem("ak_order_success")) location.replace("index.html");
+}catch(e){ location.replace("index.html"); }
+</script>
+<style>
+:root{--primary:#c0006b;--accent:#e70080;--cream:#fdfcff;--line:#efe6f0;--muted:#7A6E6A;--ink:#1E1E1E;--sage:#f3f0f7}
+*{box-sizing:border-box}html,body{overflow-x:hidden}body{margin:0;font-family:"Plus Jakarta Sans",sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.announce{background:var(--primary);color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 16px}
+.header{position:sticky;top:0;z-index:20;background:rgba(255,249,242,.8);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+.header-inner{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;justify-content:space-between}
+.logo img{height:46px;border-radius:8px;padding:4px 6px}
+.wrap{max-width:640px;margin:26px auto;padding:0 20px}
+@media(max-width:640px){.wrap{padding:0 12px}.card{padding:20px 16px!important}}
+.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:32px;text-align:center}
+.tick{width:76px;height:76px;border-radius:50%;background:#e9f9ef;color:#0d7a3f;font-size:38px;display:grid;place-items:center;margin:0 auto 12px}
+.card h1{font-family:"Cormorant Garamond",serif;margin:6px 0;font-size:32px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 6px}
+.orderbox{font-size:13px;background:var(--sage);padding:12px;border-radius:12px;margin:14px 0;word-break:break-word}
+.btn-primary{width:100%;background:#fff;color:var(--primary);border:2px solid var(--primary);outline:none;padding:15px 18px;border-radius:999px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:10px;display:inline-flex;justify-content:center;align-items:center;gap:8px;text-decoration:none}
+.btn-primary:hover{color:#000}
+.btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px;display:block;text-decoration:none}
+.survey{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;text-align:left}
+.survey h3{margin:0 0 4px;font-size:15px}
+.survey p{font-size:12px;color:var(--muted);margin:0 0 10px}
+.survey label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer;margin-top:8px}
+.survey label.on{border-color:var(--primary);background:rgba(192,0,107,.04)}
+.survey input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;margin-top:8px;outline:none}
+.thanks{display:none;background:#e9f9ef;color:#0d7a3f;border-radius:12px;padding:12px;font-size:13px;margin-top:10px;text-align:center}
+.footer{background:var(--primary);color:#fff;margin-top:40px;padding:28px 20px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="announce">Ammi Enterprises • Est. 2003 • Mumbai</div>
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
+    <a href="index.html" style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff">← Continue Shopping</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="tick">✓</div>
+    <h1>Payment Successful!</h1>
+    <p class="sub">Thank you for shopping with <b>Ammi Kids by Ammi Enterprises</b>.</p>
+    <div class="orderbox" id="orderInfo">Order confirmed</div>
+    <a href="profile.html" class="btn-primary">View My Orders</a>
+    <a href="index.html" class="btn-ghost">Continue Shopping</a>
+    <div class="survey" id="surveyBox">
+      <h3>How did you get to know about us?</h3>
+      <p>It takes 5 seconds and helps us serve you better.</p>
+      <div id="surveyOpts">
+        <label><input type="radio" name="src" value="Instagram"/> Instagram</label>
+        <label><input type="radio" name="src" value="Google"/> Google Search</label>
+        <label><input type="radio" name="src" value="Friend / Family"/> Friend / Family</label>
+        <label><input type="radio" name="src" value="WhatsApp"/> WhatsApp</label>
+        <label><input type="radio" name="src" value="Walk-in store"/> Walk-in store</label>
+        <label><input type="radio" name="src" value="Other"/> Other</label>
+      </div>
+      <input type="text" id="surveyText" placeholder="Tell us more (optional)"/>
+      <button class="btn-ghost" onclick="submitSurvey()">Submit</button>
+      <div class="thanks" id="surveyThanks">Thanks for your feedback! ❤️</div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>Mumbai 400028</span></div></footer>
+<script>
+(function(){
+  let info={};
+  try{ info=JSON.parse(sessionStorage.getItem("ak_order_success")||"{}"); }catch(e){}
+  const parts=[];
+  if(info.number) parts.push("Order #"+info.number);
+  if(info.amountTxt) parts.push(info.amountTxt+" paid via PhonePe");
+  else parts.push("Paid via PhonePe");
+  document.getElementById('orderInfo').textContent=parts.join(" • ");
+  try{
+    const prev=JSON.parse(localStorage.getItem("ak_feedback")||"null");
+    if(prev&&prev.source){ showThanks(); }
+  }catch(e){}
+  document.querySelectorAll('#surveyOpts label').forEach(l=>l.addEventListener('click',()=>{
+    document.querySelectorAll('#surveyOpts label').forEach(x=>x.classList.remove('on'));
+    l.classList.add('on'); l.querySelector('input').checked=true;
+  }));
+})();
+function showThanks(){
+  document.getElementById('surveyOpts').style.display="none";
+  document.getElementById('surveyText').style.display="none";
+  document.getElementById('surveyThanks').style.display="block";
+}
+function submitSurvey(){
+  const sel=document.querySelector('input[name="src"]:checked');
+  if(!sel){ alert("Please pick an option"); return; }
+  const fb={source:sel.value, note:document.getElementById('surveyText').value.trim(), at:Date.now()};
+  try{ localStorage.setItem("ak_feedback",JSON.stringify(fb)); }catch(e){}
+  showThanks();
+}
+</script>
+</body>
+</html>
