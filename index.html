@@ -764,7 +764,7 @@ function openModal(id){
   // variants
   const vWrap=document.getElementById('mVariants');
   if(p.variants?.length){
-    vWrap.innerHTML = p.variants.map((v,i)=>`<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${v.sku||v.name}</button>`).join("") + `<span style="font-size:12px;color:var(--muted);align-self:center">${p.variants.length} variant(s)</span>`;
+    vWrap.innerHTML = p.variants.map((v,i)=>`<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${v.name||v.sku}</button>`).join("") + `<span style="font-size:12px;color:var(--muted);align-self:center">${p.variants.length} variant(s)</span>`;
     ACTIVE._selected = p.variants[0].id;
   }else{
     vWrap.innerHTML="";
