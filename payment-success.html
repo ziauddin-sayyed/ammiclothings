@@ -7,9 +7,15 @@
 <link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
-// Guard: block direct visits without a placed order.
+// Guard: block direct visits without a placed order. Accepts this tab's
+// session flag or another tab's fresh shared flag.
 try{
-  if(!sessionStorage.getItem("ak_order_success")) location.replace("index.html");
+  let ok=!!sessionStorage.getItem("ak_order_success");
+  if(!ok){
+    const l=JSON.parse(localStorage.getItem("ak_last_order")||"null");
+    ok=!!(l&&l.number&&(Date.now()-(l.ts||0)<30*60*1000));
+  }
+  if(!ok) location.replace("index.html");
 }catch(e){ location.replace("index.html"); }
 </script>
 <style>
@@ -80,7 +86,7 @@ a{color:inherit;text-decoration:none}
 <script>
 (function(){
   let info={};
-  try{ info=JSON.parse(sessionStorage.getItem("ak_order_success")||"{}"); }catch(e){}
+  try{ info=JSON.parse(sessionStorage.getItem("ak_order_success")||localStorage.getItem("ak_last_order")||"{}"); }catch(e){}
   const parts=[];
   if(info.number) parts.push("Order #"+info.number);
   if(info.amountTxt) parts.push(info.amountTxt+" paid via PhonePe");

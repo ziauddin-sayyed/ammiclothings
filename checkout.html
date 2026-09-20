@@ -597,6 +597,7 @@ async function completePhonepeOrder(){
     localStorage.removeItem("ak_phonepe_pending"); PHONEPE_PENDING=null;
     CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0;
     try{ sessionStorage.setItem("ak_order_success",JSON.stringify(orderInfo)); }catch(e){}
+    try{ localStorage.setItem("ak_last_order",JSON.stringify(orderInfo)); }catch(e){}
     location.href="payment-success.html";
   }catch(e){
     console.warn(e);
@@ -621,6 +622,12 @@ function handlePhonepeReturn(){
         ppSetStatus("Back from PhonePe — verifying payment automatically…","ok");
         history.replaceState(null,"",location.pathname);
         autoVerifyPhonepe(false);
+      }else{
+        // Stale return (e.g. another tab already finished this payment).
+        history.replaceState(null,"",location.pathname);
+        let done=null;
+        try{done=JSON.parse(localStorage.getItem("ak_last_order")||"null");}catch(e){}
+        if(done&&done.number&&(Date.now()-(done.ts||0)<30*60*1000)){ location.href="payment-success.html"; }
       }
     }
   }catch(e){console.warn("phonepe return parse",e)}
@@ -694,6 +701,15 @@ function closeSucc(){document.getElementById('success').classList.remove('open')
 if(IS_LOCAL){document.getElementById('localLoginBox').classList.add('show'); document.getElementById('localAddrBox').classList.add('show');}
 try{if(TOKEN){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 refreshAcct(); render(); handlePhonepeReturn();
+// If another tab finishes this order, follow it to the success page
+// instead of getting stranded on checkout.
+window.addEventListener("storage",(e)=>{
+  if(e.key!=="ak_last_order"||!e.newValue) return;
+  try{
+    const o=JSON.parse(e.newValue);
+    if(o&&o.number&&(Date.now()-(o.ts||0)<30*60*1000)){ stopPhonepePolling(); location.href="payment-success.html"; }
+  }catch(_){}
+});
 ["firstName","lastName","phone","street","city","state","postal","country"].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("change",scheduleDeliveryRefresh);});
 console.log("[checkout] GRAPHQL="+GRAPHQL+" PHONEPE_BASE="+PHONEPE_BASE);
 </script>
