@@ -494,7 +494,6 @@ function hidePhonepeFrame(){
     document.getElementById('ppFrame').src="about:blank";
   }catch(e){}
 }
-function isDesktopWide(){try{return window.matchMedia&&window.matchMedia("(min-width: 861px)").matches;}catch(e){return true;}}
 function startPhonepePolling(){stopPhonepePolling(); PP_POLL=setInterval(()=>{autoVerifyPhonepe(true);},4000);}
 function stopPhonepePolling(){if(PP_POLL){clearInterval(PP_POLL); PP_POLL=null;}}
 function armPhonepeReturnDetect(){
@@ -536,17 +535,13 @@ async function startPhonepeFlow(checkout,total,cur,form){
     PHONEPE_PENDING={merchantOrderId:j.merchantOrderId,checkoutId:checkout.id,amount:j.amount,amountInRupees:j.amountInRupees,createdAt:Date.now()};
     localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING));
     document.getElementById('ppMeta').textContent=`Merchant Order: ${j.merchantOrderId} • Expires: ${j.expireAt||"~20 min"}`;
-    if(isDesktopWide()){
-      document.getElementById('ppFrame').src=j.redirectUrl;
-      document.getElementById('ppNewTab').href=j.redirectUrl;
-      document.getElementById('ppFrameWrap').style.display="";
-      ppSetStatus(`✅ Pay securely below (${money(total,cur)}). This popup closes automatically on success or failure — no need to tap anything.`,"ok");
-    }else{
-      document.getElementById('ppPayLink').href=j.redirectUrl;
-      document.getElementById('ppPayLink').style.display="";
-      ppSetStatus(`✅ PhonePe order created (${money(total,cur)}).<br/>Tap <b>Pay with PhonePe →</b> and complete the payment — this popup detects your return and places the order automatically.`,"ok");
-      window.open(j.redirectUrl,"_blank");
-    }
+    // Always pay inside this page (iframe) — never a new tab, so only one
+    // tab drives verification and there is no cross-tab race.
+    document.getElementById('ppPayLink').style.display="none";
+    document.getElementById('ppFrame').src=j.redirectUrl;
+    document.getElementById('ppNewTab').href=j.redirectUrl;
+    document.getElementById('ppFrameWrap').style.display="";
+    ppSetStatus(`✅ Pay securely below (${money(total,cur)}). This popup closes automatically on success or failure — no need to tap anything.`,"ok");
     startPhonepePolling();
   }catch(e){ console.warn(e); hidePhonepeFrame(); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"PhonePe failed").slice(0,140)); }
 }
@@ -612,6 +607,9 @@ async function completePhonepeOrder(){
 }
 function handlePhonepeReturn(){
   try{
+    // If PhonePe redirected inside the embedded frame, hand control to the
+    // top-level checkout page instead of nesting pages inside the frame.
+    if(window.self!==window.top){ try{window.top.location.href=location.href;}catch(e){} return; }
     const q=new URLSearchParams(location.search);
     const mid=q.get("merchantOrderId")||q.get("merchantTransactionId")||q.get("transactionId");
     if(mid) { PHONEPE_PENDING=PHONEPE_PENDING||{}; PHONEPE_PENDING.merchantOrderId=mid; localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING)); }
