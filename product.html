@@ -139,12 +139,12 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 </style>
 </head>
 <body>
-<div class="announce"><span>Ammi Enterprises • Est. 2003 • Mumbai</span><span>•</span><span><a href="index.html" style="color:var(--yellow);text-decoration:underline">← Back to Store</a></span><span>•</span><span><a href="https://www.ammienterprises.in/" target="_blank" style="color:var(--yellow);text-decoration:underline">ammienterprises.in →</a></span></div>
+<div class="announce"><span>Ammi Enterprises • Est. 2003 • Mumbai</span><span>•</span><span><a href="index.html" style="color:var(--yellow);text-decoration:underline">← Back to Store</a></span></div>
 <header class="header">
   <div class="header-inner">
     <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi"/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="index.html#collections">Collections</a><a href="profile.html" id="ordersLink" style="display:none">Profile</a></nav>
+    <nav class="nav" id="mainNav"><a href="index.html#shop">Shop</a><a href="products.html">Products</a><a href="index.html#collections">Collections</a><a href="profile.html" id="ordersLink" style="display:none">My Profile</a></nav>
     <div class="spacer"></div>
     <div class="nav-backdrop" id="navBackdrop"></div>
     <a class="icon-btn" href="checkout.html" id="cartBtn" aria-label="cart">🛒<span class="badge" id="cartCount">0</span></a>
@@ -191,9 +191,10 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 
 <footer class="footer">
   <div class="footer-inner">
-    <div><div class="brand-foot"><img src="images/logo.png" alt="" style="height:36px;background:#fff;border-radius:8px;padding:4px 8px"/><br/>AMMI<i>kids</i></div><p style="color:#fff">A-7, Ground Floor, Kasturchand Mill Compound, Mumbai - 400028<br/>📞 +91 70219 46362 • ✉️ +91 70219 46362 • <a href="https://www.ammienterprises.in" target="_blank" style="color:#fff;text-decoration:underline">www.ammienterprises.in</a></p></div>
+    <div><div class="brand-foot"><img src="images/logo.png" alt="" style="height:36px;background:#fff;border-radius:8px;padding:4px 8px"/><br/>AMMI<i>kids</i></div><p style="color:#fff">A-7, Ground Floor, Kasturchand Mill Compound, Mumbai - 400028<br/>📞 +91 70219 46362 • ✉️ +91 70219 46362</p></div>
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Shop</h4><a href="index.html#shop">All Frocks</a><br/></div>
-    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Ammi Enterprises</h4><a href="https://www.ammienterprises.in/products.htm" target="_blank">Products</a><br/><a href="https://www.ammienterprises.in/about-us.htm" target="_blank">About Us</a></div>
+    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Company</h4><a href="products.html">Products</a><br/><a href="index.html#story">About Us</a></div>
+    <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Policies</h4><a href="terms-and-conditions.html">Terms & Conditions</a><br/><a href="privacy-policy.html">Privacy Policy</a><br/><a href="refund-policy.html">Refund Policy</a><br/><a href="return-policy.html">Return Policy</a><br/><a href="shipping-policy.html">Shipping Policy</a></div>
     <div><h4 style="color:#fff;margin:0 0 8px;font-family:'Cormorant Garamond'">Help</h4><a href="tel:+917021946362">Send Email</a><br/><a href="https://api.whatsapp.com/send?phone=917021946362" target="_blank">WhatsApp</a></div>
   </div>
   <div class="legal"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span>#c0006b • #e70080 • Mumbai 400028</span></div>
@@ -326,16 +327,29 @@ function fillChart(){
   }).join("")}</table></div>`;
   note.textContent=`${rows.length} sizes across ${PRODUCT.variants.length} variants • selected variant highlighted • all measurements in inches.`;
 }
+function slugifyName(s){return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
+function pluralVariants(s){const out=[s]; if(!s) return out; if(s.endsWith("s")) out.push(s.slice(0,-1)); else out.push(s+"s"); return out;}
 function setChartImg(){
   const img=document.getElementById('chartImg');
-  const urls=[];
-  const sc=(PRODUCT?.attributes||[]).find(a=>(a.attribute?.name||"").toLowerCase()==="size chart type");
-  (sc?.values||[]).forEach(v=>{if(v.name) urls.push("images/size_charts_graph/"+v.name)});
-  const seen=new Set(), slugs=[];
+  const urls=[], seen=new Set();
+  const push=u=>{if(u&&!seen.has(u)){seen.add(u); urls.push(u);}};
+  // 1) size-charts/categories/{category-name} — image name = category name
   let c=PRODUCT?.category;
-  while(c&&slugs.length<4){if(c.slug&&!seen.has(c.slug)){seen.add(c.slug); slugs.push(c.slug)} c=c.parent}
-  slugs.forEach(s=>{const b=s.replace(/^ladies-wear-/,""); if(b!==s&&!seen.has(b)){seen.add(b); slugs.push(b)}});
-  slugs.forEach(s=>urls.push("images/category_graph/"+s+".jpeg"));
+  const chain=[];
+  while(c&&chain.length<4){chain.push(c); c=c.parent;}
+  chain.forEach(n=>{
+    const bases=[];
+    if(n.slug) bases.push(n.slug);
+    bases.push(slugifyName(n.name));
+    const stripped=(n.slug||"").replace(/^ladies-wear-/,"").replace(/^ladies-/,"");
+    if(stripped) bases.push(stripped);
+    bases.forEach(b=>pluralVariants(b).forEach(v=>{if(v) push("size-charts/categories/"+v+".jpeg");}));
+  });
+  // 2) legacy fallbacks
+  const sc=(PRODUCT?.attributes||[]).find(a=>(a.attribute?.name||"").toLowerCase()==="size chart type");
+  (sc?.values||[]).forEach(v=>{if(v.name) push("images/size_charts_graph/"+v.name)});
+  chain.forEach(n=>{if(n.slug) pluralVariants(n.slug).forEach(v=>push("images/size_charts_graph/"+v+".jpeg"));});
+  chain.forEach(n=>{if(n.slug) push("images/category_graph/"+n.slug+".jpeg");});
   let i=0;
   img.onerror=()=>{i++; if(i<urls.length){img.src=urls[i]} else {img.removeAttribute("src"); img.style.display="none"}};
   img.onload=()=>{img.style.display="block"};
