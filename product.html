@@ -106,9 +106,13 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 .related{max-width:1280px;margin:40px auto 0;padding:0 20px}
 .rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 @media(max-width:1000px){.rgrid{grid-template-columns:repeat(2,1fr)}}
-.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.card img{aspect-ratio:1/1;object-fit:cover}
-.card-body{padding:12px}.card-title{font-family:"Cormorant Garamond",serif;font-size:15px;margin:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.card img{aspect-ratio:1/1;object-fit:cover;width:100%}
+.card-body{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}.card-title{font-family:"Cormorant Garamond",serif;font-size:15px;margin:0}
+.card-actions{margin-top:auto;padding-top:8px;display:flex;gap:8px}
+.mini-add{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;text-align:center;display:block;color:var(--primary)}
+.mini-add:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.card-actions .qty{flex:1;justify-content:space-between}
 .footer{background:var(--primary-dark);color:#fff;margin-top:56px;padding:42px 20px 24px}
 .footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:28px}
 @media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr}}
@@ -216,14 +220,14 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 <script src="config.js"></script>
 <script>
 const GRAPHQL = window.APP_CONFIG.GRAPHQL;
-let PRODUCT=null, VARIANT=null, QTY=1, SIZECHART=null, SIZE=null;
+let PRODUCT=null, VARIANT=null, QTY=1, SIZECHART=null, SIZE=null, REL=[];
 const SECTION_FOR_TYPE={"Kurti Set":"Kurti Set","Ladies Kurti Set":"Kurti Set Ladies","Cord Set":"Cord Set","Ladies Cord Set":"Cord Set Ladies","Hanger Set":"Hanger Set","Frock":"Frock Full Sleeves","Mini Frock":"Mini Frock Full Sleeves"};
 async function loadSizeCharts(){if(SIZECHART) return SIZECHART; try{const r=await fetch("products/values.json"); if(!r.ok) throw 0; SIZECHART=await r.json();}catch(e){SIZECHART={sections:{}};} return SIZECHART;}
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]"), WISH=JSON.parse(localStorage.getItem("ak_wish")||"[]");
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
 async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})});const j=await r.json();return j.data}
-function save(){localStorage.setItem("ak_cart",JSON.stringify(CART));localStorage.setItem("ak_wish",JSON.stringify(WISH));document.getElementById('cartCount').textContent=CART.reduce((s,c)=>s+c.qty,0); renderCart()}
+function save(){localStorage.setItem("ak_cart",JSON.stringify(CART));localStorage.setItem("ak_wish",JSON.stringify(WISH));document.getElementById('cartCount').textContent=CART.reduce((s,c)=>s+c.qty,0); renderCart(); try{if(typeof renderRelated==="function") renderRelated();}catch(e){}}
 function getSlug(){const u=new URL(location.href);return u.searchParams.get('slug')||u.searchParams.get('id')||localStorage.getItem('ak_last_slug')||"fm108-00001"}
 async function load(){
   const slug=getSlug();
@@ -243,7 +247,7 @@ async function load(){
   document.getElementById('pName').textContent=PRODUCT.name;
   document.getElementById('crumbName').textContent=PRODUCT.name;
   document.title=PRODUCT.name+" — Ammi Kids by Ammi Enterprises";
-  document.getElementById('pSku').textContent=PRODUCT.variants?.[0]?.sku||PRODUCT.slug;
+  document.getElementById('pSku').textContent=PRODUCT.variants?.[0]?.name||PRODUCT.variants?.[0]?.sku||PRODUCT.slug;
   document.getElementById('pDesc').textContent=PRODUCT.plain;
   document.getElementById('pPrice').innerHTML=`${price?money(price.amount,price.currency):"—"} ${und && price && und.amount>price.amount?`<s>${money(und.amount,price.currency)}</s> <span style="color:var(--accent);font-size:12px">${Math.round((1-price.amount/und.amount)*100)}% OFF</span>`:""} `;
   document.getElementById('addPrice').textContent=price?money(price.amount,price.currency):"—";
@@ -261,14 +265,25 @@ async function load(){
   updateWish();
   // related
   const rel=(d?.products?.edges||[]).filter(e=>e.node.slug!==slug).slice(0,4);
-  document.getElementById('rgrid').innerHTML=rel.map(e=>{const n=e.node; return `<a class="card" href="product.html?slug=${n.slug}"><img src="${n.thumbnail?.url||''}" alt=""/><div class="card-body"><div class="card-title">${n.name}</div><div style="font-size:13px;font-weight:700">${n.pricing?.priceRange?money(n.pricing.priceRange.start.gross.amount,n.pricing.priceRange.start.gross.currency):""}</div></div></a>`}).join("");
+  REL=rel.map(e=>e.node);
+  renderRelated();
 }
+function renderRelated(){
+  const grid=document.getElementById('rgrid'); if(!grid) return;
+  grid.innerHTML=REL.map(n=>{
+    const qty=CART.filter(c=>c.id===n.id).reduce((s,c)=>s+c.qty,0);
+    const price=n.pricing?.priceRange?money(n.pricing.priceRange.start.gross.amount,n.pricing.priceRange.start.gross.currency):"";
+    return `<article class="card"><a href="product.html?slug=${n.slug}" style="display:block"><img src="${n.thumbnail?.url||''}" alt=""/></a><div class="card-body"><a href="product.html?slug=${n.slug}"><div class="card-title">${n.name}</div></a><div style="font-size:13px;font-weight:700">${price}</div><div class="card-actions">${qty>0?`<div class="qty"><button onclick="event.stopPropagation();relDec('${n.id}')">−</button><span style="min-width:22px;text-align:center;font-weight:700">${qty}</span><button onclick="event.stopPropagation();relInc('${n.id}')">+</button></div>`:`<a class="mini-add" href="product.html?slug=${n.slug}">Add</a>`}</div></div></article>`;
+  }).join("");
+}
+window.relDec=(id)=>{ for(let i=CART.length-1;i>=0;i--){ if(CART[i].id===id){ CART[i].qty--; if(CART[i].qty<=0) CART.splice(i,1); break; } } save(); renderRelated(); };
+window.relInc=(id)=>{ const n=REL.find(x=>x.id===id); if(!n) return; location.href='product.html?slug='+n.slug; };
 function setImg(u,el){document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); el.classList.add('active')}
 function openLb(){const i=document.getElementById('lbImg'); i.src=document.getElementById('mainImg').src||i.src; document.getElementById('lightbox').classList.add('open')}
 function closeLb(){document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('mainImg').onclick=openLb;
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
-function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
+function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
 async function loadSiblings(){
   const wrap=document.getElementById('colorWrap'), box=document.getElementById('colors');
   try{
@@ -365,9 +380,9 @@ document.getElementById('wishBtn').onclick=()=>{const i=WISH.indexOf(PRODUCT.id)
 document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.getElementById('qVal').textContent=QTY; refreshAdd()};
 document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
-document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex) ex.qty+=QTY; else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
+document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex){ ex.qty+=QTY; if(!ex.vName&&VARIANT?.name) ex.vName=VARIANT.name; } else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, vName:VARIANT?.name||"", size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
 function buyNow(){document.getElementById('addBtn').click(); location.href="checkout.html"}
-function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999</div>`}
+function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.vName||c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999</div>`}
 window.rem=(i)=>{CART.splice(i,1);save()}
 function openDrawer(){document.getElementById('drawer').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open')}

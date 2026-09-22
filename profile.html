@@ -184,7 +184,7 @@ async function loadOrders(){
     box.innerHTML=edges.map((e,i)=>{const o=e.node; return `<div class="order ${i===0?'current':''}">
       <div class="ohead"><b>Order #${o.number}</b><span class="pill ${i===0?'cur':''}">${o.statusDisplay}</span></div>
       <div class="meta">${fmtDate(o.created)} • ${o.paymentStatusDisplay}${o.shippingMethodName?` • Delivery: ${o.shippingMethodName}`:""}</div>
-      ${o.lines.map(l=>`<div class="oline"><span><b>${l.variant.sku}</b> <small>${l.variant.name||""} × ${l.quantity}</small></span><b>${money(l.totalPrice.gross.amount,l.totalPrice.gross.currency)}</b></div>`).join("")}
+      ${o.lines.map(l=>`<div class="oline"><span><b>${l.variant.name||l.variant.sku}</b> <small>× ${l.quantity}</small></span><b>${money(l.totalPrice.gross.amount,l.totalPrice.gross.currency)}</b></div>`).join("")}
       <div class="otot"><span>Total</span><span>${money(o.total.gross.amount,o.total.gross.currency)}</span></div>
     </div>`}).join("");
   }catch(err){box.innerHTML="<p class='sub'>Couldn’t load orders: "+(err.message||"error").slice(0,120)+"</p>"}
