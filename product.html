@@ -177,7 +177,6 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
     </div>
     <div class="actions">
       <button class="btn-primary" id="addBtn">Add to Bag <span id="addPrice">—</span></button>
-      <button class="btn-ghost" onclick="buyNow()">Buy Now</button>
       <button class="btn-ghost" id="wishBtn">♡ Wishlist</button>
     </div>
     <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
@@ -381,7 +380,6 @@ document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.ge
 document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
 document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex){ ex.qty+=QTY; if(!ex.vName&&VARIANT?.name) ex.vName=VARIANT.name; } else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, vName:VARIANT?.name||"", size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
-function buyNow(){document.getElementById('addBtn').click(); location.href="checkout.html"}
 function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.vName||c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999</div>`}
 window.rem=(i)=>{CART.splice(i,1);save()}
 function openDrawer(){document.getElementById('drawer').classList.add('open')}
