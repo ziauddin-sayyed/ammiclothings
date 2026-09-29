@@ -225,27 +225,27 @@ a{color:inherit;text-decoration:none}
     <button class="btn-ghost" style="flex:1" onclick="closeAddrModal()">Cancel</button>
   </div>
 </div></div>
-<div class="modal" id="phonepeModal"><div class="modal-bg" onclick="closePhonepePopup(false)"></div><div class="modal-card" style="text-align:left">
-  <div class="pp-head"><span class="pp-badge">PhonePe</span><b style="font-size:18px">Complete your payment</b></div>
-  <p style="font-size:12px;color:var(--muted);margin:0;text-align:center">UPI • Cards • Netbanking • Secure PhonePe popup</p>
+<div class="modal" id="cashfreeModal"><div class="modal-bg" onclick="closeCashfreePopup(false)"></div><div class="modal-card" style="text-align:left">
+  <div class="pp-head"><span class="pp-badge" style="background:#0a6cff">Cashfree</span><b style="font-size:18px">Complete your payment</b></div>
+  <p style="font-size:12px;color:var(--muted);margin:0;text-align:center">UPI • Cards • Netbanking • Secure Cashfree checkout</p>
   <div style="text-align:center" class="pp-amt" id="ppAmt">—</div>
-  <div class="pp-status" id="ppStatus">Preparing PhonePe order…</div>
+  <div class="pp-status" id="ppStatus">Preparing Cashfree order…</div>
   <div class="pp-btnrow">
-    <a id="ppPayLink" href="#" target="_blank" rel="noopener" class="btn-primary pp-paybtn" style="text-decoration:none;display:none">Pay with PhonePe →</a>
+    <a id="ppPayLink" href="#" target="_blank" rel="noopener" class="btn-primary pp-paybtn" style="text-decoration:none;display:none;background:#0a6cff!important">Pay with Cashfree →</a>
   </div>
   <div id="ppFrameWrap" style="display:none;margin-top:12px">
-    <iframe id="ppFrame" title="PhonePe payment" style="width:100%;height:clamp(420px,60vh,540px);border:1px solid var(--line);border-radius:14px;background:#fff"></iframe>
+    <iframe id="ppFrame" title="Cashfree payment" style="width:100%;height:clamp(420px,60vh,540px);border:1px solid var(--line);border-radius:14px;background:#fff"></iframe>
     <p class="note">If the payment page doesn't load here, <a id="ppNewTab" href="#" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline">open it in a new tab →</a></p>
   </div>
   <div class="pp-btnrow" id="ppRetryRow" style="display:none">
-    <button class="btn-ghost" onclick="retryPhonepe()">↻ Try Again — New Payment</button>
+    <button class="btn-ghost" onclick="retryCashfree()">↻ Try Again — New Payment</button>
   </div>
   <div class="pp-btnrow">
-    <button class="btn-ghost" style="flex:1" onclick="checkPhonepeStatus(true)">Check Status</button>
-    <button class="btn-ghost" style="flex:1" onclick="closePhonepePopup(true)">Cancel</button>
+    <button class="btn-ghost" style="flex:1" onclick="checkCashfreeStatus(true)">Check Status</button>
+    <button class="btn-ghost" style="flex:1" onclick="closeCashfreePopup(true)">Cancel</button>
   </div>
   <div class="pp-meta" id="ppMeta"></div>
-  <p class="note">After paying on PhonePe you return here and the order confirms automatically. Sandbox test: use PhonePe test credentials. Keep this popup open until the order is placed.</p>
+  <p class="note">After paying on Cashfree you return here and the order confirms automatically. Keep this popup open until the order is placed.</p>
 </div></div>
 <div class="modal" id="success"><div class="modal-bg" onclick="closeSucc()"></div><div class="modal-card">
   <div style="font-size:40px">🎉</div>
@@ -257,11 +257,12 @@ a{color:inherit;text-decoration:none}
   <p style="font-size:11px;color:var(--muted);margin-top:8px">Questions? +91 70219 46362 • +91 70219 46362</p>
 </div></div>
 <div class="toast" id="toast"></div>
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <script src="config.js"></script>
 <script>
-const GRAPHQL=window.APP_CONFIG.GRAPHQL, PHONEPE_BASE=window.APP_CONFIG.PHONEPE_BASE;
+const GRAPHQL=window.APP_CONFIG.GRAPHQL, CASHFREE_BASE=window.APP_CONFIG.CASHFREE_BASE||window.APP_CONFIG.PAYMENTS_BASE||window.APP_CONFIG.API_BASE;
 const IS_LOCAL=window.APP_CONFIG.IS_LOCAL, CHANNEL=window.APP_CONFIG.CHANNEL;
-let PHONEPE_PENDING=JSON.parse(localStorage.getItem("ak_phonepe_pending")||"null");
+let CASHFREE_PENDING=JSON.parse(localStorage.getItem("ak_cashfree_pending")||"null");
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]");
 let USER=JSON.parse(localStorage.getItem("ak_user")||"null"), TOKEN=localStorage.getItem("ak_token")||null;
 let CHECKOUT=null, CHECKOUT_KEY="", SHIPMETHOD=null, SHIP_PRICE=null, SHIP_CACHE=[];
@@ -473,155 +474,203 @@ async function placeOrder(){
   try{
     const p=await prepareCheckout();
     btn.disabled=false; refreshPlaceBtn();
-    await startPhonepeFlow(p.co,p.total,p.cur,p.f);
+    await startCashfreeFlow(p.co,p.total,p.cur,p.f);
   }catch(e){
     console.warn(e); btn.disabled=false; refreshPlaceBtn();
   }
 }
-/* ---------- PhonePe (popup) ---------- */
+/* ---------- Cashfree (popup + SDK modal) ---------- */
 function ppSetStatus(msg,cls=""){const el=document.getElementById('ppStatus'); el.className="pp-status "+cls; el.innerHTML=msg;}
-function openPhonepePopup(){document.getElementById('phonepeModal').classList.add('open')}
-let PP_POLL=null, PP_COMPLETING=false, PP_LAST=null, _ppListeners=false;
-function closePhonepePopup(cancel){
-  stopPhonepePolling();
-  hidePhonepeFrame();
-  document.getElementById('phonepeModal').classList.remove('open');
-  if(cancel) toast("PhonePe cancelled — you can retry");
+function openCashfreePopup(){document.getElementById('cashfreeModal').classList.add('open')}
+let CF_POLL=null, CF_COMPLETING=false, CF_LAST=null, _cfListeners=false, CF_MODE="sandbox";
+function closeCashfreePopup(cancel){
+  stopCashfreePolling();
+  hideCashfreeFrame();
+  document.getElementById('cashfreeModal').classList.remove('open');
+  if(cancel) toast("Cashfree cancelled — you can retry");
 }
-function hidePhonepeFrame(){
+// Back-compat aliases (old PhonePe names now route to Cashfree)
+function openPhonepePopup(){return openCashfreePopup();}
+function closePhonepePopup(cancel){return closeCashfreePopup(cancel);}
+function hidePhonepeFrame(){return hideCashfreeFrame();}
+function hideCashfreeFrame(){
   try{
     document.getElementById('ppFrameWrap').style.display="none";
     document.getElementById('ppFrame').src="about:blank";
   }catch(e){}
 }
-function startPhonepePolling(){stopPhonepePolling(); PP_POLL=setInterval(()=>{autoVerifyPhonepe(true);},4000);}
-function stopPhonepePolling(){if(PP_POLL){clearInterval(PP_POLL); PP_POLL=null;}}
-function armPhonepeReturnDetect(){
-  if(_ppListeners) return; _ppListeners=true;
+function startCashfreePolling(){stopCashfreePolling(); CF_POLL=setInterval(()=>{autoVerifyCashfree(true);},4000);}
+function stopCashfreePolling(){if(CF_POLL){clearInterval(CF_POLL); CF_POLL=null;}}
+function stopPhonepePolling(){return stopCashfreePolling();}
+function armCashfreeReturnDetect(){
+  if(_cfListeners) return; _cfListeners=true;
   document.addEventListener("visibilitychange",()=>{if(!document.hidden) onCheckoutVisible();});
   window.addEventListener("focus",()=>{onCheckoutVisible();});
 }
+function armPhonepeReturnDetect(){return armCashfreeReturnDetect();}
 function onCheckoutVisible(){
   try{
-    const open=document.getElementById('phonepeModal')?.classList.contains('open');
-    if(open&&PHONEPE_PENDING?.merchantOrderId&&!PP_COMPLETING) autoVerifyPhonepe(true);
+    const open=document.getElementById('cashfreeModal')?.classList.contains('open');
+    if(open&&CASHFREE_PENDING?.orderId&&!CF_COMPLETING) autoVerifyCashfree(true);
   }catch(e){}
 }
-function ppRedirectUrl(){
+function cfRedirectUrl(){
   try{
-    if(location.protocol.startsWith("http")) return location.origin+location.pathname+"?phonepe_return=1";
+    if(location.protocol.startsWith("http")) return location.origin+location.pathname+"?cashfree_return=1";
   }catch(e){}
   return "https://ammikidswear.com/checkout/success";
 }
-function ppMobile(addrPhone){
+function cfPhone(addrPhone){
   const raw=(addrPhone||"").replace(/\D/g,"");
   return raw.length>=10?raw.slice(-10):"";
 }
-async function startPhonepeFlow(checkout,total,cur,form){
-  openPhonepePopup();
-  armPhonepeReturnDetect();
-  PP_LAST={co:checkout,total,cur,f:form};
-  hidePhonepeFrame();
+function cfEmail(fallback){
+  const e=(fallback||"").trim();
+  if(e && /.+@.+\..+/.test(e)) return e;
+  return "";
+}
+async function detectCashfreeMode(){
+  try{
+    const r=await fetch(CASHFREE_BASE+"/payments/gateways/cashfree/health/");
+    const j=await r.json();
+    const env=String(j.cashfreeEnv||"SANDBOX").toUpperCase();
+    CF_MODE=(env==="PRODUCTION"||env==="PROD"||env==="LIVE")?"production":"sandbox";
+  }catch(e){ CF_MODE=IS_LOCAL?"sandbox":"production"; }
+  return CF_MODE;
+}
+async function startCashfreeFlow(checkout,total,cur,form){
+  openCashfreePopup();
+  armCashfreeReturnDetect();
+  CF_LAST={co:checkout,total,cur,f:form};
+  hideCashfreeFrame();
   document.getElementById('ppRetryRow').style.display="none";
   document.getElementById('ppAmt').textContent=money(total,cur);
   document.getElementById('ppPayLink').style.display="none";
   document.getElementById('ppMeta').textContent="";
-  ppSetStatus(`<span class="spin" style="border-color:#5f259f;border-top-color:transparent"></span> Creating PhonePe order for ${money(total,cur)}…`);
+  ppSetStatus(`<span class="spin" style="border-color:#0a6cff;border-top-color:transparent"></span> Creating Cashfree order for ${money(total,cur)}…`);
   try{
-    const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/create/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({checkoutId:checkout.id,redirectUrl:ppRedirectUrl(),mobileNumber:ppMobile(form?.addr?.phone)||undefined})});
+    const mode=await detectCashfreeMode();
+    const r=await fetch(CASHFREE_BASE+"/payments/gateways/cashfree/create/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({checkoutId:checkout.id,returnUrl:cfRedirectUrl(),customerPhone:cfPhone(form?.addr?.phone)||undefined,customerEmail:cfEmail(checkout.email||form?.email)||undefined})});
     const j=await r.json();
-    if(!r.ok) throw new Error(j.error||("PhonePe create failed ("+r.status+")"));
-    if(!j.redirectUrl) throw new Error("PhonePe did not return redirectUrl");
-    PHONEPE_PENDING={merchantOrderId:j.merchantOrderId,checkoutId:checkout.id,amount:j.amount,amountInRupees:j.amountInRupees,createdAt:Date.now()};
-    localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING));
-    document.getElementById('ppMeta').textContent=`Merchant Order: ${j.merchantOrderId} • Expires: ${j.expireAt||"~20 min"}`;
-    // Always pay inside this page (iframe) — never a new tab, so only one
-    // tab drives verification and there is no cross-tab race.
-    document.getElementById('ppPayLink').style.display="none";
-    document.getElementById('ppFrame').src=j.redirectUrl;
-    document.getElementById('ppNewTab').href=j.redirectUrl;
-    document.getElementById('ppFrameWrap').style.display="";
-    ppSetStatus(`✅ Pay securely below (${money(total,cur)}). This popup closes automatically on success or failure — no need to tap anything.`,"ok");
-    startPhonepePolling();
-  }catch(e){ console.warn(e); hidePhonepeFrame(); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"PhonePe failed").slice(0,140)); }
+    if(!r.ok) throw new Error(j.error||("Cashfree create failed ("+r.status+")"));
+    if(!j.paymentSessionId && !j.paymentLink) throw new Error("Cashfree did not return paymentSessionId");
+    CASHFREE_PENDING={orderId:j.orderId,cfOrderId:j.cfOrderId||"",checkoutId:checkout.id,paymentSessionId:j.paymentSessionId||"",paymentLink:j.paymentLink||"",amount:j.amount,createdAt:Date.now()};
+    localStorage.setItem("ak_cashfree_pending",JSON.stringify(CASHFREE_PENDING));
+    // Clear any stale PhonePe pending key from previous integration
+    try{localStorage.removeItem("ak_phonepe_pending");}catch(e){}
+    document.getElementById('ppMeta').textContent=`Order: ${j.orderId} • ${money(total,cur)}`;
+    // Preferred: Cashfree JS SDK modal (stays on this page, one tab drives verification)
+    let sdkOpened=false;
+    try{
+      if(j.paymentSessionId && typeof Cashfree!=="undefined"){
+        const cf=Cashfree({mode});
+        const out=cf.checkout({paymentSessionId:j.paymentSessionId,redirectTarget:"_modal"});
+        if(out && typeof out.then==="function"){
+          sdkOpened=true;
+          out.then(()=>{ autoVerifyCashfree(false); }).catch(()=>{ autoVerifyCashfree(false); });
+        } else { sdkOpened=true; }
+        ppSetStatus(`✅ Pay securely in the Cashfree window (${money(total,cur)}). This popup closes automatically on success — no need to tap anything.`,"ok");
+      }
+    }catch(e){ console.warn("cashfree sdk:",e); sdkOpened=false; }
+    if(!sdkOpened){
+      // Fallback: embedded payment link iframe (same UX as before)
+      const link=j.paymentLink;
+      if(!link) throw new Error("Cashfree did not return a payment link");
+      document.getElementById('ppPayLink').style.display="";
+      document.getElementById('ppPayLink').href=link;
+      document.getElementById('ppFrame').src=link;
+      document.getElementById('ppNewTab').href=link;
+      document.getElementById('ppFrameWrap').style.display="";
+      ppSetStatus(`✅ Pay securely below (${money(total,cur)}). This popup closes automatically on success or failure — no need to tap anything.`,"ok");
+    }
+    startCashfreePolling();
+  }catch(e){ console.warn(e); hideCashfreeFrame(); ppSetStatus("❌ "+(e.message||"Failed").slice(0,300),"err"); toast((e.message||"Cashfree failed").slice(0,140)); }
 }
-async function getPhonepeState(){
-  if(!PHONEPE_PENDING?.merchantOrderId) return null;
-  const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/status/?merchantOrderId="+encodeURIComponent(PHONEPE_PENDING.merchantOrderId));
+async function getCashfreeState(){
+  if(!CASHFREE_PENDING?.orderId) return null;
+  const r=await fetch(CASHFREE_BASE+"/payments/gateways/cashfree/status/?orderId="+encodeURIComponent(CASHFREE_PENDING.orderId));
   const j=await r.json();
-  const st=(j.state||j?.phonepeResponse?.state||"UNKNOWN").toUpperCase();
-  document.getElementById('ppMeta').textContent=`Merchant Order: ${PHONEPE_PENDING.merchantOrderId} • State: ${st}`;
-  return {state:st, raw:j};
+  const st=String(j.orderStatus||j?.order?.order_status||"UNKNOWN").toUpperCase();
+  const paid=!!j.paid;
+  document.getElementById('ppMeta').textContent=`Order: ${CASHFREE_PENDING.orderId} • Status: ${st}`;
+  return {state:st, paid, raw:j};
 }
 /* Auto-detect: called on popup return, tab focus, polling and Check Status.
-   Only completes when PhonePe reports COMPLETED; FAILED ends the attempt. */
-async function autoVerifyPhonepe(silent){
-  if(!PHONEPE_PENDING?.merchantOrderId||PP_COMPLETING) return null;
+   Only completes when Cashfree reports PAID (paid=true); FAILED/EXPIRED ends the attempt. */
+async function autoVerifyCashfree(silent){
+  if(!CASHFREE_PENDING?.orderId||CF_COMPLETING) return null;
   if(!silent) ppSetStatus("Checking payment status…");
   let s;
-  try{ s=await getPhonepeState(); }
+  try{ s=await getCashfreeState(); }
   catch(e){ if(!silent) ppSetStatus("❌ Status check failed: "+e.message.slice(0,200),"err"); return null; }
   if(!s) return null;
-  if(s.state==="COMPLETED"){ await completePhonepeOrder(); }
-  else if(s.state==="FAILED"){ showPhonepeFailed(); }
-  else if(!silent){ ppSetStatus(`State: <b>${s.state}</b> — complete the payment on PhonePe; this popup detects it automatically.`); }
+  if(s.paid||s.state==="PAID"){ await completeCashfreeOrder(); }
+  else if(s.state==="FAILED"||s.state==="EXPIRED"||s.state==="CANCELLED"){ showCashfreeFailed(s.state); }
+  else if(!silent){ ppSetStatus(`Status: <b>${s.state}</b> — complete the payment on Cashfree; this popup detects it automatically.`); }
   return s;
 }
-async function checkPhonepeStatus(manual){ await autoVerifyPhonepe(!manual); }
-function showPhonepeFailed(){
-  stopPhonepePolling();
-  hidePhonepeFrame();
-  const mid=PHONEPE_PENDING?.merchantOrderId||"";
-  PHONEPE_PENDING=null; localStorage.removeItem("ak_phonepe_pending");
-  ppSetStatus(`❌ Payment <b>FAILED</b> (order ${mid}). No order was placed and the failed attempt cannot be reused.<br/>Tap <b>↻ Try Again</b> below for a fresh payment.`,"err");
+async function checkCashfreeStatus(manual){ await autoVerifyCashfree(!manual); }
+async function checkPhonepeStatus(manual){ await autoVerifyCashfree(!manual); }
+function showCashfreeFailed(state){
+  stopCashfreePolling();
+  hideCashfreeFrame();
+  const oid=CASHFREE_PENDING?.orderId||"";
+  CASHFREE_PENDING=null; localStorage.removeItem("ak_cashfree_pending");
+  ppSetStatus(`❌ Payment <b>${state||"FAILED"}</b> (order ${oid}). No order was placed and the failed attempt cannot be reused.<br/>Tap <b>↻ Try Again</b> below for a fresh payment.`,"err");
   document.getElementById('ppRetryRow').style.display="";
-  toast("PhonePe payment failed");
+  toast("Cashfree payment failed");
 }
-async function retryPhonepe(){
+function showPhonepeFailed(){ return showCashfreeFailed("FAILED"); }
+async function retryCashfree(){
   document.getElementById('ppRetryRow').style.display="none";
-  if(!PP_LAST){ toast("Tap Pay again to restart"); closePhonepePopup(false); return; }
-  await startPhonepeFlow(PP_LAST.co,PP_LAST.total,PP_LAST.cur,PP_LAST.f);
+  if(!CF_LAST){ toast("Tap Pay again to restart"); closeCashfreePopup(false); return; }
+  await startCashfreeFlow(CF_LAST.co,CF_LAST.total,CF_LAST.cur,CF_LAST.f);
 }
-async function completePhonepeOrder(){
-  if(!PHONEPE_PENDING?.merchantOrderId) return;
-  PP_COMPLETING=true;
-  ppSetStatus(`<span class="spin" style="border-color:#5f259f;border-top-color:transparent"></span> Payment received — placing your order…`);
+async function retryPhonepe(){ return retryCashfree(); }
+async function completeCashfreeOrder(){
+  if(!CASHFREE_PENDING?.orderId) return;
+  CF_COMPLETING=true;
+  ppSetStatus(`<span class="spin" style="border-color:#0a6cff;border-top-color:transparent"></span> Payment received — placing your order…`);
   try{
-    const r=await fetch(PHONEPE_BASE+"/payments/gateways/phonepe/complete/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({merchantOrderId:PHONEPE_PENDING.merchantOrderId,checkoutId:PHONEPE_PENDING.checkoutId})});
+    const r=await fetch(CASHFREE_BASE+"/payments/gateways/cashfree/complete/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:CASHFREE_PENDING.orderId,checkoutId:CASHFREE_PENDING.checkoutId})});
     const j=await r.json();
-    if(!r.ok) throw new Error(j.message||j.error||("Order failed ("+r.status+") state="+(j.state||"unknown")));
+    if(!r.ok) throw new Error(j.message||j.error||("Order failed ("+r.status+") status="+(j.orderStatus||"unknown")));
     const o=j.order||{};
-    const orderInfo={number:o.orderNumber||o.orderId||"", amountTxt:(typeof LAST_TOTAL_TXT!=="undefined"&&LAST_TOTAL_TXT!=="—")?LAST_TOTAL_TXT:"", merchantOrderId:PHONEPE_PENDING.merchantOrderId, ts:Date.now()};
-    stopPhonepePolling();
+    const orderInfo={number:o.orderNumber||o.orderId||"", amountTxt:(typeof LAST_TOTAL_TXT!=="undefined"&&LAST_TOTAL_TXT!=="—")?LAST_TOTAL_TXT:"", orderId:CASHFREE_PENDING.orderId, gateway:"cashfree", ts:Date.now()};
+    stopCashfreePolling();
     CART=[]; localStorage.setItem("ak_cart",JSON.stringify(CART));
-    localStorage.removeItem("ak_phonepe_pending"); PHONEPE_PENDING=null;
+    localStorage.removeItem("ak_cashfree_pending"); CASHFREE_PENDING=null;
+    try{localStorage.removeItem("ak_phonepe_pending");}catch(e){}
     CHECKOUT=null; SHIPMETHOD=null; SHIP_PRICE=null; SHIP_CACHE=[]; PROMO_CODE=null; PROMO_DISCOUNT=0;
     try{ sessionStorage.setItem("ak_order_success",JSON.stringify(orderInfo)); }catch(e){}
     try{ localStorage.setItem("ak_last_order",JSON.stringify(orderInfo)); }catch(e){}
     location.href="payment-success.html";
   }catch(e){
     console.warn(e);
-    if(/not completed/i.test(e.message||"")){ ppSetStatus("Payment is still processing — waiting for PhonePe confirmation…"); }
+    if(/not completed/i.test(e.message||"")){ ppSetStatus("Payment is still processing — waiting for Cashfree confirmation…"); }
     else{ ppSetStatus("❌ "+(e.message||"Order failed").slice(0,400),"err"); toast((e.message||"Order failed").slice(0,150)); }
   }
-  finally{ PP_COMPLETING=false; }
+  finally{ CF_COMPLETING=false; }
 }
-function handlePhonepeReturn(){
+async function completePhonepeOrder(){ return completeCashfreeOrder(); }
+async function autoVerifyPhonepe(silent){ return autoVerifyCashfree(silent); }
+function handleCashfreeReturn(){
   try{
-    // If PhonePe redirected inside the embedded frame, hand control to the
+    // If Cashfree redirected inside the embedded frame, hand control to the
     // top-level checkout page instead of nesting pages inside the frame.
     if(window.self!==window.top){ try{window.top.location.href=location.href;}catch(e){} return; }
     const q=new URLSearchParams(location.search);
-    const mid=q.get("merchantOrderId")||q.get("merchantTransactionId")||q.get("transactionId");
-    if(mid) { PHONEPE_PENDING=PHONEPE_PENDING||{}; PHONEPE_PENDING.merchantOrderId=mid; localStorage.setItem("ak_phonepe_pending",JSON.stringify(PHONEPE_PENDING)); }
-    if(q.get("phonepe_return")==="1"||mid){
-      if(PHONEPE_PENDING?.merchantOrderId){
-        openPhonepePopup();
-        armPhonepeReturnDetect();
-        document.getElementById('ppMeta').textContent=`Merchant Order: ${PHONEPE_PENDING.merchantOrderId} • Returned from PhonePe`;
-        ppSetStatus("Back from PhonePe — verifying payment automatically…","ok");
+    const oid=q.get("order_id")||q.get("orderId");
+    if(oid) { CASHFREE_PENDING=CASHFREE_PENDING||{}; CASHFREE_PENDING.orderId=oid; try{const prev=JSON.parse(localStorage.getItem("ak_cashfree_pending")||"null")||{}; CASHFREE_PENDING={...prev,...CASHFREE_PENDING};}catch(e){} localStorage.setItem("ak_cashfree_pending",JSON.stringify(CASHFREE_PENDING)); }
+    if(q.get("cashfree_return")==="1"||oid){
+      if(CASHFREE_PENDING?.orderId){
+        openCashfreePopup();
+        armCashfreeReturnDetect();
+        document.getElementById('ppMeta').textContent=`Order: ${CASHFREE_PENDING.orderId} • Returned from Cashfree`;
+        ppSetStatus("Back from Cashfree — verifying payment automatically…","ok");
         history.replaceState(null,"",location.pathname);
-        autoVerifyPhonepe(false);
+        autoVerifyCashfree(false);
+        startCashfreePolling();
       }else{
         // Stale return (e.g. another tab already finished this payment).
         history.replaceState(null,"",location.pathname);
@@ -630,7 +679,15 @@ function handlePhonepeReturn(){
         if(done&&done.number&&(Date.now()-(done.ts||0)<30*60*1000)){ location.href="payment-success.html"; }
       }
     }
-  }catch(e){console.warn("phonepe return parse",e)}
+  }catch(e){console.warn("cashfree return parse",e)}
+}
+function handlePhonepeReturn(){
+  // Legacy query (?phonepe_return=1) -> ignore; delegate to Cashfree handler.
+  try{
+    const q=new URLSearchParams(location.search);
+    if(q.get("phonepe_return")==="1"){ history.replaceState(null,"",location.pathname); }
+  }catch(e){}
+  return handleCashfreeReturn();
 }
 function render(){
   const lines=document.getElementById('lines'), badge=document.getElementById('countBadge'), tot=document.getElementById('totals'), payTotal=document.getElementById('payTotal');
@@ -700,18 +757,18 @@ function closeSucc(){document.getElementById('success').classList.remove('open')
 })();
 if(IS_LOCAL){document.getElementById('localLoginBox').classList.add('show'); document.getElementById('localAddrBox').classList.add('show');}
 try{if(TOKEN){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
-refreshAcct(); render(); handlePhonepeReturn();
+refreshAcct(); render(); handleCashfreeReturn();
 // If another tab finishes this order, follow it to the success page
 // instead of getting stranded on checkout.
 window.addEventListener("storage",(e)=>{
   if(e.key!=="ak_last_order"||!e.newValue) return;
   try{
     const o=JSON.parse(e.newValue);
-    if(o&&o.number&&(Date.now()-(o.ts||0)<30*60*1000)){ stopPhonepePolling(); location.href="payment-success.html"; }
+    if(o&&o.number&&(Date.now()-(o.ts||0)<30*60*1000)){ stopCashfreePolling(); location.href="payment-success.html"; }
   }catch(_){}
 });
 ["firstName","lastName","phone","street","city","state","postal","country"].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("change",scheduleDeliveryRefresh);});
-console.log("[checkout] GRAPHQL="+GRAPHQL+" PHONEPE_BASE="+PHONEPE_BASE);
+console.log("[checkout] GRAPHQL="+GRAPHQL+" CASHFREE_BASE="+CASHFREE_BASE);
 </script>
 </body>
 </html>

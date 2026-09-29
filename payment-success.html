@@ -92,8 +92,8 @@ a{color:inherit;text-decoration:none}
   try{ info=JSON.parse(sessionStorage.getItem("ak_order_success")||localStorage.getItem("ak_last_order")||"{}"); }catch(e){}
   const parts=[];
   if(info.number) parts.push("Order #"+info.number);
-  if(info.amountTxt) parts.push(info.amountTxt+" paid via PhonePe");
-  else parts.push("Paid via PhonePe");
+  if(info.amountTxt) parts.push(info.amountTxt+" paid via Cashfree");
+  else parts.push("Paid via Cashfree");
   document.getElementById('orderInfo').textContent=parts.join(" • ");
   try{
     const prev=JSON.parse(localStorage.getItem("ak_feedback")||"null");
