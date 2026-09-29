@@ -225,6 +225,7 @@ async function loadSizeCharts(){if(SIZECHART) return SIZECHART; try{const r=awai
 let CART=JSON.parse(localStorage.getItem("ak_cart")||"[]"), WISH=JSON.parse(localStorage.getItem("ak_wish")||"[]");
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
+function imgOrig(u){if(!u)return"";return u.replace(/thumbnail_\d+/gi,"thumbnail_4096")}
 async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})});const j=await r.json();return j.data}
 function save(){localStorage.setItem("ak_cart",JSON.stringify(CART));localStorage.setItem("ak_wish",JSON.stringify(WISH));document.getElementById('cartCount').textContent=CART.reduce((s,c)=>s+c.qty,0); renderCart(); try{if(typeof renderRelated==="function") renderRelated();}catch(e){}}
 function getSlug(){const u=new URL(location.href);return u.searchParams.get('slug')||u.searchParams.get('id')||localStorage.getItem('ak_last_slug')||"fm108-00001"}
@@ -272,7 +273,7 @@ function renderRelated(){
   grid.innerHTML=REL.map(n=>{
     const qty=CART.filter(c=>c.id===n.id).reduce((s,c)=>s+c.qty,0);
     const price=n.pricing?.priceRange?money(n.pricing.priceRange.start.gross.amount,n.pricing.priceRange.start.gross.currency):"";
-    return `<article class="card"><a href="product.html?slug=${n.slug}" style="display:block"><img src="${n.thumbnail?.url||''}" alt=""/></a><div class="card-body"><a href="product.html?slug=${n.slug}"><div class="card-title">${n.name}</div></a><div style="font-size:13px;font-weight:700">${price}</div><div class="card-actions">${qty>0?`<div class="qty"><button onclick="event.stopPropagation();relDec('${n.id}')">−</button><span style="min-width:22px;text-align:center;font-weight:700">${qty}</span><button onclick="event.stopPropagation();relInc('${n.id}')">+</button></div>`:`<a class="mini-add" href="product.html?slug=${n.slug}">Add</a>`}</div></div></article>`;
+    return `<article class="card"><a href="product.html?slug=${n.slug}" style="display:block"><img src="${imgOrig(n.thumbnail?.url)||''}" alt=""/></a><div class="card-body"><a href="product.html?slug=${n.slug}"><div class="card-title">${n.name}</div></a><div style="font-size:13px;font-weight:700">${price}</div><div class="card-actions">${qty>0?`<div class="qty"><button onclick="event.stopPropagation();relDec('${n.id}')">−</button><span style="min-width:22px;text-align:center;font-weight:700">${qty}</span><button onclick="event.stopPropagation();relInc('${n.id}')">+</button></div>`:`<a class="mini-add" href="product.html?slug=${n.slug}">Add</a>`}</div></div></article>`;
   }).join("");
 }
 window.relDec=(id)=>{ for(let i=CART.length-1;i>=0;i--){ if(CART[i].id===id){ CART[i].qty--; if(CART[i].qty<=0) CART.splice(i,1); break; } } save(); renderRelated(); };
@@ -294,7 +295,7 @@ async function loadSiblings(){
     const colOf=p=>{const a=(p.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="color"); const v=(a?.values||[]).map(y=>y.name).filter(Boolean); return v.join(", ")||p.name};
     wrap.style.display="";
     document.getElementById('colorHint').textContent="— "+sibs.length+" colours";
-    box.innerHTML=sibs.map(p=>`<button class="opt ${p.id===PRODUCT.id?'active':''}" style="display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:8px;border-radius:14px" onclick="location.href='product.html?slug=${p.slug}'">${p.thumbnail?.url?`<img src="${p.thumbnail.url}" alt="${colOf(p)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover"/>`:""}<span>${colOf(p)}</span></button>`).join("");
+    box.innerHTML=sibs.map(p=>`<button class="opt ${p.id===PRODUCT.id?'active':''}" style="display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:8px;border-radius:14px" onclick="location.href='product.html?slug=${p.slug}'">${p.thumbnail?.url?`<img src="${imgOrig(p.thumbnail.url)}" alt="${colOf(p)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover"/>`:""}<span>${colOf(p)}</span></button>`).join("");
   }catch(e){wrap.style.display="none"}
 }
 function selSize(el){SIZE=el.dataset.s; document.querySelectorAll('#sizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('sizeHint').textContent="— "+SIZE;}

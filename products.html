@@ -160,11 +160,11 @@ function cardInc(id){
   const vid=v?.id||p.id;
   const ex=CART.find(c=>c.variantId===vid&&(c.size||"")==="");
   if(ex){ ex.qty+=1; if(!ex.vName&&v?.name) ex.vName=v.name; }
-  else CART.push({id:p.id, variantId:vid, name:p.name, sku:v?.sku||p.slug, vName:v?.name||"", size:"", img:imgSmall(p.thumbnail?.url)||((p.media||[])[0]?.url||""), price:price.amount, currency:price.currency, qty:1});
+   else CART.push({id:p.id, variantId:vid, name:p.name, sku:v?.sku||p.slug, vName:v?.name||"", size:"", img:imgOrig(p.thumbnail?.url)||((p.media||[])[0]?.url||""), price:price.amount, currency:price.currency, qty:1});
   saveCart(); render();
 }
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
-function imgSmall(u,s=256){if(!u)return"";return u.replace(/thumbnail_\d+/gi,"thumbnail_"+s)}
+function imgOrig(u){if(!u)return"";return u.replace(/thumbnail_\d+/gi,"thumbnail_4096")}
 async function gql(q,v={}){const r=await fetch(GRAPHQL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q,variables:v})}); const j=await r.json(); if(j.errors) console.warn(j.errors); return j.data}
 function valsOf(p,name){const out=[]; (p.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(v=>{if(v.name&&!out.includes(v.name)) out.push(v.name)})}); (p.variants||[]).forEach(v=>(v.attributes||[]).forEach(a=>{if((a.attribute?.name||"").toLowerCase()===name.toLowerCase()) (a.values||[]).forEach(x=>{if(x.name&&!out.includes(x.name)) out.push(x.name)})})); return out}
 function hayOf(p){const t=[p.name,p.category?.name,(p.category?.slug||"").replace(/-/g," ")]; (p.attributes||[]).forEach(a=>(a.values||[]).forEach(v=>t.push(v.name))); (p.variants||[]).forEach(v=>{t.push(v.sku,v.name); (v.attributes||[]).forEach(a=>(a.values||[]).forEach(x=>t.push(x.name)))}); return t.filter(Boolean).join(" ").toLowerCase()}
@@ -292,7 +292,7 @@ function render(){
     const p=gr.rep;
     const price=p.pricing?.priceRange?.start?.gross;
     const images=(p.media||[]).filter(m=>m&&m.url);
-    const img=imgSmall(p.thumbnail?.url)||images[0]?.url||"";
+    const img=imgOrig(p.thumbnail?.url)||images[0]?.url||"";
     const fab=(valsOf(p,"Fabric")[0]||"");
     const thumbs=images.slice(1,5);
     const qty=gr.items.reduce((s,it)=>s+CART.filter(c=>c.id===it.id).reduce((a,c)=>a+c.qty,0),0);
