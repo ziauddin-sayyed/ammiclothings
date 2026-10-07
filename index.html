@@ -6,6 +6,17 @@
 <title>Ammikids — by Ammi Enterprises | Little Couture, Big Dreams</title>
 <meta name="description" content="Ammikids by Ammi Enterprises (Est. 2003, Mumbai) – Manufacturer & wholesaler of kids wear & ladies wear. Fancy kidswear boutique. A-7 Kasturchand Mill Compound, Mumbai."/>
 <link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Ammikids by Ammi Enterprises"/>
+<meta property="og:title" content="Ammikids — by Ammi Enterprises | Little Couture, Big Dreams"/>
+<meta property="og:description" content="Ammikids by Ammi Enterprises (Est. 2003, Mumbai) – Manufacturer & wholesaler of kids wear & ladies wear. Fancy kidswear boutique."/>
+<meta property="og:image" content="https://ammiclothings.com/images/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Ammikids — by Ammi Enterprises | Little Couture, Big Dreams"/>
+<meta name="twitter:description" content="Ammikids by Ammi Enterprises (Est. 2003, Mumbai) – Manufacturer & wholesaler of kids wear & ladies wear. Fancy kidswear boutique."/>
+<meta name="twitter:image" content="https://ammiclothings.com/images/og-cover.jpg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -169,6 +180,8 @@ button{font:inherit}
 .card:hover .card-img img{transform:scale(1.06)}
 .wish{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:none;display:grid;place-items:center;cursor:pointer}
 .wish.active{color:var(--mauve)}
+.wish.share{right:52px}
+.wish.share svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 .wish svg{width:16px;height:16px}
 .card-body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card-cat{display:inline-block;align-self:flex-start;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 10px;border-radius:999px}
@@ -652,6 +665,9 @@ function renderProducts(){
         <button class="wish ${wishActive}" onclick="event.stopPropagation(); toggleWish('${p.id}')" aria-label="wishlist">
           <svg viewBox="0 0 24 24" fill="${WISH.includes(p.id)?'currentColor':'none'}" stroke="currentColor"><path d="M12 20l-3.6-3.2C5 13.6 2 10.8 2 7.5 2 4.2 4.5 2 7.3 2c1.6 0 3.1.8 3.9 2 .8-1.2 2.3-2 3.9-2C18 2 20.5 4.2 20.5 7.5c0 3.3-3 6.1-6.4 9.3L12 20z"/></svg>
         </button>
+        <button class="wish share" onclick="event.stopPropagation(); shareCard('${p.slug}')" aria-label="share">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        </button>
       </div>
       <div class="card-body">
         <div class="card-cat">${p.category?.name||'Kidswear'}</div>
@@ -671,6 +687,14 @@ function toggleWish(id){
   const i=WISH.indexOf(id);
   if(i>=0) WISH.splice(i,1); else WISH.push(id);
   save(); renderProducts(); toast(i>=0?'Removed from wishlist':'Added to wishlist ♥');
+}
+async function shareCard(slug){
+  const p=PRODUCTS.find(x=>x.slug===slug);
+  const url=new URL('product.html?slug='+slug, location.href).href;
+  const title=p?p.name:document.title;
+  if(navigator.share){ try{await navigator.share({title,url});}catch(e){} return; }
+  try{ await navigator.clipboard.writeText(url); toast('Link copied ✓'); }
+  catch(e){ window.prompt('Copy link:', url); }
 }
 function quickAdd(id){
   openModal(id);
@@ -905,6 +929,7 @@ function openModal(id){
     ACTIVE._selected = (_mDisplay.find(v=>v._color===col)?.id) || ACTIVE._selected;
     ACTIVE._size=null;
     renderModalSizes();
+    syncModalImg();
     const pv=_mDisplay.find(v=>v.id===ACTIVE._selected); const price=pv?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
     document.getElementById('mPrice').textContent = price? money(price.amount, price.currency):'—';
     document.getElementById('mAddPrice').textContent = price? money(price.amount*QTY, price.currency):'—';
@@ -943,6 +968,12 @@ function openModal(id){
   document.getElementById('modal').classList.add('open');
 }
 function selectedVariant(){return ACTIVE?.variants?.find(x=>x.id===ACTIVE._selected)||ACTIVE?.variants?.[0]||null;}
+function syncModalImg(){
+  const p=ACTIVE; if(!p) return;
+  const v=(p.variants||[]).find(x=>x.id===p._selected)||null;
+  const url=(v?.media?.[0]?.url && imgOrig(v.media[0].url)) || p.media?.[0]?.url || imgOrig(p.thumbnail?.url) || "";
+  if(url) document.getElementById('mImg').src=url;
+}
 function modalMatchQty(){
   if(!ACTIVE) return 0;
   const v = selectedVariant();
@@ -1012,6 +1043,7 @@ function selectVariant(vid){
   const v=(p.variants||[]).find(x=>x.id===vid);
   ACTIVE._selected=vid;
   ACTIVE._size=null;
+  syncModalImg();
   if(v?._color){ const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${v._color}`; document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===v._color)); }
   renderModalSizes();
   const price=v?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;

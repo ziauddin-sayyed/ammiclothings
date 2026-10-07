@@ -6,6 +6,17 @@
 <title>Product — Ammi Kids by Ammi Enterprises</title>
 <meta name="description" content="Product details - Ammi Enterprises Kidswear."/>
 <link rel="icon" href="https://catalog.wlimg.com/1/4698801/other-images/favicon.ico"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Ammikids by Ammi Enterprises"/>
+<meta property="og:title" content="Product — Ammi Kids by Ammi Enterprises"/>
+<meta property="og:description" content="Premium kidswear from Ammi Enterprises — comfortable, easily washable, anti-wrinkle. Mumbai."/>
+<meta property="og:image" content="https://ammiclothings.com/images/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Product — Ammi Kids by Ammi Enterprises"/>
+<meta name="twitter:description" content="Premium kidswear from Ammi Enterprises — comfortable, easily washable, anti-wrinkle. Mumbai."/>
+<meta name="twitter:image" content="https://ammiclothings.com/images/og-cover.jpg"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -113,6 +124,8 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .btn-primary{background:#fff;color:var(--primary);border:none;padding:14px 22px;border-radius:999px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;cursor:pointer;flex:1;justify-content:center;display:inline-flex;align-items:center;gap:8px}
 .btn-primary:hover{background:var(--accent-dark)} .btn-ghost{background:#fff;border:1px solid var(--line);padding:14px 22px;border-radius:999px;font-weight:700;cursor:pointer}
+.btn-ghost.icon-only{padding:14px 18px;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.btn-ghost.icon-only svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
 .trust{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .trust span{border:1px solid var(--line);background:var(--cream);padding:8px 10px;border-radius:999px}
 .related{max-width:1280px;margin:40px auto 0;padding:0 20px}
@@ -172,6 +185,7 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
   <div class="gallery">
     <div class="main-img" id="mainBox"><img id="mainImg" alt="product" draggable="false"/><button class="g-nav prev" id="gPrev" aria-label="Previous image">‹</button><button class="g-nav next" id="gNext" aria-label="Next image">›</button><span class="g-count" id="gCount" style="display:none"></span><span class="zoom-hint">⛶ Click to zoom</span></div>
     <div class="thumbs" id="thumbs"></div>
+    <button id="instaBtn" style="display:none;width:100%;margin-top:10px;border:none;border-radius:999px;padding:12px;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5);cursor:pointer" onclick="openVideo()">▶ Watch Video</button>
   </div>
   <div class="info">
     <span class="pill" id="pCat">Loading</span>
@@ -189,7 +203,8 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
     </div>
     <div class="actions">
       <button class="btn-primary" id="addBtn">Add to Bag <span id="addPrice">—</span></button>
-      <button class="btn-ghost" id="wishBtn">♡ Wishlist</button>
+      <button class="btn-ghost icon-only" id="wishBtn" aria-label="Wishlist" title="Wishlist">♡</button>
+      <button class="btn-ghost icon-only" id="shareBtn" aria-label="Share" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     </div>
     <button class="chart-link" id="sizeChartBtn" onclick="openChart()">📏 Size chart</button>
     <p class="desc" id="pDesc">Fetching product details…</p>
@@ -221,6 +236,12 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
   <img class="chart-img" id="chartImg" alt="Size Chart" style="display:none"/>
   <div id="chartTables"></div>
   <div class="chart-note" id="chartNote"></div></div>
+</div>
+<!-- video popup -->
+<div class="chart-modal" id="videoModal" aria-hidden="true"><div class="chart-bg" onclick="closeVideo()"></div>
+  <div class="chart-card" style="max-width:430px"><div class="chart-head"><span>Product video</span><button class="chart-close" onclick="closeVideo()" aria-label="Close">✕</button></div>
+  <div style="background:#000"><iframe id="videoFrame" title="Product video" style="display:block;width:100%;height:min(72vh,600px);border:0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+  <div class="chart-note"><a id="videoLink" href="#" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">Open on Instagram →</a></div></div>
 </div>
 <!-- mini cart drawer -->
 <div class="drawer" id="drawer"><div class="drawer-bg" id="drawerBg"></div>
@@ -635,12 +656,52 @@ async function loadSiblings(){
   }catch(e){wrap.style.display="none"}
 }
 function selSize(el){SIZE=el.dataset.s; document.querySelectorAll('#sizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('sizeHint').textContent="— "+SIZE;}
+function instaRawLink(){
+  const grab=(attrs)=>{
+    if(!attrs) return "";
+    const a=attrs.find(x=>/instagram/i.test((x.attribute?.name||"").trim()));
+    const vals=(a?.values||[]).map(v=>v.name).filter(Boolean);
+    return vals.find(v=>/instagram\.com/i.test(v))||vals[0]||"";
+  };
+  return grab(VARIANT?.attributes)||grab(PRODUCT?.attributes)||"";
+}
+function instaEmbedUrl(url){
+  if(!url) return "";
+  const m=String(url).match(/instagram\.com\/(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if(!m) return "";
+  const kind=m[1].toLowerCase()==="reels"?"reel":m[1].toLowerCase();
+  return `https://www.instagram.com/${kind}/${m[2]}/embed`;
+}
+function syncInstaBtn(){
+  const btn=document.getElementById('instaBtn');
+  if(!btn) return;
+  btn.style.display=instaRawLink()?"":"none";
+}
+function openVideo(){
+  const raw=instaRawLink();
+  if(!raw) return;
+  const link=document.getElementById('videoLink');
+  if(link) link.href=raw;
+  const fr=document.getElementById('videoFrame');
+  if(fr) fr.src=instaEmbedUrl(raw)||raw;
+  document.getElementById('videoModal').classList.add('open');
+  document.getElementById('videoModal').setAttribute('aria-hidden','false');
+}
+function closeVideo(){
+  const m=document.getElementById('videoModal');
+  if(!m) return;
+  m.classList.remove('open');
+  m.setAttribute('aria-hidden','true');
+  const fr=document.getElementById('videoFrame');
+  if(fr) fr.removeAttribute('src');
+}
 function renderAttrs(){
   const grid=document.getElementById('attrGrid'); if(!grid) return;
   const seen=new Set(), cards=[];
   (PRODUCT.attributes||[]).forEach(a=>{const n=a.attribute?.name||""; const vals=(a.values||[]).map(v=>v.name).filter(Boolean); if(!n||!vals.length||seen.has(n.toLowerCase())) return; seen.add(n.toLowerCase()); cards.push(`<div class="meta"><b>${n}</b><span>${vals.join(", ")}</span></div>`);});
   (VARIANT?.attributes||[]).forEach(a=>{const n=a.attribute?.name||""; const vals=(a.values||[]).map(v=>v.name).filter(Boolean); if(!n||!vals.length||seen.has(n.toLowerCase())) return; seen.add(n.toLowerCase()); cards.push(`<div class="meta"><b>${n}</b><span>${vals.join(", ")}</span></div>`);});
   grid.innerHTML=cards.length?cards.join(""):`<div class="meta"><b>Details</b><span>Premium kidswear by Ammi Enterprises</span></div>`;
+  try{syncInstaBtn();}catch(e){}
 }
 function renderSizes(){
   const box=document.getElementById('sizes'), hint=document.getElementById('sizeHint');
@@ -723,9 +784,15 @@ function setChartImg(){
 }
 function openChart(){fillChart(); document.getElementById('chartModal').classList.add('open'); document.getElementById('chartModal').setAttribute('aria-hidden','false')}
 function closeChart(){document.getElementById('chartModal').classList.remove('open'); document.getElementById('chartModal').setAttribute('aria-hidden','true')}
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeChart()});
-function updateWish(){const b=document.getElementById('wishBtn');const on=WISH.includes(PRODUCT?.id); b.textContent= on?"♥ Wishlisted":"♡ Wishlist"; b.style.borderColor=on?"var(--accent)":"var(--line)"; b.style.color=on?"var(--accent)":"inherit"}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart(); closeVideo();}});
+function updateWish(){const b=document.getElementById('wishBtn');const on=WISH.includes(PRODUCT?.id); b.textContent= on?"♥":"♡"; b.style.borderColor=on?"var(--accent)":"var(--line)"; b.style.color=on?"var(--accent)":"inherit"}
 document.getElementById('wishBtn').onclick=()=>{const i=WISH.indexOf(PRODUCT.id); if(i>=0) WISH.splice(i,1); else WISH.push(PRODUCT.id); localStorage.setItem("ak_wish",JSON.stringify(WISH)); updateWish(); toast(i>=0?"Removed from wishlist":"Added to wishlist ♥")};
+document.getElementById('shareBtn').onclick=async()=>{
+  const url=location.href, text=document.title;
+  if(navigator.share){ try{await navigator.share({title:text,url});}catch(e){} return; }
+  try{ await navigator.clipboard.writeText(url); toast("Link copied ✓"); }
+  catch(e){ window.prompt("Copy link:", url); }
+};
 document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.getElementById('qVal').textContent=QTY; refreshAdd()};
 document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
