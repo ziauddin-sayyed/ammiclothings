@@ -7,8 +7,8 @@
 */
 (function () {
   var PROD_API = "https://ammikids.themanagemate.com";
-  // var LOCAL_API = "https://ammikids.themanagemate.com";
-  var LOCAL_API = "http://localhost:8001";
+  var LOCAL_API = "https://ammikids.themanagemate.com";
+  // var LOCAL_API = "http://localhost:8001";
   var host = (typeof location !== "undefined" && location.hostname) || "";
   var IS_LOCAL = ["localhost", "127.0.0.1", ""].indexOf(host) !== -1;
   var API_BASE = IS_LOCAL ? LOCAL_API : PROD_API;
