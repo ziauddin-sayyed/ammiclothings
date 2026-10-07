@@ -267,6 +267,12 @@ button{font:inherit}
 .opts{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
 .opt{border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer;background:#fff}
 .opt.active{background:#1E1E1E;color:#fff;border-color:#1E1E1E}
+#mColors{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+#mColors .color-tile{display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:8px 8px 10px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;min-width:86px;transition:.2s}
+#mColors .color-tile img{width:64px;height:64px;border-radius:12px;object-fit:cover;background:var(--sage);display:block}
+#mColors .color-tile span{font-size:12px;font-weight:700;letter-spacing:.02em;line-height:1.2;text-align:center;max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mColors .color-tile.active{border-color:var(--primary);background:var(--blush);box-shadow:0 4px 16px rgba(192,0,107,.12)}
+#mColors .color-tile.active span{color:var(--primary)}
 .close-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:999px;border:none;background:#fff;box-shadow:var(--shadow-sm);cursor:pointer;display:grid;place-items:center;z-index:2}
 
 /* toast */
@@ -531,7 +537,7 @@ async function loadProducts(){
           pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } }
           category{ name slug }
           attributes{ attribute{ name } values{ name } }
-          variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } }
+          variants{ id sku name media{ url } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } }
         }}
         totalCount
       }
@@ -696,8 +702,8 @@ function addToCart(product, variant, qty, size){
   const price = variant?.pricing?.price?.gross?.amount ?? product.pricing?.priceRange?.start?.gross?.amount ?? 0;
   const currency = variant?.pricing?.price?.gross?.currency ?? product.pricing?.priceRange?.start?.gross?.currency ?? "INR";
   const existing = CART.find(c=>c.variantId===vid && (c.size||"")===(size||""));
-  if(existing){ existing.qty += qty; if(!existing.vName && variant?.name) existing.vName=variant.name; }
-  else CART.push({ id:product.id, variantId:vid, name:product.name, sku:variant?.sku||product.slug, vName:variant?.name||"", size:size||"", img:imgOrig(product.thumbnail?.url)||product.media?.[0]?.url||"", price, currency, qty });
+  if(existing){ const lab=(variant? ((variant.name||variant.sku||"Variant") + (variant._color? " - "+variant._color:"")): variant?.name||""); existing.qty += qty; if(!existing.vName && lab) existing.vName=lab; }
+  else CART.push({ id:product.id, variantId:vid, name:product.name, sku:variant?.sku||product.slug, vName:(variant? ((variant.name||variant.sku||"Variant") + (variant._color? " - "+variant._color:"")): "") || variant?.name || "", size:size||"", img:imgOrig(product.thumbnail?.url)||product.media?.[0]?.url||"", price, currency, qty });
   save(); renderCart(); toast(`${product.name}${size?` (${size})`:""} added to bag`);
   if(typeof syncModalCartUI==="function") syncModalCartUI();
   if(document.getElementById('products')) renderProducts();
@@ -803,11 +809,131 @@ function openModal(id){
   document.getElementById('mAddPrice').textContent = price? money(price.amount, price.currency) : "—";
   document.getElementById('qVal').textContent="1";
   // variants
+  const M_KNOWN_COLORS = [
+    "Off White", "Light Yellow", "Baby Pink", "Dark Pink", "Navy Blue", "Sky Blue", "Royal Blue",
+    "Dark Purple", "Light Grey", "Dark Brown", "Dark Green",
+    "White", "Cream", "Ivory", "Yellow", "Mustard", "Black", "Red", "Maroon", "Pink",
+    "Peach", "Orange", "Rust", "Green", "Olive", "Mint", "Pista", "Blue", "Navy",
+    "Purple", "Lavender", "Lilac", "Magenta", "Wine", "Grey", "Gray", "Brown",
+    "Beige", "Golden", "Gold", "Silver", "Teal", "Turquoise", "Aqua", "Coral", "Multi"
+  ];
+  function mColorOf(v, prod){
+    if(!v) return "";
+    const va=(v.attributes||[]).find(x=>/^(color|colour)$/i.test((x.attribute?.name||'').trim()));
+    const val=(va?.values||[]).map(y=>y.name).filter(Boolean)[0];
+    if(val && !/^(rayon|cotton|silk|fabric|georgette|crepe)$/i.test(val.trim())) return val.trim();
+    const txt=`${v.name||""} ${v.sku||""}`.trim();
+    if(txt){
+      for(const c of M_KNOWN_COLORS){
+        const rx=new RegExp("(?:^|[^a-zA-Z0-9])"+c.replace(/\s+/g,"[\\s_-]+")+"(?:$|[^a-zA-Z0-9])","i");
+        if(rx.test(txt)) return c;
+      }
+    }
+    const pa=(prod?.attributes||[]).find(x=>/^(color|colour)$/i.test((x.attribute?.name||'').trim()));
+    const pval=(pa?.values||[]).map(y=>y.name).filter(Boolean)[0];
+    if(pval && !/^(rayon|cotton|silk|fabric|georgette|crepe)$/i.test(pval.trim())) return pval.trim();
+    return "";
+  }
+  function mCleanLabel(v, filterColor){
+    let name = v.name || v.sku || "Variant";
+    if(filterColor){
+      const reg = new RegExp(`^${filterColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[-–—/:]\\s*`, "i");
+      if(reg.test(name)){
+        name = name.replace(reg, "");
+      }
+    }
+    return name;
+  }
+  function mSizeOfLocal(v){const a=(v.attributes||[]).find(x=>(x.attribute?.name||'').toLowerCase()==='size'); return (a?.values||[]).map(y=>y.name).filter(Boolean);}
+  p.variants?.forEach(v=>{v._color=mColorOf(v, p); v._sizes=mSizeOfLocal(v);});
+  const _mValid = (p.variants||[]).filter(v=>{
+    if((v._sizes||[]).length > 0) return true;
+    const hasSiblingWithSizes = (p.variants||[]).some(o => o.id !== v.id && o._color && o._color.toLowerCase() === (v._color||"").toLowerCase() && (o._sizes||[]).length > 0);
+    return !hasSiblingWithSizes;
+  });
+  const _mSeen=new Set();
+  const _mDisplay=_mValid.filter(v=>{const k=`${v.name||''}|${v._color||''}|${(v._sizes||[]).join(',')}`; if(_mSeen.has(k)) return false; _mSeen.add(k); return true;});
+  window._MDISPLAY=_mDisplay;
+  // render colour chips in modal (reuse mColorWrap if not overwritten by siblings flow)
+  (function renderMColourChips(){
+    const wrap=document.getElementById('mColorWrap'), box=document.getElementById('mColors'), hint=document.getElementById('mColorHint');
+    const uniq=[...new Set(_mDisplay.map(v=>v._color).filter(Boolean))];
+    if(!uniq.length){ /* leave to loadModalColors for product-level siblings */ return; }
+    const selCol=(ACTIVE.variants||[]).find(v=>v.id===ACTIVE._selected)?._color || null;
+    if(hint && uniq.length) hint.textContent = selCol? (`— ${selCol}`) : (`— ${uniq.length} colours · pick one`);
+    if(box && uniq.length){
+      const curSelCol = selCol;
+      const colorToCss = (name)=>{
+        const map={"white":"#ffffff","off white":"#faf9f6","cream":"#fffdd0","ivory":"#fffff0","yellow":"#f6ba22","light yellow":"#fff9c4","mustard":"#d4a017","black":"#1e1e1e","red":"#d32f2f","maroon":"#7a0a0a","pink":"#e77aa8","peach":"#ffdab9","orange":"#ff7a3d","green":"#4caf6b","olive":"#6b7c3f","mint":"#b9e4c9","blue":"#3a7bd5","navy":"#1a2a4a","navy blue":"#1a2a4a","sky blue":"#87ceeb","royal blue":"#4169e1","purple":"#8a5a9e","lavender":"#c9b6e4","lilac":"#c8a2c8","grey":"#b8b8b8","gray":"#b8b8b8","light grey":"#e6e6e6","brown":"#8d6e63","beige":"#f5f5dc","golden":"#d4af37","silver":"#c0c0c0","teal":"#4db6ac","turquoise":"#40e0d0","aqua":"#7fdbda"};
+        const k=(name||"").trim().toLowerCase();
+        if(map[k]) return map[k];
+        const el=document.createElement('div'); el.style.color=''; el.style.color=k; if(el.style.color) return k;
+        const parts=k.split(/[\s\/-]+/);
+        for(const p of parts){ if(map[p]) return map[p]; el.style.color=p; if(el.style.color) return p; }
+        return 'var(--sage)';
+      };
+      const firstMediaByColor = (col)=>{
+        const v = _mDisplay.find(x=>x._color===col);
+        if(!v) return "";
+        if(v.media && v.media[0] && v.media[0].url) return imgOrig(v.media[0].url);
+        return "";
+      };
+      box.innerHTML = uniq.map(c=>{
+        const img = firstMediaByColor(c);
+        const esc = c.replace(/'/g,"\\'");
+        const active = curSelCol===c?'active':'';
+        return `<button class="opt color-tile ${active}" data-color="${c}" onclick="pickModalColor('${esc}')">${img?`<img src="${img}" alt="${c}" loading="lazy"/>`:`<span style="width:64px;height:64px;border-radius:12px;background:${colorToCss(c)};display:block;border:1px solid rgba(0,0,0,.07)"></span>`}<span>${c}</span></button>`;
+      }).join('');
+      if(wrap) wrap.style.display='';
+    }
+  })();
+  function renderMVariants(filterColor){
+    const list = filterColor ? _mDisplay.filter(v=>v._color===filterColor) : _mDisplay;
+    if(!list.length){ vWrap.innerHTML = `<span style='font-size:12px;color:var(--muted)'>No variants for ${filterColor}</span>`; return; }
+    vWrap.innerHTML = list.map(v=>{
+      const active=v.id===ACTIVE._selected?'active':'';
+      const label=mCleanLabel(v, filterColor);
+      const cnt=v._sizes?.length? ` (${v._sizes.length} sizes)`:'';
+      return `<button class="opt ${active}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${label}${cnt}</button>`;
+    }).join('') + `<span style="font-size:12px;color:var(--muted);align-self:center">${_mDisplay.length} variant(s)</span>`;
+  }
+  window.pickModalColor=(col)=>{
+    document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===col));
+    const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${col}`;
+    renderMVariants(col);
+    ACTIVE._selected = (_mDisplay.find(v=>v._color===col)?.id) || ACTIVE._selected;
+    ACTIVE._size=null;
+    renderModalSizes();
+    const pv=_mDisplay.find(v=>v.id===ACTIVE._selected); const price=pv?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
+    document.getElementById('mPrice').textContent = price? money(price.amount, price.currency):'—';
+    document.getElementById('mAddPrice').textContent = price? money(price.amount*QTY, price.currency):'—';
+    syncModalCartUI();
+  };
   const vWrap=document.getElementById('mVariants');
-  if(p.variants?.length){
-    vWrap.innerHTML = p.variants.map((v)=>`<button class="opt ${v.id===ACTIVE._selected?'active':''}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${v.name||v.sku}</button>`).join("") + `<span style="font-size:12px;color:var(--muted);align-self:center">${p.variants.length} variant(s)</span>`;
+  if(_mDisplay.length){
+    // default: show only first colour's variants and select first variant of that colour (do not show all)
+    // honour restored ACTIVE._selected if its colour exists, else use first variant's colour
+    let _mDefaultColor = (ACTIVE.variants||[]).find(v=>v.id===ACTIVE._selected)?._color || _mDisplay[0]?._color || null;
+    if(_mDefaultColor && !_mDisplay.some(v=>v._color===_mDefaultColor)) _mDefaultColor = _mDisplay[0]?._color || null;
+    // ensure selected variant belongs to default colour
+    if(_mDefaultColor){
+      const selIsInDefault = _mDisplay.some(v=>v.id===ACTIVE._selected && v._color===_mDefaultColor);
+      if(!selIsInDefault){ ACTIVE._selected = (_mDisplay.find(v=>v._color===_mDefaultColor)?.id) || _mDisplay[0].id; ACTIVE._size=null; } else {
+        // if restored size not in newly selected variant, clear it
+        const curV=_mDisplay.find(v=>v.id===ACTIVE._selected); if(curV && ACTIVE._size && !(curV._sizes||[]).includes(ACTIVE._size)) ACTIVE._size=null;
+      }
+      // re-sync colour chips to default (renderMColourChips already ran, but update hint/active)
+      const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${_mDefaultColor}`;
+      document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===_mDefaultColor));
+    }
+    renderMVariants(_mDefaultColor);
+    // sync price for default variant selection
+    {
+      const pv=_mDisplay.find(v=>v.id===ACTIVE._selected); const pr=pv?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
+      if(pr){ document.getElementById('mPrice').textContent = money(pr.amount, pr.currency); document.getElementById('mAddPrice').textContent = money(pr.amount*QTY, pr.currency); }
+    }
   }else{
-    vWrap.innerHTML="";
+    const vWrap2=document.getElementById('mVariants'); if(vWrap2) vWrap2.innerHTML="";
     ACTIVE._selected=null;
   }
   renderModalSizes();
@@ -862,10 +988,12 @@ function renderModalSizes(){
 }
 function selSize(el){ACTIVE._size=el.dataset.s; document.querySelectorAll('#mSizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('mSizeHint').textContent="— "+ACTIVE._size; syncModalCartUI();}
 async function loadModalColors(){
+  // if variants already have Color attribute, keep variant colours (do not overwrite with product-level siblings)
+  if((window._MDISPLAY||[]).some(v=>v._color)){ const w=document.getElementById('mColorWrap'); if(w) w.dataset.siblings="variant-colors"; return; }
   const wrap=document.getElementById('mColorWrap'), box=document.getElementById('mColors');
   wrap.style.display="none"; box.innerHTML="";
   try{
-    const d=await gql(`query{products(first:100){edges{node{id name slug thumbnail{url} category{name slug} attributes{attribute{name} values{name}} media{url} pricing{priceRange{start{gross{amount currency}}}} variants{id sku name pricing{price{gross{amount currency}}} attributes{attribute{name} values{name}}}}}}}`);
+    const d=await gql(`query{products(first:100){edges{node{id name slug thumbnail{url} category{name slug} attributes{attribute{name} values{name}} media{url} pricing{priceRange{start{gross{amount currency}}}} variants{ id sku name media{ url } pricing{price{gross{amount currency}}} attributes{attribute{name} values{name}}}}}}}`);
     const all=(d?.products?.edges||[]).map(e=>e.node);
     const key=(ACTIVE.name||"").trim().toLowerCase();
     const sibs=all.filter(p=>(p.name||"").trim().toLowerCase()===key);
@@ -883,6 +1011,7 @@ function selectVariant(vid){
   const v=(p.variants||[]).find(x=>x.id===vid);
   ACTIVE._selected=vid;
   ACTIVE._size=null;
+  if(v?._color){ const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${v._color}`; document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===v._color)); }
   renderModalSizes();
   const price=v?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
   document.getElementById('mPrice').textContent = price? money(price.amount, price.currency):"—";
@@ -910,6 +1039,9 @@ function updateAddPrice(){
 }
 document.getElementById('mAdd').addEventListener('click', ()=>{
   const v = (ACTIVE.variants||[]).find(x=>x.id===ACTIVE._selected) || (ACTIVE.variants||[])[0] || null;
+  // require colour variant selection when colours exist (modal uses _MDISPLAY list)
+  const hasColourVariants = (window._MDISPLAY||ACTIVE.variants||[]).some(x=>x._color);
+  if(hasColourVariants && !v?._color){ toast("Please select a colour"); return; }
   const sizes = sizeOf(v||{});
   if(sizes.length && !ACTIVE._size){ toast("Please select a size"); return; }
   addToCart(ACTIVE, v, QTY, ACTIVE._size); QTY=1;
@@ -960,7 +1092,7 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
   window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
 })();
 // expose for inline handlers
-window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.selSize=selSize; window.closeDrawer=closeDrawer; window.checkout=checkout; window.cardInc=cardInc; window.cardDec=cardDec;
+window.pickModalColor=pickModalColor; window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.selSize=selSize; window.closeDrawer=closeDrawer; window.checkout=checkout; window.cardInc=cardInc; window.cardDec=cardDec;
 // show Profile only when logged in
 try{if(localStorage.getItem("ak_token")){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 </script>

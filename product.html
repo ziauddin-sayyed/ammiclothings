@@ -69,6 +69,12 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .variants{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .opt{border:1px solid var(--line);padding:9px 14px;border-radius:999px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
 .opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+#colors{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+#colors .color-tile{display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:8px 8px 10px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;min-width:86px;transition:.2s}
+#colors .color-tile img{width:64px;height:64px;border-radius:12px;object-fit:cover;background:var(--sage);display:block}
+#colors .color-tile span{font-size:12px;font-weight:700;letter-spacing:.02em;line-height:1.2;text-align:center;max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#colors .color-tile.active{border-color:var(--primary);background:var(--blush);box-shadow:0 4px 16px rgba(192,0,107,.12)}
+#colors .color-tile.active span{color:var(--primary)}
 .sizes-label{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--primary);font-weight:800;margin:14px 0 8px;background:var(--blush);border:2px solid var(--accent);padding:10px 14px;border-radius:14px}
 .sizes-label .hint{text-transform:none;letter-spacing:0;font-weight:600;color:var(--accent-dark)}
 .sizes{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
@@ -232,7 +238,7 @@ function getSlug(){const u=new URL(location.href);return u.searchParams.get('slu
 async function load(){
   const slug=getSlug();
   document.getElementById('crumbName').textContent=slug;
-  const q=`query P($slug:String!){ product(slug:$slug, channel:"in"){ id name slug description media{url alt} thumbnail{url} category{name slug parent{name slug parent{name slug}}} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
+  const q=`query P($slug:String!){ product(slug:$slug, channel:"in"){ id name slug description media{url alt} thumbnail{url} category{name slug parent{name slug parent{name slug}}} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name media{ url } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
   const [d]=await Promise.all([gql(q,{slug}), loadSizeCharts()]);
   PRODUCT=d?.product;
   if(!PRODUCT){document.getElementById('pName').textContent="Product not found"; document.getElementById('pDesc').textContent="Try going back to shop."; return;}
@@ -258,10 +264,133 @@ async function load(){
   document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" onclick="setImg('${u}',this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
   // variants + sizes + size-chart values
   const vwrap=document.getElementById('variants');
+  const KNOWN_COLORS = [
+    "Off White", "Light Yellow", "Baby Pink", "Dark Pink", "Navy Blue", "Sky Blue", "Royal Blue",
+    "Dark Purple", "Light Grey", "Dark Brown", "Dark Green",
+    "White", "Cream", "Ivory", "Yellow", "Mustard", "Black", "Red", "Maroon", "Pink",
+    "Peach", "Orange", "Rust", "Green", "Olive", "Mint", "Pista", "Blue", "Navy",
+    "Purple", "Lavender", "Lilac", "Magenta", "Wine", "Grey", "Gray", "Brown",
+    "Beige", "Golden", "Gold", "Silver", "Teal", "Turquoise", "Aqua", "Coral", "Multi"
+  ];
   function sizeOf(v){const a=(v.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="size"); return (a?.values||[]).map(y=>y.name).filter(Boolean)}
-  PRODUCT.variants?.forEach(v=>{v._sizes=sizeOf(v)});
-  if(PRODUCT.variants?.length){ vwrap.innerHTML=PRODUCT.variants.map((v,i)=>{const nm=v.name||v.sku||("Variant "+(i+1)); return `<button class="opt ${i===0?'active':''}" data-vid="${v.id}" onclick="pick('${v.id}')">${nm} • ${v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):""}</button>`}).join(""); VARIANT=PRODUCT.variants[0]; } else { vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"}
-  renderSizes(); renderAttrs(); loadSiblings();
+  function colorOf(v, prod){
+    if(!v) return "";
+    const va = (v.attributes || []).find(x => /^(color|colour)$/i.test((x.attribute?.name || "").trim()));
+    const val = (va?.values || []).map(y => y.name).filter(Boolean)[0];
+    if(val && !/^(rayon|cotton|silk|fabric|georgette|crepe)$/i.test(val.trim())) return val.trim();
+    const txt = `${v.name || ""} ${v.sku || ""}`.trim();
+    if(txt){
+      for(const c of KNOWN_COLORS){
+        const rx = new RegExp("(?:^|[^a-zA-Z0-9])" + c.replace(/\s+/g, "[\\s_-]+") + "(?:$|[^a-zA-Z0-9])", "i");
+        if(rx.test(txt)) return c;
+      }
+    }
+    const pa = (prod?.attributes || []).find(x => /^(color|colour)$/i.test((x.attribute?.name || "").trim()));
+    const pval = (pa?.values || []).map(y => y.name).filter(Boolean)[0];
+    if(pval && !/^(rayon|cotton|silk|fabric|georgette|crepe)$/i.test(pval.trim())) return pval.trim();
+    return "";
+  }
+  function cleanVariantLabel(v, filterColor){
+    let name = v.name || v.sku || "Variant";
+    if(filterColor){
+      const reg = new RegExp(`^${filterColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[-–—/:]\\s*`, "i");
+      if(reg.test(name)){
+        name = name.replace(reg, "");
+      }
+    }
+    return name;
+  }
+  PRODUCT.variants?.forEach(v=>{v._sizes=sizeOf(v); v._color=colorOf(v, PRODUCT);});
+  const _validVariants = (PRODUCT.variants||[]).filter(v=>{
+    if((v._sizes||[]).length > 0) return true;
+    const hasSiblingWithSizes = (PRODUCT.variants||[]).some(o => o.id !== v.id && o._color && o._color.toLowerCase() === (v._color||"").toLowerCase() && (o._sizes||[]).length > 0);
+    return !hasSiblingWithSizes;
+  });
+  const _seenVar=new Set();
+  const _displayVariants=_validVariants.filter(v=>{const k=`${v.name||""}|${v._color||""}|${(v._sizes||[]).join(",")}`; if(_seenVar.has(k)) return false; _seenVar.add(k); return true;});
+  window._DISPLAY_VARIANTS=_displayVariants;
+  VARIANT=null; SIZE=null;
+  function renderColorOptions(){
+    const wrap=document.getElementById('colorWrap'), box=document.getElementById('colors'), hint=document.getElementById('colorHint');
+    const uniq=[...new Set(_displayVariants.map(v=>v._color).filter(Boolean))];
+    if(!uniq.length){ wrap.style.display="none"; return; }
+    wrap.style.display="";
+    const selCol=VARIANT?VARIANT._color:null;
+    if(hint) hint.textContent = selCol ? "— "+selCol : "— "+uniq.length+" colours · pick one";
+    const colorToCss = (name)=>{
+      const map={"white":"#ffffff","off white":"#faf9f6","cream":"#fffdd0","ivory":"#fffff0","yellow":"#f6ba22","light yellow":"#fff9c4","mustard":"#d4a017","black":"#1e1e1e","red":"#d32f2f","maroon":"#7a0a0a","pink":"#e77aa8","peach":"#ffdab9","orange":"#ff7a3d","green":"#4caf6b","olive":"#6b7c3f","mint":"#b9e4c9","blue":"#3a7bd5","navy":"#1a2a4a","navy blue":"#1a2a4a","sky blue":"#87ceeb","royal blue":"#4169e1","purple":"#8a5a9e","lavender":"#c9b6e4","lilac":"#c8a2c8","grey":"#b8b8b8","gray":"#b8b8b8","light grey":"#e6e6e6","brown":"#8d6e63","beige":"#f5f5dc","golden":"#d4af37","silver":"#c0c0c0","teal":"#4db6ac","turquoise":"#40e0d0","aqua":"#7fdbda"};
+      const k=(name||"").trim().toLowerCase();
+      if(map[k]) return map[k];
+      const el=document.createElement('div'); el.style.color=''; el.style.color=k; if(el.style.color) return k;
+      const parts=k.split(/[\s\/-]+/);
+      for(const p of parts){ if(map[p]) return map[p]; el.style.color=p; if(el.style.color) return p; }
+      return 'var(--sage)';
+    };
+    const firstMediaByColor = (col)=>{
+      const v = _displayVariants.find(x=>x._color===col);
+      if(!v) return "";
+      if(v.media && v.media[0] && v.media[0].url) return imgOrig(v.media[0].url);
+      return "";
+    };
+    box.innerHTML=uniq.map(c=>{
+      const img = firstMediaByColor(c);
+            const esc = c.replace(/'/g,"\\'");
+      const active = selCol===c?'active':'';
+      return `<button class="opt color-tile ${active}" data-color="${c}" onclick="pickColor('${esc}')">${img?`<img src="${img}" alt="${c}" loading="lazy"/>`: `<span style="width:64px;height:64px;border-radius:12px;background:${colorToCss(c)};display:block;border:1px solid rgba(0,0,0,.07)"></span>`}<span>${c}</span></button>`;
+    }).join("");
+  }
+  function renderVariantOptions(filterColor){
+    const list = filterColor ? _displayVariants.filter(v=>v._color===filterColor) : _displayVariants;
+    if(!_displayVariants.length){ vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>"; return; }
+    if(filterColor && !list.length){ vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants for "+filterColor+"</span>"; return; }
+    vwrap.innerHTML=list.map(v=>{
+      const active=VARIANT && VARIANT.id===v.id ? 'active':'';
+      const label=cleanVariantLabel(v, filterColor);
+      const price=v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):"";
+      return `<button class="opt ${active}" data-vid="${v.id}" onclick="pick('${v.id}')">${label} • ${price}</button>`;
+    }).join("");
+  }
+  window.pickColor=(col)=>{
+    document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===col));
+    const hint=document.getElementById('colorHint'); if(hint) hint.textContent="— "+col;
+    const colorVars = _displayVariants.filter(v=>v._color===col);
+    VARIANT = colorVars[0] || null;
+    SIZE = null;
+    renderVariantOptions(col);
+    if(VARIANT){
+      const pr = VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross;
+      if(pr){
+        const addEl = document.getElementById('addPrice'); if(addEl) addEl.textContent = money(pr.amount * QTY, pr.currency);
+        const pEl = document.getElementById('pPrice'); if(pEl) pEl.innerHTML = money(pr.amount, pr.currency);
+      }
+      const base = VARIANT?.name || VARIANT?.sku || PRODUCT.slug;
+      const skuEl = document.getElementById('pSku'); if(skuEl) skuEl.textContent = base;
+    }
+    renderSizes();
+    renderAttrs();
+    fillChart();
+  };
+  if(_displayVariants.length){
+    // default: select first variant's colour + first variant (do not show all)
+    const _defaultColor = _displayVariants[0]?._color || null;
+    const _defaultVariant = _defaultColor ? (_displayVariants.find(v=>v._color===_defaultColor) || _displayVariants[0]) : _displayVariants[0];
+    VARIANT = _defaultVariant;
+    renderColorOptions();
+    renderVariantOptions(_defaultColor);
+    // sync sku / price / sizes for default variant
+    {
+      const pr0 = VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross;
+      if(pr0){ const addEl=document.getElementById('addPrice'); if(addEl) addEl.textContent=money(pr0.amount, pr0.currency); const pEl=document.getElementById('pPrice'); if(pEl) pEl.innerHTML=money(pr0.amount, pr0.currency); }
+      const base0 = VARIANT?.name||VARIANT?.sku||PRODUCT.slug;
+      const col0 = VARIANT?._color? ` - ${VARIANT._color}`:'';
+      const skuEl=document.getElementById('pSku'); if(skuEl) skuEl.textContent = base0+col0;
+    }
+    renderSizes();
+  } else {
+    vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>";
+    document.getElementById('colorWrap').style.display="none";
+  }
+  renderAttrs(); loadSiblings(); fillChart();
   updateWish();
   // related
   const rel=(d?.products?.edges||[]).filter(e=>e.node.slug!==slug).slice(0,4);
@@ -283,7 +412,7 @@ function openLb(){const i=document.getElementById('lbImg'); i.src=document.getEl
 function closeLb(){document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('mainImg').onclick=openLb;
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
-function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=PRODUCT.variants.find(v=>v.id===id); SIZE=null; const p=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=p?money(p.amount*QTY,p.currency):"—"; document.getElementById('pPrice').innerHTML=p?money(p.amount,p.currency):"—"; document.getElementById('pSku').textContent=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; renderSizes(); renderAttrs()}
+function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=(window._DISPLAY_VARIANTS||PRODUCT.variants).find(v=>v.id===id)||PRODUCT.variants.find(v=>v.id===id); SIZE=null; if(VARIANT&&VARIANT._color){ const ch=document.getElementById('colorHint'); if(ch) ch.textContent="— "+VARIANT._color; document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.color===VARIANT._color)); } const pr=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=pr?money(pr.amount*QTY,pr.currency):"—"; document.getElementById('pPrice').innerHTML=pr?money(pr.amount,pr.currency):"—"; const base=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; document.getElementById('pSku').textContent=base; renderSizes(); renderAttrs()}
 async function loadSiblings(){
   const wrap=document.getElementById('colorWrap'), box=document.getElementById('colors');
   try{
@@ -291,7 +420,8 @@ async function loadSiblings(){
     const all=(d?.products?.edges||[]).map(e=>e.node);
     const key=(PRODUCT.name||"").trim().toLowerCase();
     const sibs=all.filter(p=>(p.name||"").trim().toLowerCase()===key);
-    if(sibs.length<2){wrap.style.display="none"; return;}
+    if(sibs.length<2 && !(window._DISPLAY_VARIANTS||[]).some(v=>v._color)){ wrap.style.display="none"; return; }
+    if((window._DISPLAY_VARIANTS||[]).some(v=>v._color)){ wrap.dataset.siblings=String(sibs.length); return; }
     const colOf=p=>{const a=(p.attributes||[]).find(x=>(x.attribute?.name||"").toLowerCase()==="color"); const v=(a?.values||[]).map(y=>y.name).filter(Boolean); return v.join(", ")||p.name};
     wrap.style.display="";
     document.getElementById('colorHint').textContent="— "+sibs.length+" colours";
@@ -308,6 +438,7 @@ function renderAttrs(){
 }
 function renderSizes(){
   const box=document.getElementById('sizes'), hint=document.getElementById('sizeHint');
+  if(!VARIANT){ box.innerHTML="<span style='font-size:12px;color:var(--muted)'>Pick a colour & variant first</span>"; if(hint) hint.textContent="— pick a colour & variant first"; fillChart(); return; }
   const list=VARIANT?._sizes||[];
   if(!list.length){box.innerHTML="<span style='font-size:12px;color:var(--muted)'>No sizes in this variant</span>"; if(hint) hint.textContent=""; fillChart(); return;}
   if(hint) hint.textContent=SIZE?("— "+SIZE):("— pick one of "+list.length);
@@ -380,7 +511,48 @@ document.getElementById('wishBtn').onclick=()=>{const i=WISH.indexOf(PRODUCT.id)
 document.getElementById('qMinus').onclick=()=>{QTY=Math.max(1,QTY-1);document.getElementById('qVal').textContent=QTY; refreshAdd()};
 document.getElementById('qPlus').onclick=()=>{QTY++;document.getElementById('qVal').textContent=QTY; refreshAdd()};
 function refreshAdd(){const p=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; if(p) document.getElementById('addPrice').textContent=money(p.amount*QTY,p.currency)}
-document.getElementById('addBtn').onclick=()=>{if(!SIZE){toast("Please select a size"); document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"}); return;} const vid=VARIANT?.id||PRODUCT.id; const pr=VARIANT?.pricing?.price?.gross||PRODUCT.pricing?.priceRange?.start?.gross; const ex=CART.find(c=>c.variantId===vid&&c.size===SIZE); if(ex){ ex.qty+=QTY; if(!ex.vName&&VARIANT?.name) ex.vName=VARIANT.name; } else CART.push({id:PRODUCT.id, variantId:vid, name:PRODUCT.name, sku:VARIANT?.sku||PRODUCT.slug, vName:VARIANT?.name||"", size:SIZE, img:document.getElementById('mainImg').src, price:pr.amount, currency:pr.currency,qty:QTY}); save(); toast("Added "+SIZE+" to bag"); openDrawer()};
+document.getElementById('addBtn').onclick=()=>{
+  if(!PRODUCT) return;
+  // If there are variants/sizes available, require both Color/Variant selection and Size selection
+  const hasVariants = PRODUCT.variants && PRODUCT.variants.length > 0;
+  if(hasVariants && !VARIANT){
+    toast("Please select a color variant");
+    document.getElementById('colorWrap')?.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  const sizes = VARIANT?._sizes || [];
+  if(sizes.length > 0 && !SIZE){
+    toast("Please select a size");
+    document.getElementById('sizes').scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  const vid = VARIANT?.id || PRODUCT.id;
+  const pr = VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross || {amount:0, currency:"INR"};
+  const colorName = document.getElementById('colorHint')?.textContent?.replace(/^—\s*/,'') || "";
+  const labelWithColor = VARIANT ? ((VARIANT.name||VARIANT.sku||"Variant") + (VARIANT._color? " - "+VARIANT._color:"")) : "";
+  const ex = CART.find(c=>c.variantId===vid && (c.size||"")===(SIZE||""));
+  if(ex){
+    ex.qty += QTY;
+    if(!ex.vName && labelWithColor) ex.vName = labelWithColor;
+  } else {
+    CART.push({
+      id: PRODUCT.id,
+      variantId: vid,
+      name: PRODUCT.name,
+      sku: VARIANT?.sku || PRODUCT.slug,
+      vName: labelWithColor || VARIANT?.name || "",
+      color: colorName,
+      size: SIZE || "",
+      img: document.getElementById('mainImg').src || "",
+      price: pr.amount,
+      currency: pr.currency,
+      qty: QTY
+    });
+  }
+  save();
+  toast(`Added ${SIZE?Size+" ":""}to bag`);
+  openDrawer();
+};
 function renderCart(){const body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot'); if(!body) return; if(!CART.length){body.innerHTML="<p style='color:var(--muted);text-align:center;padding:20px'>Bag empty</p>";foot.innerHTML="";return} body.innerHTML=CART.map((c,i)=>`<div class="line-item"><img src="${c.img}" style="width:60px;height:70px;border-radius:10px;object-fit:cover"/><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.vName||c.sku}${c.size?` • Size ${c.size}`:""}</div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>${c.qty} × ${money(c.price,c.currency)}</span><b>${money(c.price*c.qty,c.currency)}</b></div></div><button onclick="rem(${i})">✕</button></div>`).join(""); const sub=CART.reduce((s,c)=>s+c.price*c.qty,0); const ship=sub>999?0:79; foot.innerHTML=`<div class="sub-row"><span>Subtotal</span><b>${money(sub,"INR")}</b></div><div class="sub-row"><span>Shipping</span><span>${ship?money(ship,"INR"):"Free"}</span></div><a href="checkout.html" class="btn-primary" style="justify-content:center">Go to Checkout →</a><button class="btn-ghost" onclick="closeDrawer()">Continue Shopping</button><div class="checkout-note">✓ Free shipping over ₹999</div>`}
 window.rem=(i)=>{CART.splice(i,1);save()}
 function openDrawer(){document.getElementById('drawer').classList.add('open')}
