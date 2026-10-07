@@ -238,7 +238,7 @@ function getSlug(){const u=new URL(location.href);return u.searchParams.get('slu
 async function load(){
   const slug=getSlug();
   document.getElementById('crumbName').textContent=slug;
-  const q=`query P($slug:String!){ product(slug:$slug, channel:"in"){ id name slug description media{url alt} thumbnail{url} category{name slug parent{name slug parent{name slug}}} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name media{ url } metadata{ key value } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
+  const q=`query P($slug:String!){ product(slug:$slug, channel:"in"){ id name slug description media{url alt} thumbnail{url} category{name slug parent{name slug parent{name slug}}} productType{name} attributes{attribute{name} values{name}} pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } } variants{ id sku name media{ url alt } metadata{ key value } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } } } products(first:8){ edges{ node{ id name slug thumbnail{url} pricing{ priceRange{ start{ gross{ amount currency } } } } } } } }`;
   const [d]=await Promise.all([gql(q,{slug}), loadSizeCharts()]);
   PRODUCT=d?.product;
   if(!PRODUCT){document.getElementById('pName').textContent="Product not found"; document.getElementById('pDesc').textContent="Try going back to shop."; return;}
@@ -257,11 +257,40 @@ async function load(){
   document.getElementById('pDesc').textContent=PRODUCT.plain;
   document.getElementById('pPrice').innerHTML=`${price?money(price.amount,price.currency):"—"} ${und && price && und.amount>price.amount?`<s>${money(und.amount,price.currency)}</s> <span style="color:var(--accent);font-size:12px">${Math.round((1-price.amount/und.amount)*100)}% OFF</span>`:""} `;
   document.getElementById('addPrice').textContent=price?money(price.amount,price.currency):"—";
-  // images (exclude Size Chart media from gallery + thumbs)
-  const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean).filter(m=>!/size.?chart/i.test(m.alt||""));
-  const urls=media.map(m=>m.url);
-  document.getElementById('mainImg').src=urls[0]||"";
-  document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" onclick="setImg('${u}',this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
+  // images: thumbs (div#thumbs) show ONLY the selected variant's images,
+  // not all product images. Falls back to product media only when the
+  // variant (and its parent in SUBMODE) has no media.
+  window._GALLERY=[];
+  function productFallbackUrls(){
+    const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean).filter(m=>!/size.?chart/i.test((m.alt||"")+(m.url||"")));
+    return media.map(m=>m.url).filter(Boolean);
+  }
+  function currentGalleryUrls(){
+    const clean=(list)=>(list||[]).filter(Boolean).filter(m=>!/size.?chart/i.test((m.alt||"")+(m.url||""))).map(m=>m.url).filter(Boolean);
+    if(VARIANT?.media?.length){
+      const u=clean(VARIANT.media);
+      if(u.length) return u;
+    }
+    if(window._SUBMODE && window._PARENT_ID && window._SUBOF){
+      try{
+        const p=(window._PARENTS||[]).find(x=>x.id===window._PARENT_ID);
+        const u=clean(p?.media);
+        if(u.length) return u;
+      }catch(e){}
+    }
+    return productFallbackUrls();
+  }
+  function renderGallery(){
+    const urls=currentGalleryUrls();
+    window._GALLERY=urls;
+    const main=document.getElementById('mainImg');
+    if(main) main.src=urls[0]||"";
+    const lb=document.getElementById('lbImg');
+    if(lb && urls[0]) lb.src=urls[0];
+    document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" data-i="${i}" onclick="setImgByIndex(${i},this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
+  }
+  window.renderGallery=renderGallery;
+  renderGallery();
   // variants + sizes + size-chart values
   const vwrap=document.getElementById('variants');
   const KNOWN_COLORS = [
@@ -419,6 +448,7 @@ async function load(){
       }
       const skuEl=document.getElementById('pSku'); if(skuEl) skuEl.textContent=VARIANT?.name||VARIANT?.sku||PRODUCT.slug;
     }
+    renderGallery();
     renderSizes();
     renderAttrs();
     fillChart();
@@ -444,6 +474,7 @@ async function load(){
       const base = VARIANT?.name || VARIANT?.sku || PRODUCT.slug;
       const skuEl = document.getElementById('pSku'); if(skuEl) skuEl.textContent = base;
     }
+    renderGallery();
     renderSizes();
     renderAttrs();
     fillChart();
@@ -462,6 +493,7 @@ async function load(){
       if(pr0){ const addEl=document.getElementById('addPrice'); if(addEl) addEl.textContent=money(pr0.amount,pr0.currency); const pEl=document.getElementById('pPrice'); if(pEl) pEl.innerHTML=money(pr0.amount,pr0.currency); }
       const skuEl=document.getElementById('pSku'); if(skuEl) skuEl.textContent=VARIANT?.name||VARIANT?.sku||PRODUCT.slug;
     }
+    renderGallery();
     renderSizes();
   } else if(_displayVariants.length){
     // default: prefer first variant WITH sizes (color-only variants like
@@ -480,6 +512,7 @@ async function load(){
       const col0 = VARIANT?._color? ` - ${VARIANT._color}`:'';
       const skuEl=document.getElementById('pSku'); if(skuEl) skuEl.textContent = base0+col0;
     }
+    renderGallery();
     renderSizes();
   } else {
     vwrap.innerHTML="<span style='font-size:12px;color:var(--muted)'>No variants</span>";
@@ -502,12 +535,13 @@ function renderRelated(){
 }
 window.relDec=(id)=>{ for(let i=CART.length-1;i>=0;i--){ if(CART[i].id===id){ CART[i].qty--; if(CART[i].qty<=0) CART.splice(i,1); break; } } save(); renderRelated(); };
 window.relInc=(id)=>{ const n=REL.find(x=>x.id===id); if(!n) return; location.href='product.html?slug='+n.slug; };
-function setImg(u,el){document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); el.classList.add('active')}
+function setImg(u,el){document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); if(el) el.classList.add('active')}
+function setImgByIndex(i,el){const u=(window._GALLERY||[])[i]; if(!u) return; setImg(u,el)}
 function openLb(){const i=document.getElementById('lbImg'); i.src=document.getElementById('mainImg').src||i.src; document.getElementById('lightbox').classList.add('open')}
 function closeLb(){document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('mainImg').onclick=openLb;
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
-function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=(window._DISPLAY_VARIANTS||PRODUCT.variants).find(v=>v.id===id)||PRODUCT.variants.find(v=>v.id===id); SIZE=null; if(window._SUBMODE&&VARIANT&&VARIANT._parentOf){document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.pid===VARIANT._parentOf));} if(VARIANT&&VARIANT._color){ const ch=document.getElementById('colorHint'); if(ch) ch.textContent="— "+VARIANT._color; document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.color===VARIANT._color)); } const pr=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=pr?money(pr.amount*QTY,pr.currency):"—"; document.getElementById('pPrice').innerHTML=pr?money(pr.amount,pr.currency):"—"; const base=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; document.getElementById('pSku').textContent=base; renderSizes(); renderAttrs()}
+function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=(window._DISPLAY_VARIANTS||PRODUCT.variants).find(v=>v.id===id)||PRODUCT.variants.find(v=>v.id===id); SIZE=null; if(window._SUBMODE&&VARIANT&&VARIANT._parentOf){document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.pid===VARIANT._parentOf));} if(VARIANT&&VARIANT._color){ const ch=document.getElementById('colorHint'); if(ch) ch.textContent="— "+VARIANT._color; document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.color===VARIANT._color)); } const pr=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=pr?money(pr.amount*QTY,pr.currency):"—"; document.getElementById('pPrice').innerHTML=pr?money(pr.amount,pr.currency):"—"; const base=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; document.getElementById('pSku').textContent=base; try{if(typeof window.renderGallery==="function") window.renderGallery();}catch(e){} renderSizes(); renderAttrs()}
 async function loadSiblings(){
   const wrap=document.getElementById('colorWrap'), box=document.getElementById('colors');
   try{
