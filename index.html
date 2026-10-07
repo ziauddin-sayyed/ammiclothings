@@ -303,12 +303,12 @@ button{font:inherit}
 
 <header class="header">
   <div class="header-inner">
-    <a href="index.html" class="logo"><img src="images/logo.png" alt="Ammi Enterprises"/></a>
+    <a href="./" class="logo"><img src="images/logo.png" alt="Ammi Enterprises"/></a>
     <button class="hamburger" id="hamBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="nav" id="mainNav">
-      <a href="index.html#shop">Shop</a>
-      <a href="products.html">Products</a>
-      <a href="profile.html" id="ordersLink" style="display:none">My Profile</a>
+      <a href="./#shop">Shop</a>
+      <a href="products/">Products</a>
+      <a href="profile/" id="ordersLink" style="display:none">My Profile</a>
 
 
 
@@ -425,20 +425,20 @@ button{font:inherit}
     </div>
     <div>
       <h4>Kids Wear</h4>
-      <a href="products.html">Kids Wear</a><br/>
-      <a href="products.html">Kids Embroidered Rayon Top</a><br/>
-      <a href="products.html">Kids Co Ord Set</a><br/>
-      <a href="products.html">Kids Frock</a><br/>
-      <a href="products.html">Kids Night Suit</a><br/>
+      <a href="products/">Kids Wear</a><br/>
+      <a href="products/">Kids Embroidered Rayon Top</a><br/>
+      <a href="products/">Kids Co Ord Set</a><br/>
+      <a href="products/">Kids Frock</a><br/>
+      <a href="products/">Kids Night Suit</a><br/>
       <a href="#shop">Live Shop</a>
     </div>
     <div>
       <h4>Girls & Ladies Wear</h4>
-      <a href="products.html">Girls Wear</a><br/>
-      <a href="products.html">Girl One Piece Dress</a><br/>
-      <a href="products.html">Ladies Wear</a><br/>
-      <a href="products.html">Ladies Kurti Set</a><br/>
-      <a href="products.html">Ladies Palazzo Set</a><br/>
+      <a href="products/">Girls Wear</a><br/>
+      <a href="products/">Girl One Piece Dress</a><br/>
+      <a href="products/">Ladies Wear</a><br/>
+      <a href="products/">Ladies Kurti Set</a><br/>
+      <a href="products/">Ladies Palazzo Set</a><br/>
       <a href="#collections">Collections (in-store)</a>
     </div>
     <div>
@@ -449,11 +449,11 @@ button{font:inherit}
     </div>
     <div>
       <h4>Policies</h4>
-      <a href="terms-and-conditions.html">Terms & Conditions</a><br/>
-      <a href="privacy-policy.html">Privacy Policy</a><br/>
-      <a href="refund-policy.html">Refund Policy</a><br/>
-      <a href="return-policy.html">Return Policy</a><br/>
-      <a href="shipping-policy.html">Shipping Policy</a>
+      <a href="terms-and-conditions/">Terms & Conditions</a><br/>
+      <a href="privacy-policy/">Privacy Policy</a><br/>
+      <a href="refund-policy/">Refund Policy</a><br/>
+      <a href="return-policy/">Return Policy</a><br/>
+      <a href="shipping-policy/">Shipping Policy</a>
     </div>
   </div>
   <div class="legal">
@@ -609,7 +609,7 @@ function renderCategories(){
     grid.querySelectorAll('.cat-card').forEach(c=>c.addEventListener('click', e=>{
       e.preventDefault();
       FILTER=c.dataset.cat; document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active', x.dataset.filter===FILTER));
-      location.href='products.html?cat='+encodeURIComponent(FILTER);
+      location.href='products/?cat='+encodeURIComponent(FILTER);
     }));
   }
 }
@@ -648,7 +648,7 @@ function renderProducts(){
   const wrap = document.getElementById('products');
   document.getElementById('status').textContent = list.length ? `Showing ${list.length} bestseller${list.length>1?"s":""}` : ``;
   if(!list.length){
-    wrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)">No bestsellers match your search. Try clearing search or <a href="products.html" style="color:var(--primary);text-decoration:underline">browse all products →</a></div>`;
+    wrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;background:#fff;border-radius:20px;border:1px dashed var(--blush-deep);color:var(--muted)">No bestsellers match your search. Try clearing search or <a href="products/" style="color:var(--primary);text-decoration:underline">browse all products →</a></div>`;
     return;
   }
   wrap.innerHTML = list.map(g=>{
@@ -660,7 +660,7 @@ function renderProducts(){
     const img = imgOrig(p.thumbnail?.url) || p.media?.[0]?.url || "https://images.unsplash.com/photo-1617331726728-8f47a0e693b4?q=80&w=600&auto=format&fit=crop";
     const qty = g.items.reduce((s,it)=>s+CART.filter(c=>c.id===it.id).reduce((a,c)=>a+c.qty,0),0);
     return `<article class="card">
-      <div class="card-img" data-id="${p.id}" style="cursor:pointer" onclick="location.href='product.html?slug=${p.slug}'">
+      <div class="card-img" data-id="${p.id}" style="cursor:pointer" onclick="location.href='product/?slug=${p.slug}'">
         <img loading="lazy" src="${img}" alt="${p.name}"/>
         <button class="wish ${wishActive}" onclick="event.stopPropagation(); toggleWish('${p.id}')" aria-label="wishlist">
           <svg viewBox="0 0 24 24" fill="${WISH.includes(p.id)?'currentColor':'none'}" stroke="currentColor"><path d="M12 20l-3.6-3.2C5 13.6 2 10.8 2 7.5 2 4.2 4.5 2 7.3 2c1.6 0 3.1.8 3.9 2 .8-1.2 2.3-2 3.9-2C18 2 20.5 4.2 20.5 7.5c0 3.3-3 6.1-6.4 9.3L12 20z"/></svg>
@@ -671,7 +671,7 @@ function renderProducts(){
       </div>
       <div class="card-body">
         <div class="card-cat">${p.category?.name||'Kidswear'}</div>
-        <a href="product.html?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
+        <a href="product/?slug=${p.slug}"><h3 class="card-title">${p.name}</h3></a>
         ${g.colours.length>1?`<div style="font-size:11px;color:var(--muted)">${g.colours.length} colours: ${g.colours.join(" • ")}</div>`:""}
         <div class="card-price"><b>${price?money(price.amount, price.currency):'—'}</b>${hasSale?`<s>${money(und.amount, und.currency)}</s>`:''}</div>
         <div class="card-actions">
@@ -690,7 +690,7 @@ function toggleWish(id){
 }
 async function shareCard(slug){
   const p=PRODUCTS.find(x=>x.slug===slug);
-  const url=new URL('product.html?slug='+slug, location.href).href;
+  const url=new URL('product/?slug='+slug, location.href).href;
   const title=p?p.name:document.title;
   if(navigator.share){ try{await navigator.share({title,url});}catch(e){} return; }
   try{ await navigator.clipboard.writeText(url); toast('Link copied ✓'); }
@@ -777,9 +777,9 @@ function renderCart(){
     <div class="row"><span>Subtotal</span><b>${money(subtotal, cur)}</b></div>
     <div class="row"><span>Shipping</span><span>${shipping?money(shipping,cur):'Free'}</span></div>
     <div class="row total"><span>Total</span><span>${money(total, cur)}</span></div>
-    <a href="checkout.html" class="btn-primary" style="width:100%;justify-content:center;margin-top:12px;display:flex">Go to Checkout • ${money(total,cur)}</a>
+    <a href="checkout/" class="btn-primary" style="width:100%;justify-content:center;margin-top:12px;display:flex">Go to Checkout • ${money(total,cur)}</a>
     <button class="btn-ghost" style="width:100%;margin-top:8px;border-radius:999px;padding:10px" onclick="checkout()">Quick Checkout</button>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0">Secure checkout • <a href="checkout.html" style="color:var(--primary);text-decoration:underline">Full checkout page →</a></p>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0">Secure checkout • <a href="checkout/" style="color:var(--primary);text-decoration:underline">Full checkout page →</a></p>
   `;
 }
 function changeQty(i,d){
