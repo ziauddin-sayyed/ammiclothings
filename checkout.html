@@ -383,11 +383,43 @@ function sizeNote(){return CART.map(c=>`${c.vName||c.sku} x${c.qty}${c.size?` in
 async function ensureCheckout(email,addr){
   const key=JSON.stringify([CART,email,addr]);
   if(CHECKOUT&&CHECKOUT_KEY===key) return CHECKOUT;
+  // Drop lines with missing / malformed variantIds (e.g. stale ak_cart from
+  // another env, or a Product id used as variantId). Saleor would reject the
+  // whole checkoutCreate with "Could not resolve to a node...".
+  const isVariantId=(id)=>{
+    if(!id || typeof id!=="string") return false;
+    try{
+      const s=atob(id);
+      return s.startsWith("ProductVariant:");
+    }catch(e){ return false; }
+  };
+  const bad=CART.filter(c=>!isVariantId(c.variantId));
+  if(bad.length){
+    CART=CART.filter(c=>isVariantId(c.variantId));
+    localStorage.setItem("ak_cart",JSON.stringify(CART));
+    try{render();}catch(e){}
+    if(!CART.length) throw new Error("That item is no longer available — your bag was cleared. Please re-add the product.");
+  }
+  if(!CART.length) throw new Error("Your bag is empty.");
   const lines=CART.map(c=>({quantity:c.qty,variantId:c.variantId}));
   const notes=[document.getElementById('notes').value.trim(),("Sizes: "+sizeNote())].filter(Boolean).join(" | ");
   const d=await gql(`mutation($lines:[CheckoutLineInput!]!,$email:String,$addr:AddressInput){checkoutCreate(input:{channel:"${CHANNEL}",lines:$lines,email:$email,shippingAddress:$addr,billingAddress:$addr}){checkout{id token} errors{field message code}}}`,
     {lines,email,addr});
-  if(d.checkoutCreate.errors?.length) throw new Error(d.checkoutCreate.errors.map(e=>e.message).join(", "));
+  if(d.checkoutCreate.errors?.length){
+    const msgs=d.checkoutCreate.errors.map(e=>e.message).join(", ");
+    // Variant deleted / unpublished / not in channel "in" → Saleor returns
+    // "Could not resolve to a node...". Auto-drop the stale lines so the
+    // next attempt can succeed after re-adding.
+    if(/could not resolve to a node/i.test(msgs)){
+      const ids=new Set(lines.map(l=>l.variantId));
+      CART=CART.filter(c=>!ids.has(c.variantId));
+      localStorage.setItem("ak_cart",JSON.stringify(CART));
+      CHECKOUT=null; CHECKOUT_KEY="";
+      try{render();}catch(e){}
+      throw new Error("That variant (ProductVariant:194 or similar) no longer exists in channel \"in\" — it was removed from your bag. Please re-add the product from the shop to get a fresh variant.");
+    }
+    throw new Error(msgs);
+  }
   CHECKOUT=d.checkoutCreate.checkout; CHECKOUT_KEY=key; SHIPMETHOD=null;
   const note=[document.getElementById('notes').value.trim(),("Sizes: "+sizeNote())].filter(Boolean).join(" | ").slice(0,500);
   try{await gql(`mutation($id:ID!,$n:String!){checkoutCustomerNoteUpdate(id:$id,customerNote:$n){checkout{id} errors{field message}}}`,

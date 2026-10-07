@@ -698,7 +698,8 @@ function cardInc(id){
   addToCart(p,v,1,"");
 }
 function addToCart(product, variant, qty, size){
-  const vid = variant?.id || product.id;
+  const vid = variant?.id;
+  if(!vid){ toast("Please choose options on the product page"); return; }
   const price = variant?.pricing?.price?.gross?.amount ?? product.pricing?.priceRange?.start?.gross?.amount ?? 0;
   const currency = variant?.pricing?.price?.gross?.currency ?? product.pricing?.priceRange?.start?.gross?.currency ?? "INR";
   const existing = CART.find(c=>c.variantId===vid && (c.size||"")===(size||""));

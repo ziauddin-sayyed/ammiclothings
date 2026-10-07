@@ -51,6 +51,12 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}button{fon
 .thumbs img{width:74px;height:74px;border-radius:12px;object-fit:cover;border:2px solid transparent;cursor:pointer;background:#fff}
 .thumbs img.active{border-color:var(--accent)}
 .main-img .zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(49,29,64,.75);color:#fff;font-size:11px;padding:6px 10px;border-radius:999px;letter-spacing:.06em;pointer-events:none}
+.main-img img{touch-action:pan-y;user-select:none;-webkit-user-drag:none}
+.g-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:2}
+.g-nav.prev{left:10px}.g-nav.next{right:10px}
+.g-nav:hover{border-color:var(--accent);color:var(--accent)}
+.g-count{position:absolute;top:12px;right:12px;background:rgba(49,29,64,.75);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.06em;pointer-events:none}
+@media(max-width:900px){.g-nav{width:34px;height:34px}}
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(20,12,30,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
 .lightbox.open{display:flex}
 .lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
@@ -164,7 +170,7 @@ table.chart tr.sel td{background:var(--blush);font-weight:700}
 
 <section class="pdp" id="pdp">
   <div class="gallery">
-    <div class="main-img"><img id="mainImg" alt="product"/><span class="zoom-hint">⛶ Click to zoom</span></div>
+    <div class="main-img" id="mainBox"><img id="mainImg" alt="product" draggable="false"/><button class="g-nav prev" id="gPrev" aria-label="Previous image">‹</button><button class="g-nav next" id="gNext" aria-label="Next image">›</button><span class="g-count" id="gCount" style="display:none"></span><span class="zoom-hint">⛶ Click to zoom</span></div>
     <div class="thumbs" id="thumbs"></div>
   </div>
   <div class="info">
@@ -261,6 +267,7 @@ async function load(){
   // not all product images. Falls back to product media only when the
   // variant (and its parent in SUBMODE) has no media.
   window._GALLERY=[];
+  window._GALLERY_IDX=0;
   function productFallbackUrls(){
     const media=(PRODUCT.media?.length?PRODUCT.media:[PRODUCT.thumbnail]).filter(Boolean).filter(m=>!/size.?chart/i.test((m.alt||"")+(m.url||"")));
     return media.map(m=>m.url).filter(Boolean);
@@ -280,14 +287,47 @@ async function load(){
     }
     return productFallbackUrls();
   }
+  function syncGalleryUI(){
+    const urls=window._GALLERY||[];
+    const idx=window._GALLERY_IDX||0;
+    const thumbs=document.querySelectorAll('.thumbs img');
+    thumbs.forEach((t,i)=>t.classList.toggle('active',i===idx));
+    const act=thumbs[idx];
+    if(act && act.scrollIntoView) try{act.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"})}catch(e){}
+    const c=document.getElementById('gCount');
+    if(c){
+      if(urls.length>1){c.style.display=""; c.textContent=(idx+1)+" / "+urls.length;}
+      else c.style.display="none";
+    }
+    const pv=document.getElementById('gPrev'), nx=document.getElementById('gNext');
+    const showNav=urls.length>1;
+    if(pv) pv.style.display=showNav?"":"none";
+    if(nx) nx.style.display=showNav?"":"none";
+  }
+  function showGalleryIndex(i){
+    const urls=window._GALLERY||[];
+    if(!urls.length) return;
+    const n=((i%urls.length)+urls.length)%urls.length;
+    window._GALLERY_IDX=n;
+    const main=document.getElementById('mainImg');
+    if(main) main.src=urls[n];
+    const lb=document.getElementById('lbImg');
+    if(lb) lb.src=urls[n];
+    syncGalleryUI();
+  }
+  function galleryNext(){showGalleryIndex((window._GALLERY_IDX||0)+1)}
+  function galleryPrev(){showGalleryIndex((window._GALLERY_IDX||0)-1)}
+  window.showGalleryIndex=showGalleryIndex; window.galleryNext=galleryNext; window.galleryPrev=galleryPrev;
   function renderGallery(){
     const urls=currentGalleryUrls();
     window._GALLERY=urls;
+    window._GALLERY_IDX=0;
     const main=document.getElementById('mainImg');
     if(main) main.src=urls[0]||"";
     const lb=document.getElementById('lbImg');
     if(lb && urls[0]) lb.src=urls[0];
-    document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" data-i="${i}" onclick="setImgByIndex(${i},this)"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
+    document.getElementById('thumbs').innerHTML=urls.map((u,i)=>`<img src="${u}" class="${i===0?'active':''}" data-i="${i}" onclick="setImgByIndex(${i},this)" loading="lazy"/>`).join("")||`<span style="font-size:12px;color:var(--muted)">No image</span>`;
+    syncGalleryUI();
   }
   window.renderGallery=renderGallery;
   renderGallery();
@@ -535,11 +575,47 @@ function renderRelated(){
 }
 window.relDec=(id)=>{ for(let i=CART.length-1;i>=0;i--){ if(CART[i].id===id){ CART[i].qty--; if(CART[i].qty<=0) CART.splice(i,1); break; } } save(); renderRelated(); };
 window.relInc=(id)=>{ const n=REL.find(x=>x.id===id); if(!n) return; location.href='product.html?slug='+n.slug; };
-function setImg(u,el){document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); if(el) el.classList.add('active')}
-function setImgByIndex(i,el){const u=(window._GALLERY||[])[i]; if(!u) return; setImg(u,el)}
-function openLb(){const i=document.getElementById('lbImg'); i.src=document.getElementById('mainImg').src||i.src; document.getElementById('lightbox').classList.add('open')}
-function closeLb(){document.getElementById('lightbox').classList.remove('open')}
-document.getElementById('mainImg').onclick=openLb;
+function setImg(u,el){const idx=(window._GALLERY||[]).indexOf(u); if(idx>=0 && typeof window.showGalleryIndex==="function"){window.showGalleryIndex(idx); return;} document.getElementById('mainImg').src=u; document.getElementById('lbImg').src=u; document.querySelectorAll('.thumbs img').forEach(i=>i.classList.remove('active')); if(el) el.classList.add('active')}
+function setImgByIndex(i,el){if(typeof window.showGalleryIndex==="function") window.showGalleryIndex(i);}
+function openLb(){if(window._SWIPE_SUPPRESS) return; const i=document.getElementById('lbImg'); i.src=document.getElementById('mainImg').src||i.src; document.getElementById('lightbox').classList.add('open')}
+function closeLb(){if(window._SWIPE_SUPPRESS){window._SWIPE_SUPPRESS=false; return;} document.getElementById('lightbox').classList.remove('open')}
+(function(){
+  let suppressClick=false;
+  function bindSwipe(el, onLeft, onRight){
+    if(!el || el.dataset.swipeBound) return;
+    el.dataset.swipeBound="1";
+    let sx=0, sy=0, dx=0, dy=0, down=false, pid=null;
+    const TH=40, VETO=60;
+    el.addEventListener('touchstart',e=>{const t=e.changedTouches[0]; sx=t.clientX; sy=t.clientY;},{passive:true});
+    el.addEventListener('touchend',e=>{
+      const t=e.changedTouches[0]; dx=t.clientX-sx; dy=t.clientY-sy;
+      if(Math.abs(dx)>TH && Math.abs(dx)>Math.abs(dy)+10){ e.preventDefault(); if(dx<0) onLeft(); else onRight(); suppressClick=true; window._SWIPE_SUPPRESS=true; setTimeout(()=>{suppressClick=false; window._SWIPE_SUPPRESS=false;},300); }
+    },{passive:false});
+    el.addEventListener('mousedown',e=>{down=true; pid=1; sx=e.clientX; sy=e.clientY;});
+    window.addEventListener('mousemove',e=>{if(!down) return; dx=e.clientX-sx; dy=e.clientY-sy;});
+    window.addEventListener('mouseup',e=>{
+      if(!down) return; down=false;
+      if(Math.abs(dx)>TH && Math.abs(dx)>Math.abs(dy)+10){ if(dx<0) onLeft(); else onRight(); suppressClick=true; window._SWIPE_SUPPRESS=true; setTimeout(()=>{suppressClick=false; window._SWIPE_SUPPRESS=false;},300); }
+      dx=dy=0;
+    });
+    el.addEventListener('click',e=>{if(suppressClick){e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); e.preventDefault(); suppressClick=false;}},true);
+  }
+  function next(){try{(window.galleryNext||galleryNext)()}catch(e){}}
+  function prev(){try{(window.galleryPrev||galleryPrev)()}catch(e){}}
+  const box=document.getElementById('mainBox');
+  const img=document.getElementById('mainImg');
+  bindSwipe(box||img, next, prev);
+  const lb=document.getElementById('lightbox');
+  bindSwipe(lb, next, prev);
+  const gp=document.getElementById('gPrev'), gn=document.getElementById('gNext');
+  if(gp) gp.onclick=(e)=>{e.stopPropagation(); prev();};
+  if(gn) gn.onclick=(e)=>{e.stopPropagation(); next();};
+  if(img) img.onclick=(e)=>{openLb();};
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'){ next(); }
+    else if(e.key==='ArrowLeft'){ prev(); }
+  });
+})();
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLb()});
 function pick(id){document.querySelectorAll('#variants .opt').forEach(o=>o.classList.toggle('active',o.dataset.vid===id)); VARIANT=(window._DISPLAY_VARIANTS||PRODUCT.variants).find(v=>v.id===id)||PRODUCT.variants.find(v=>v.id===id); SIZE=null; if(window._SUBMODE&&VARIANT&&VARIANT._parentOf){document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.pid===VARIANT._parentOf));} if(VARIANT&&VARIANT._color){ const ch=document.getElementById('colorHint'); if(ch) ch.textContent="— "+VARIANT._color; document.querySelectorAll('#colors .opt').forEach(o=>o.classList.toggle('active',o.dataset.color===VARIANT._color)); } const pr=VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross; document.getElementById('addPrice').textContent=pr?money(pr.amount*QTY,pr.currency):"—"; document.getElementById('pPrice').innerHTML=pr?money(pr.amount,pr.currency):"—"; const base=VARIANT?.name||VARIANT?.sku||PRODUCT.slug; document.getElementById('pSku').textContent=base; try{if(typeof window.renderGallery==="function") window.renderGallery();}catch(e){} renderSizes(); renderAttrs()}
 async function loadSiblings(){
@@ -679,7 +755,13 @@ document.getElementById('addBtn').onclick=()=>{
     const sameColor = pool.find(v=>(v._sizes||[]).includes(SIZE) && (v._color||"")===((VARIANT||{})._color||""));
     orderVariant = sameColor || pool.find(v=>(v._sizes||[]).includes(SIZE)) || VARIANT;
   }
-  const vid = orderVariant?.id || VARIANT?.id || PRODUCT.id;
+  const vid = orderVariant?.id || VARIANT?.id;
+  try{
+    if(!vid || !atob(vid).startsWith("ProductVariant:")) throw 0;
+  }catch(e){
+    toast("Please select a variant first");
+    return;
+  }
   const pr = orderVariant?.pricing?.price?.gross || VARIANT?.pricing?.price?.gross || PRODUCT.pricing?.priceRange?.start?.gross || {amount:0, currency:"INR"};
   const colorName = document.getElementById('colorHint')?.textContent?.replace(/^—\s*/,'') || "";
   const labelWithColor = VARIANT ? ((VARIANT.name||VARIANT.sku||"Variant") + (VARIANT._color? " - "+VARIANT._color:"")) : "";

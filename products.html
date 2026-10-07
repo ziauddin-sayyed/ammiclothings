@@ -157,7 +157,8 @@ function cardInc(id){
   const v=(p.variants||[])[0]||null;
   const price=p.pricing?.priceRange?.start?.gross;
   if(!price) { location.href='product.html?slug='+p.slug; return; }
-  const vid=v?.id||p.id;
+  const vid=v?.id;
+  if(!vid){ location.href='product.html?slug='+p.slug; return; }
   const ex=CART.find(c=>c.variantId===vid&&(c.size||"")==="");
   if(ex){ ex.qty+=1; if(!ex.vName&&v?.name) ex.vName=v.name; }
    else CART.push({id:p.id, variantId:vid, name:p.name, sku:v?.sku||p.slug, vName:v?.name||"", size:"", img:imgOrig(p.thumbnail?.url)||((p.media||[])[0]?.url||""), price:price.amount, currency:price.currency, qty:1});

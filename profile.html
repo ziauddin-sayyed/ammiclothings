@@ -81,6 +81,15 @@ a{color:inherit;text-decoration:none}
 @keyframes sp{to{transform:rotate(360deg)}}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--primary);color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.3s;z-index:50}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.print-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:12px;margin-top:10px}
+.print-btn:hover{border-color:var(--accent);color:var(--accent)}
+#printArea{display:none}
+@media print{
+  @page{size:4in 6in;margin:0}
+  body{background:#fff!important}
+  body>*{display:none!important}
+  #printArea{display:block!important;width:4in;height:6in;overflow:hidden;background:#fff;color:#000}
+}
 .footer{background:var(--primary);color:#fff;margin-top:40px;padding:28px 20px}
 .footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
 </style>
@@ -148,12 +157,17 @@ a{color:inherit;text-decoration:none}
 
 <footer class="footer"><div class="footer-inner"><span>© 2026 Ammi Enterprises • Ammikids Retail</span><span><a href="terms-and-conditions.html">Terms</a> • <a href="privacy-policy.html">Privacy</a> • <a href="refund-policy.html">Refunds</a> • <a href="return-policy.html">Returns</a> • <a href="shipping-policy.html">Shipping</a></span><span>Mumbai 400028</span></div></footer>
 <div class="toast" id="toast"></div>
+<div id="printArea"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script>
 const GRAPHQL = window.APP_CONFIG.GRAPHQL;
 let USER=JSON.parse(localStorage.getItem("ak_user")||"null"), TOKEN=localStorage.getItem("ak_token")||null;
 let EDIT_ID=null, ADDR_CACHE=[];
 const ADDR_Q=`{me{email addresses{id firstName lastName streetAddress1 city postalCode country{code} countryArea phone isDefaultShippingAddress}}}`;
+const SELLER={name:"Ammikids by Ammi Enterprises",addr:"A-7, Ground Floor, Kasturchand Mill Compound, M.C. Jawale Marg, Mumbai - 400028, Maharashtra, India",phone:"+91 70219 46362",gstin:"27JHIPK9504H1ZX"};
+let ORDER_CACHE=[];
+function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function money(a,c="INR"){return new Intl.NumberFormat('en-IN',{style:'currency',currency:c,maximumFractionDigits:0}).format(a)}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
 function fmtDate(s){try{return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch(e){return s||""}}
@@ -177,17 +191,78 @@ async function boot(){
 async function loadOrders(){
   const box=document.getElementById('orders'); box.innerHTML="<p class='sub'>Loading orders…</p>";
   try{
-    const d=await gql(`{me{orders(first:20){edges{node{id number created status statusDisplay paymentStatusDisplay shippingMethodName customerNote total{gross{amount currency}} lines{quantity variant{sku name} totalPrice{gross{amount currency}}}}}}}}`,{},TOKEN);
+    const d=await gql(`{me{orders(first:20){edges{node{id number created status statusDisplay paymentStatusDisplay shippingMethodName customerNote subtotal{gross{amount currency}} shippingPrice{gross{amount currency}} total{gross{amount currency}} shippingAddress{firstName lastName streetAddress1 city postalCode country{code} countryArea phone} lines{quantity productName productSku variantName variant{sku name} totalPrice{gross{amount currency}}}}}}}}`,{},TOKEN);
     if(!d.me){doLogout(); return;}
-    const edges=d.me.orders.edges;
+    const edges=d.me?.orders?.edges||[];
+    ORDER_CACHE=edges.map(e=>e.node);
     if(!edges.length){box.innerHTML="<p class='sub'>No orders yet. <a href='index.html#shop' style='color:var(--primary);text-decoration:underline'>Start shopping →</a></p>"; return;}
-    box.innerHTML=edges.map((e,i)=>{const o=e.node; return `<div class="order ${i===0?'current':''}">
-      <div class="ohead"><b>Order #${o.number}</b><span class="pill ${i===0?'cur':''}">${o.statusDisplay}</span></div>
-      <div class="meta">${fmtDate(o.created)} • ${o.paymentStatusDisplay}${o.shippingMethodName?` • Delivery: ${o.shippingMethodName}`:""}</div>
-      ${o.lines.map(l=>`<div class="oline"><span><b>${l.variant.name||l.variant.sku}</b> <small>× ${l.quantity}</small></span><b>${money(l.totalPrice.gross.amount,l.totalPrice.gross.currency)}</b></div>`).join("")}
-      <div class="otot"><span>Total</span><span>${money(o.total.gross.amount,o.total.gross.currency)}</span></div>
+    box.innerHTML=edges.map((e,i)=>{const o=e.node; const lines=o.lines||[]; return `<div class="order ${i===0?'current':''}">
+      <div class="ohead"><b>Order #${o.number}</b><span class="pill ${i===0?'cur':''}">${o.statusDisplay||o.status||""}</span></div>
+      <div class="meta">${fmtDate(o.created)} • ${o.paymentStatusDisplay||""}${o.shippingMethodName?` • Delivery: ${o.shippingMethodName}`:""}</div>
+      ${lines.map(l=>{const nm=l.variant?.name||l.variantName||l.productName||l.variant?.sku||l.productSku||"Item"; const amt=l.totalPrice?.gross; return `<div class="oline"><span><b>${nm}</b> <small>× ${l.quantity}</small></span><b>${amt!=null?money(amt.amount,amt.currency):""}</b></div>`}).join("")}
+      <div class="otot"><span>Total</span><span>${o.total?.gross?money(o.total.gross.amount,o.total.gross.currency):""}</span></div>
+      <button class="print-btn" onclick="printSlipByIdx(${i})">🖨 Print 4×6 slip</button>
     </div>`}).join("");
   }catch(err){box.innerHTML="<p class='sub'>Couldn’t load orders: "+(err.message||"error").slice(0,120)+"</p>"}
+}
+function fmtAddr(a){
+  if(!a) return "—";
+  const nm=[a.firstName,a.lastName].filter(Boolean).join(" ");
+  const lines=[nm,a.streetAddress1,[a.city,a.countryArea].filter(Boolean).join(", ")+(a.postalCode?" - "+a.postalCode:""),a.phone||""].filter(Boolean);
+  return lines.map(esc).join("<br/>");
+}
+function printSlipByIdx(i){
+  const o=ORDER_CACHE[i];
+  if(!o) return toast("Order not found");
+  const a=o.shippingAddress||{};
+  const cname=[a.firstName,a.lastName].filter(Boolean).join(" ")||"Customer";
+  const trackUrl="https://ammiclothings.com/orders/"+(o.number||o.id);
+  const lines=o.lines||[];
+  const rows=lines.map((l,ix)=>{
+    const nm=l.variant?.name||l.variantName||l.productName||l.variant?.sku||l.productSku||"Item";
+    const amt=l.totalPrice?.gross?money(l.totalPrice.gross.amount,l.totalPrice.gross.currency):"—";
+    return `<tr><td style="padding:3px 4px;border-top:1px dashed #999">${ix+1}</td><td style="padding:3px 4px;border-top:1px dashed #999">${esc(nm)} × ${l.quantity}</td><td align="right" style="padding:3px 4px;border-top:1px dashed #999">${esc(amt)}</td></tr>`;
+  }).join("");
+  const sub=o.subtotal?.gross?money(o.subtotal.gross.amount,o.subtotal.gross.currency):null;
+  const ship=o.shippingPrice?.gross?money(o.shippingPrice.gross.amount,o.shippingPrice.gross.currency):null;
+  const tot=o.total?.gross?money(o.total.gross.amount,o.total.gross.currency):"—";
+  document.getElementById('printArea').innerHTML=`
+  <div style="width:4in;height:6in;padding:0.22in 0.25in;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;font-size:10px;line-height:1.45;color:#000;background:#fff">
+    <div style="display:flex;align-items:center;gap:8px;border-bottom:2px solid #000;padding-bottom:6px">
+      <img src="images/logo.png" style="height:30px" alt=""/>
+      <div style="flex:1"><div style="font-size:14px;font-weight:800">AMMI kids</div><div style="font-size:9px">by Ammi Enterprises • Shipping Slip</div></div>
+      <div style="text-align:right;font-size:10px"><b>Order #${esc(o.number||"")}</b><br/>${esc(fmtDate(o.created))}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <div style="flex:1;border:1px solid #000;border-radius:6px;padding:5px 7px"><b style="font-size:9px">SHIP TO</b><br/><b>${esc(cname)}</b><br/>${fmtAddr(a)}</div>
+      <div style="flex:1;border:1px solid #000;border-radius:6px;padding:5px 7px"><b style="font-size:9px">SOLD BY</b><br/><b>${esc(SELLER.name)}</b><br/>${esc(SELLER.addr)}<br/>${esc(SELLER.phone)}<br/>GSTIN: ${esc(SELLER.gstin)}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-top:6px;font-size:10px"><tr style="font-size:9px;text-align:left"><th style="padding:3px 4px">#</th><th style="padding:3px 4px">Item</th><th style="padding:3px 4px" align="right">Amount</th></tr>${rows}</table>
+    <div style="margin-top:4px;font-size:10px">
+      ${sub?`<div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>${esc(sub)}</span></div>`:""}
+      ${ship?`<div style="display:flex;justify-content:space-between"><span>Shipping${o.shippingMethodName?" ("+esc(o.shippingMethodName)+")":""}</span><span>${esc(ship)}</span></div>`:""}
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;border-top:2px solid #000;margin-top:3px;padding-top:3px"><span>Total</span><span>${esc(tot)}</span></div>
+      <div style="font-size:9px">Payment: ${esc(o.paymentStatusDisplay||"")}</div>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:10px;margin-top:6px">
+      <div style="flex:1;font-size:9px">Scan to track your order:<br/><b style="font-size:8px;word-break:break-all">${esc(trackUrl)}</b><br/><br/>Thank you for shopping with Ammikids!</div>
+      <div id="slipQr" style="width:84px;height:84px"></div>
+    </div>
+  </div>`;
+  const qrEl=document.getElementById('slipQr');
+  const doPrint=()=>setTimeout(()=>window.print(),350);
+  try{
+    if(window.QRCode && qrEl){
+      new QRCode(qrEl,{text:trackUrl,width:84,height:84,correctLevel:QRCode.CorrectLevel.M});
+      doPrint();
+    }else if(qrEl){
+      const im=new Image();
+      im.onload=doPrint; im.onerror=doPrint;
+      im.src="https://api.qrserver.com/v1/create-qr-code/?size=84x84&data="+encodeURIComponent(trackUrl);
+      qrEl.appendChild(im);
+      setTimeout(()=>window.print(),2500);
+    }else doPrint();
+  }catch(e){ doPrint(); }
 }
 async function loadAddrs(){
   const box=document.getElementById('addrList'); box.innerHTML="<p class='sub'>Loading addresses…</p>";
