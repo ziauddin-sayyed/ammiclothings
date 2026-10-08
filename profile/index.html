@@ -213,6 +213,7 @@ async function loadOrders(){
       ${lines.map(l=>{const nm=l.variant?.name||l.variantName||l.productName||l.variant?.sku||l.productSku||"Item"; const amt=l.totalPrice?.gross; return `<div class="oline"><span><b>${nm}</b> <small>× ${l.quantity}</small></span><b>${amt!=null?money(amt.amount,amt.currency):""}</b></div>`}).join("")}
       <div class="otot"><span>Total</span><span>${o.total?.gross?money(o.total.gross.amount,o.total.gross.currency):""}</span></div>
       <button class="print-btn" onclick="printSlipByIdx(${i})">🖨 Print 4×6 slip</button>
+      <button class="print-btn" onclick="openInvoice(${i})">🧾 Invoice</button>
     </div>`}).join("");
   }catch(err){box.innerHTML="<p class='sub'>Couldn’t load orders: "+(err.message||"error").slice(0,120)+"</p>"}
 }
@@ -221,6 +222,12 @@ function fmtAddr(a){
   const nm=[a.firstName,a.lastName].filter(Boolean).join(" ");
   const lines=[nm,a.streetAddress1,[a.city,a.countryArea].filter(Boolean).join(", ")+(a.postalCode?" - "+a.postalCode:""),a.phone||""].filter(Boolean);
   return lines.map(esc).join("<br/>");
+}
+function openInvoice(i){
+  const o=ORDER_CACHE[i];
+  if(!o) return toast("Order not found");
+  try{localStorage.setItem("ak_print_order",JSON.stringify(o));}catch(e){}
+  location.href='../printproductpage/?number='+encodeURIComponent(o.number||"");
 }
 function printSlipByIdx(i){
   const o=ORDER_CACHE[i];
