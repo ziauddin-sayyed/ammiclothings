@@ -724,13 +724,45 @@ function renderSizes(){
   box.innerHTML=list.map(s=>`<button class="size-chip ${SIZE===s?'sel':''}" data-s="${s}" onclick="selSize(this)">${s}</button>`).join("");
   fillChart();
 }
+function normSize(s){
+  let t=String(s||"").toLowerCase().trim();
+  if(!t) return "";
+  t=t.replace(/[-–—/]/g," ");
+  const words=t.split(/\s+/).filter(w=>w&&w!=="to"&&w!=="and");
+  const toks=words.map(w=>{
+    const m=w.match(/^(\d+)([a-z]*)$/);
+    if(!m) return {n:"",u:w};
+    let u=m[2];
+    if(/^mo(nths?)?$/.test(u)) u="m";
+    else if(/^(y|yr|yrs|year|years)$/.test(u)) u="y";
+    return {n:m[1],u};
+  });
+  for(let i=toks.length-2;i>=0;i--){
+    if(toks[i].n&&!toks[i].u){
+      const nxt=toks.slice(i+1).find(x=>x.n&&x.u);
+      if(nxt) toks[i].u=nxt.u;
+    }
+  }
+  toks.forEach(x=>{if(!x.n){if(/^mo(nths?)?$/.test(x.u)) x.u="m"; else if(/^(y|yr|yrs|year|years)$/.test(x.u)) x.u="y";}});
+  for(let i=toks.length-1;i>=0;i--){
+    if(!toks[i].n&&(toks[i].u==="m"||toks[i].u==="y")){
+      let attached=false;
+      for(let j=i-1;j>=0;j--){
+        if(toks[j].n&&!toks[j].u){toks[j].u=toks[i].u; attached=true;}
+        else if(toks[j].n&&toks[j].u) break;
+      }
+      if(attached) toks[i].u="";
+    }
+  }
+  return toks.filter(x=>x.n||x.u).map(x=>x.n+x.u).join(" ");
+}
 function chartRows(){
   const sel=VARIANT?._sizes||[];
   const all=[]; PRODUCT.variants.forEach(v=>(v._sizes||[]).forEach(s=>{if(!all.includes(s)) all.push(s)}));
   const ptype=PRODUCT.productType?.name||"";
   const secKey=SECTION_FOR_TYPE[ptype]||Object.keys(SIZECHART.sections||{}).find(k=>k.toLowerCase().includes(ptype.toLowerCase()))||"";
-  const rows=((SIZECHART.sections||{})[secKey]||[]).filter(r=>sel.includes(r.size));
-  const showRows=rows.length?rows:((SIZECHART.sections||{})[secKey]||[]).filter(r=>all.includes(r.size));
+  const rows=((SIZECHART.sections||{})[secKey]||[]).filter(r=>sel.some(s=>normSize(s)===normSize(r.size)));
+  const showRows=rows.length?rows:((SIZECHART.sections||{})[secKey]||[]).filter(r=>all.some(s=>normSize(s)===normSize(r.size)));
   return {secKey, showRows};
 }
 function fillChart(){
@@ -743,12 +775,13 @@ function fillChart(){
   document.getElementById('chartTitle').textContent=`Size chart — ${secKey} (${PRODUCT.variants.length} variants)`;
   const mcols=["length","shoulder","chest","hip","sleeves","pant_length","pant_waist"].filter(c=>secRows.some(r=>r[c]!==undefined));
   const pretty=c=>({size:"Size",length:"Length",shoulder:"Shoulder",chest:"Chest",hip:"Hip",sleeves:"Sleeve Length",pant_length:"Pant Length",pant_waist:"Pant Waist"}[c]||c);
-  const rows=[];
-  PRODUCT.variants.forEach(v=>{(v._sizes||[]).forEach(s=>{const m=secRows.find(r=>r.size===s); if(m) rows.push({v, m});});});
+  const allSizes=new Set();
+  PRODUCT.variants.forEach(v=>{(v._sizes||[]).forEach(s=>{const k=normSize(s); if(k) allSizes.add(k);});});
+  const selSizes=new Set([...(VARIANT?._effSizes||[]),...(VARIANT?._sizes||[])].map(normSize).filter(Boolean));
+  const rows=secRows.filter(r=>allSizes.has(normSize(r.size))).map(m=>({m, sel:selSizes.has(normSize(m.size))}));
   const cols=["size",...mcols];
-  host.innerHTML=`<div class="chart-scroll"><table class="chart"><tr>${cols.map(c=>`<th>${pretty(c)}</th>`).join("")}</tr>${rows.map(({v,m})=>{
-    const isSel=VARIANT&&v.id===VARIANT.id;
-    return `<tr class="${isSel?'sel':''}"><td>${m.size}</td>${mcols.map(c=>`<td>${m[c]??"—"}</td>`).join("")}</tr>`;
+  host.innerHTML=`<div class="chart-scroll"><table class="chart"><tr>${cols.map(c=>`<th>${pretty(c)}</th>`).join("")}</tr>${rows.map(({m,sel})=>{
+    return `<tr class="${sel?'sel':''}"><td>${m.size}</td>${mcols.map(c=>`<td>${m[c]??"—"}</td>`).join("")}</tr>`;
   }).join("")}</table></div>`;
   note.textContent=`${rows.length} sizes across ${PRODUCT.variants.length} variants • selected variant highlighted • all measurements in inches.`;
 }
