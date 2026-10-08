@@ -178,11 +178,9 @@ button{font:inherit}
 .card-img{aspect-ratio:4/4.8;background:var(--sage);position:relative;overflow:hidden}
 .card-img img{width:100%;height:100%;object-fit:cover;transition:.6s}
 .card:hover .card-img img{transform:scale(1.06)}
-.wish{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:none;display:grid;place-items:center;cursor:pointer}
-.wish.active{color:var(--mauve)}
-.wish.share{right:52px}
-.wish.share svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
-.wish svg{width:16px;height:16px}
+.mini-ico{width:38px;height:38px;flex-shrink:0;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:#1E1E1E}
+.mini-ico svg{width:17px;height:17px}
+.mini-ico.active{color:var(--mauve);border-color:var(--mauve)}
 .card-body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card-cat{display:inline-block;align-self:flex-start;background:var(--primary);color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:6px 10px;border-radius:999px}
 .card-title{font-family:"Cormorant Garamond",serif;font-size:17px;line-height:1.2;margin:0}
@@ -657,17 +655,15 @@ function renderProducts(){
     const und = p.pricing?.priceRangeUndiscounted?.start?.gross;
     const hasSale = und && und.amount>price.amount;
     const wishActive = WISH.includes(p.id) ? "active" : "";
-    const img = imgOrig(p.thumbnail?.url) || p.media?.[0]?.url || "https://images.unsplash.com/photo-1617331726728-8f47a0e693b4?q=80&w=600&auto=format&fit=crop";
+    window._SLIDES=window._SLIDES||{};
+    const slides=[imgOrig(p.thumbnail?.url)||(p.media?.[0]?.url||""), ...((p.media||[]).map(m=>m.url)||[])].filter(Boolean).filter((u,i,a)=>a.indexOf(u)===i).slice(0,5);
+    if(!slides.length) slides.push("https://images.unsplash.com/photo-1617331726728-8f47a0e693b4?q=80&w=600&auto=format&fit=crop");
+    window._SLIDES[p.id]=slides;
+    const img = slides[0];
     const qty = g.items.reduce((s,it)=>s+CART.filter(c=>c.id===it.id).reduce((a,c)=>a+c.qty,0),0);
     return `<article class="card">
       <div class="card-img" data-id="${p.id}" style="cursor:pointer" onclick="location.href='product/?slug=${p.slug}'">
-        <img loading="lazy" src="${img}" alt="${p.name}"/>
-        <button class="wish ${wishActive}" onclick="event.stopPropagation(); toggleWish('${p.id}')" aria-label="wishlist">
-          <svg viewBox="0 0 24 24" fill="${WISH.includes(p.id)?'currentColor':'none'}" stroke="currentColor"><path d="M12 20l-3.6-3.2C5 13.6 2 10.8 2 7.5 2 4.2 4.5 2 7.3 2c1.6 0 3.1.8 3.9 2 .8-1.2 2.3-2 3.9-2C18 2 20.5 4.2 20.5 7.5c0 3.3-3 6.1-6.4 9.3L12 20z"/></svg>
-        </button>
-        <button class="wish share" onclick="event.stopPropagation(); shareCard('${p.slug}')" aria-label="share">
-          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-        </button>
+        <img loading="lazy" src="${img}" alt="${p.name}" data-pid="${p.id}" data-slide="0"/>
       </div>
       <div class="card-body">
         <div class="card-cat">${p.category?.name||'Kidswear'}</div>
@@ -676,10 +672,44 @@ function renderProducts(){
         <div class="card-price"><b>${price?money(price.amount, price.currency):'—'}</b>${hasSale?`<s>${money(und.amount, und.currency)}</s>`:''}</div>
         <div class="card-actions">
           ${qty>0?`<div class="qty" style="flex:1;justify-content:space-between"><button onclick="event.stopPropagation();cardDec('${p.id}')">−</button><span style="min-width:22px;text-align:center;font-weight:700">${qty}</span><button onclick="event.stopPropagation();cardInc('${p.id}')">+</button></div>`:`<button class="btn-sm dark" style="flex:1" onclick="quickAdd('${p.id}')">Add</button>`}
+          <button class="mini-ico ${wishActive}" onclick="toggleWish('${p.id}')" aria-label="wishlist">
+            <svg viewBox="0 0 24 24" fill="${WISH.includes(p.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M12 20l-3.6-3.2C5 13.6 2 10.8 2 7.5 2 4.2 4.5 2 7.3 2c1.6 0 3.1.8 3.9 2 .8-1.2 2.3-2 3.9-2C18 2 20.5 4.2 20.5 7.5c0 3.3-3 6.1-6.4 9.3L12 20z"/></svg>
+          </button>
+          <button class="mini-ico" onclick="shareCard('${p.slug}')" aria-label="share">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
         </div>
       </div>
     </article>`;
   }).join("");
+  if(!window._SLIDE_TIMER) window._SLIDE_TIMER=setInterval(tickCardSlides,1500);
+}
+
+function tickCardSlides(){
+  if(document.hidden) return;
+  document.querySelectorAll('#products .card-img img[data-pid]').forEach(im=>{
+    if(im.matches(':hover')||im.dataset.anim==="1") return;
+    const arr=(window._SLIDES||{})[im.dataset.pid];
+    if(!arr||arr.length<2) return;
+    const i=(parseInt(im.dataset.slide||"0",10)+1)%arr.length;
+    im.dataset.slide=i;
+    if(im.getAttribute('src')===arr[i]) return;
+    const pre=new Image(); pre.src=arr[(i+1)%arr.length];
+    im.dataset.anim="1";
+    im.style.transition='transform .32s ease-in, opacity .32s ease-in';
+    im.style.transform='translateX(46px)';
+    im.style.opacity='0';
+    setTimeout(()=>{
+      im.src=arr[i];
+      im.style.transition='none';
+      im.style.transform='translateX(-46px)';
+      void im.offsetWidth;
+      im.style.transition='transform .32s ease-out, opacity .32s ease-out';
+      im.style.transform='translateX(0)';
+      im.style.opacity='1';
+      setTimeout(()=>{ im.style.transition=''; im.style.transform=''; im.style.opacity=''; im.dataset.anim=""; },340);
+    },330);
+  });
 }
 
 // wishlist, cart
