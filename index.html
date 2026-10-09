@@ -47,9 +47,9 @@
   --shadow-sm:0 8px 30px rgba(108,67,140,.08);
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
 html,body{overflow-x:hidden}
-body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{margin:0;padding-top:67px;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 button{font:inherit}
@@ -63,8 +63,8 @@ button{font:inherit}
 .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
 @media(max-width:760px){.splash{background:#fff} .splash img{width:90%;height:90%;max-width:90%;max-height:90%;object-fit:contain}}
 
-/* header */
-.header{position:sticky;top:0;z-index:40;background:rgba(255,249,242,.8);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line)}
+/* header - fixed on scroll so cart/checkout stay reachable */
+.header{position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(255,249,242,.92);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line)}
 .header-inner{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:24px;position:relative;justify-content:space-between}
 .logo{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-family:"Cormorant Garamond",serif;font-weight:700;font-size:26px;letter-spacing:.08em;line-height:1}
 .logo i{font-family:"Instrument Serif",serif;font-weight:400;font-style:italic;color:var(--accent);letter-spacing:.02em}
@@ -88,6 +88,7 @@ button{font:inherit}
 .nav-backdrop{display:none;position:fixed;inset:0;background:rgba(20,14,14,.32);backdrop-filter:blur(2px);z-index:39}
 .nav-backdrop.open{display:block}
 @media(max-width:900px){
+  body{padding-top:59px}
   .header-inner{gap:12px;padding:12px 14px}
   .hamburger{display:flex}
   .nav{display:none}
@@ -419,7 +420,7 @@ button{font:inherit}
     <div>
       <div class="brand-foot"><img src="https://catalog.wlimg.com/1/4698801/other-images/12585-comp-image.png" alt="Ammi Enterprises"/><br/><span style="color:#fff">AMMI<i style="color:#fff">kids</i></span></div>
       <p style="color:#fff;line-height:1.6;margin:10px 0">By <b>Ammi Enterprises</b> — Leading Manufacturer & Supplier of Ladies Salwar Kurti Set, Kids Co Ord Set & One Piece Dress.</p>
-      <p style="color:#fff;font-size:12px;margin-top:12px"><b style="color:#fff">A-7, Ground Floor, Kasturchand Mill Compound,</b><br/>Near Professional Courier, M.C. Jawale Marg, Mumbai - 400028, Maharashtra, India<br/>📞 <a href="tel:+917021946362" style="color:#fff">+91 70219 46362</a> • ✉️ <a href="mailto:info@ammiclothings.com" style="color:#fff">info@ammiclothings.com</a><br/>GST • Pan India • Upto 10 Employees • Founder: Aqueel Yusuf Khan</p>
+      <p style="color:#fff;font-size:12px;margin-top:12px"><b style="color:#fff">A-7, Ground Floor, Kasturchand Mill Compound,</b><br/>Near Professional Courier, M.C. Jawale Marg, Mumbai - 400028, Maharashtra, India<br/>📞 <a href="tel:+917021946362" style="color:#fff">+91 70219 46362</a> • ✉️ <a href="mailto:ammikidsretail@gmail.com" style="color:#fff">ammikidsretail@gmail.com</a><br/>GST • Pan India • Upto 10 Employees • Founder: Aqueel Yusuf Khan</p>
       <p style="margin-top:10px"><a href="https://api.whatsapp.com/send?phone=917021946362&text=Hello%21+I+found+your+website+ammikids+and+am+interested+in+your+products." target="_blank" class="btn-primary" style="background:#25D366;padding:10px 14px;font-size:12px">WhatsApp Us →</a></p>
     </div>
     <div>
@@ -549,7 +550,7 @@ async function loadProducts(){
           pricing{ priceRange{ start{ gross{ amount currency } } } priceRangeUndiscounted{ start{ gross{ amount } } } }
           category{ name slug }
           attributes{ attribute{ name } values{ name } }
-          variants{ id sku name media{ url } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } }
+          variants{ id sku name media{ url } metadata{ key value } pricing{ price{ gross{ amount currency } } } attributes{ attribute{ name } values{ name } } }
         }}
         totalCount
       }
@@ -753,14 +754,15 @@ function cardInc(id){
   const v=(p.variants||[])[0]||null;
   addToCart(p,v,1,"");
 }
-function addToCart(product, variant, qty, size){
+function addToCart(product, variant, qty, size, colorLabel){
   const vid = variant?.id;
   if(!vid){ toast("Please choose options on the product page"); return; }
   const price = variant?.pricing?.price?.gross?.amount ?? product.pricing?.priceRange?.start?.gross?.amount ?? 0;
   const currency = variant?.pricing?.price?.gross?.currency ?? product.pricing?.priceRange?.start?.gross?.currency ?? "INR";
+  const col = (colorLabel!==undefined && colorLabel!==null && colorLabel!=="") ? colorLabel : variant?._color;
   const existing = CART.find(c=>c.variantId===vid && (c.size||"")===(size||""));
-  if(existing){ const lab=(variant? ((variant.name||variant.sku||"Variant") + (variant._color? " - "+variant._color:"")): variant?.name||""); existing.qty += qty; if(!existing.vName && lab) existing.vName=lab; }
-  else CART.push({ id:product.id, variantId:vid, name:product.name, sku:variant?.sku||product.slug, vName:(variant? ((variant.name||variant.sku||"Variant") + (variant._color? " - "+variant._color:"")): "") || variant?.name || "", size:size||"", img:imgOrig(product.thumbnail?.url)||product.media?.[0]?.url||"", price, currency, qty });
+  if(existing){ const lab=(variant? ((variant.name||variant.sku||"Variant") + (col? " - "+col:"")): variant?.name||""); existing.qty += qty; if(!existing.vName && lab) existing.vName=lab; }
+  else CART.push({ id:product.id, variantId:vid, name:product.name, sku:variant?.sku||product.slug, vName:(variant? ((variant.name||variant.sku||"Variant") + (col? " - "+col:"")): "") || variant?.name || "", size:size||"", img:imgOrig(product.thumbnail?.url)||product.media?.[0]?.url||"", price, currency, qty });
   save(); renderCart(); toast(`${product.name}${size?` (${size})`:""} added to bag`);
   if(typeof syncModalCartUI==="function") syncModalCartUI();
   if(document.getElementById('products')) renderProducts();
@@ -903,17 +905,48 @@ function openModal(id){
   }
   function mSizeOfLocal(v){const a=(v.attributes||[]).find(x=>(x.attribute?.name||'').toLowerCase()==='size'); return (a?.values||[]).map(y=>y.name).filter(Boolean);}
   p.variants?.forEach(v=>{v._color=mColorOf(v, p); v._sizes=mSizeOfLocal(v);});
+  // Sub-variant model: metadata "sub-variant-of" links a child to its parent.
+  // Parents are selector tiles; ONLY subs of the selected parent are listed.
+  p.variants?.forEach(v=>{
+    const m=(v.metadata||[]).find(x=>(x.key||"").toLowerCase()==="sub-variant-of");
+    v._parentOf=(m&&m.value)||"";
+  });
+  const _mSubMode=(p.variants||[]).some(v=>!!v._parentOf);
+  const _mParents=(p.variants||[]).filter(v=>!v._parentOf);
+  const _mSubOf=(pid)=>(p.variants||[]).filter(v=>v._parentOf===pid);
+  let _mParent=null;
+  window._MSUBMODE=_mSubMode; window._MSUBOF=_mSubOf; window._MPARENTS=_mParents; window._MPARENT_ID=null;
   const _mValid = (p.variants||[]).filter(v=>{
     if((v._sizes||[]).length > 0) return true;
     const hasSiblingWithSizes = (p.variants||[]).some(o => o.id !== v.id && o._color && o._color.toLowerCase() === (v._color||"").toLowerCase() && (o._sizes||[]).length > 0);
     return !hasSiblingWithSizes;
   });
   const _mSeen=new Set();
-  const _mDisplay=_mValid.filter(v=>{const k=`${v.name||''}|${v._color||''}|${(v._sizes||[]).join(',')}`; if(_mSeen.has(k)) return false; _mSeen.add(k); return true;});
+  let _mDisplay=_mValid.filter(v=>{const k=`${v.name||''}|${v._color||''}|${(v._sizes||[]).join(',')}`; if(_mSeen.has(k)) return false; _mSeen.add(k); return true;});
+  if(_mSubMode){
+    const _mSeenSub=new Set();
+    _mDisplay=(p.variants||[]).filter(v=>!!v._parentOf).filter(v=>{const k=`${v._parentOf}|${v.name||''}|${(v._sizes||[]).join(',')}`; if(_mSeenSub.has(k)) return false; _mSeenSub.add(k); return true;});
+  }
   window._MDISPLAY=_mDisplay;
   // render colour chips in modal (reuse mColorWrap if not overwritten by siblings flow)
-  (function renderMColourChips(){
+  function renderMColourChips(){
     const wrap=document.getElementById('mColorWrap'), box=document.getElementById('mColors'), hint=document.getElementById('mColorHint');
+    if(_mSubMode){
+      if(!_mParents.length){ if(wrap) wrap.style.display='none'; return; }
+      if(wrap) wrap.style.display='';
+      const selPid=_mParent?_mParent.id:null;
+      if(hint){
+        if(_mParent){ const n=_mSubOf(_mParent.id).length; hint.textContent=`— ${_mParent.name||''}${n?` · ${n} sub-variant${n>1?'s':''}`:''}`; }
+        else hint.textContent=`— ${_mParents.length} options · pick one`;
+      }
+      if(box) box.innerHTML=_mParents.map(pp=>{
+        const subs=_mSubOf(pp.id);
+        const img=(pp.media&&pp.media[0]&&pp.media[0].url)?imgOrig(pp.media[0].url):"";
+        const label=pp.name||pp.sku||"Option";
+        return `<button class="opt color-tile ${selPid===pp.id?'active':''}" data-pid="${pp.id}" onclick="pickModalParent('${pp.id}')">${img?`<img src="${img}" alt="${label}" loading="lazy"/>`:`<span>${label}</span>`}<span>${label}${subs.length?` (${subs.length})`:""}</span></button>`;
+      }).join('');
+      return;
+    }
     const uniq=[...new Set(_mDisplay.map(v=>v._color).filter(Boolean))];
     if(!uniq.length){ /* leave to loadModalColors for product-level siblings */ return; }
     const selCol=(ACTIVE.variants||[]).find(v=>v.id===ACTIVE._selected)?._color || null;
@@ -943,8 +976,21 @@ function openModal(id){
       }).join('');
       if(wrap) wrap.style.display='';
     }
-  })();
+  }
+  renderMColourChips();
   function renderMVariants(filterColor){
+    if(_mSubMode){
+      const list=_mParent?_mSubOf(_mParent.id):[];
+      if(!_mParents.length){ vWrap.innerHTML = `<span style='font-size:12px;color:var(--muted)'>No variants</span>`; return; }
+      if(!_mParent){ vWrap.innerHTML = `<span style='font-size:12px;color:var(--muted)'>Pick a parent option above to see its sub-variants</span>`; return; }
+      if(!list.length){ vWrap.innerHTML = `<span style='font-size:12px;color:var(--muted)'>No sub-variants for ${_mParent.name||'this option'}</span>`; return; }
+      vWrap.innerHTML = list.map(v=>{
+        const active=v.id===ACTIVE._selected?'active':'';
+        const price=v.pricing?.price?money(v.pricing.price.gross.amount, v.pricing.price.gross.currency):"";
+        return `<button class="opt ${active}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${v.name||v.sku||'Sub-variant'} • ${price}</button>`;
+      }).join('');
+      return;
+    }
     const list = filterColor ? _mDisplay.filter(v=>v._color===filterColor) : _mDisplay;
     if(!list.length){ vWrap.innerHTML = `<span style='font-size:12px;color:var(--muted)'>No variants for ${filterColor}</span>`; return; }
     vWrap.innerHTML = list.map(v=>{
@@ -954,11 +1000,33 @@ function openModal(id){
       return `<button class="opt ${active}" data-vid="${v.id}" onclick="selectVariant('${v.id}')">${label}${cnt}</button>`;
     }).join('') + `<span style="font-size:12px;color:var(--muted);align-self:center">${_mDisplay.length} variant(s)</span>`;
   }
+  window.pickModalParent=(pid)=>{
+    _mParent=_mParents.find(x=>x.id===pid)||null;
+    if(!_mParent) return;
+    window._MPARENT_ID=pid;
+    document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.pid===pid));
+    const subs=_mSubOf(pid);
+    const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${_mParent.name||''}${subs.length?` · ${subs.length} sub-variant${subs.length>1?'s':''}`:''}`;
+    const withSizes=subs.filter(v=>(v._sizes||[]).length>0);
+    ACTIVE._selected=(withSizes[0]||subs[0]||{}).id||null;
+    ACTIVE._size=null;
+    renderMVariants();
+    renderModalSizes();
+    syncModalImg();
+    const pv=(p.variants||[]).find(v=>v.id===ACTIVE._selected); const price=pv?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
+    document.getElementById('mPrice').textContent = price? money(price.amount, price.currency):'—';
+    document.getElementById('mAddPrice').textContent = price? money(price.amount*QTY, price.currency):'—';
+    syncModalCartUI();
+  };
   window.pickModalColor=(col)=>{
+    if(_mSubMode){
+      const pp=_mParents.find(x=>(x._color||"")===col)||_mParents.find(x=>(x.name||"")===col);
+      if(pp){ pickModalParent(pp.id); return; }
+    }
     document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===col));
     const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${col}`;
     renderMVariants(col);
-    ACTIVE._selected = (_mDisplay.find(v=>v._color===col)?.id) || ACTIVE._selected;
+    ACTIVE._selected = ((_mDisplay.find(v=>v._color===col&&(v._sizes||[]).length)||_mDisplay.find(v=>v._color===col))?.id) || ACTIVE._selected;
     ACTIVE._size=null;
     renderModalSizes();
     syncModalImg();
@@ -968,7 +1036,21 @@ function openModal(id){
     syncModalCartUI();
   };
   const vWrap=document.getElementById('mVariants');
-  if(_mDisplay.length){
+  if(_mSubMode && _mParents.length && _mDisplay.length){
+    // Sub-variant mode default: first parent with sized subs, first sized sub.
+    _mParent=_mParents.find(pp=>_mSubOf(pp.id).some(v=>(v._sizes||[]).length>0))||_mParents.find(pp=>_mSubOf(pp.id).length)||_mParents[0];
+    window._MPARENT_ID=_mParent.id;
+    const _subs=_mSubOf(_mParent.id);
+    const _sized=_subs.filter(v=>(v._sizes||[]).length>0);
+    ACTIVE._selected=((_sized[0]||_subs[0]||{}).id)||null;
+    ACTIVE._size=null;
+    renderMColourChips();
+    renderMVariants();
+    {
+      const pv=(p.variants||[]).find(v=>v.id===ACTIVE._selected); const pr=pv?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
+      if(pr){ document.getElementById('mPrice').textContent = money(pr.amount, pr.currency); document.getElementById('mAddPrice').textContent = money(pr.amount*QTY, pr.currency); }
+    }
+  } else if(_mDisplay.length){
     // default: show only first colour's variants and select first variant of that colour (do not show all)
     // honour restored ACTIVE._selected if its colour exists, else use first variant's colour
     let _mDefaultColor = (ACTIVE.variants||[]).find(v=>v.id===ACTIVE._selected)?._color || _mDisplay[0]?._color || null;
@@ -976,7 +1058,7 @@ function openModal(id){
     // ensure selected variant belongs to default colour
     if(_mDefaultColor){
       const selIsInDefault = _mDisplay.some(v=>v.id===ACTIVE._selected && v._color===_mDefaultColor);
-      if(!selIsInDefault){ ACTIVE._selected = (_mDisplay.find(v=>v._color===_mDefaultColor)?.id) || _mDisplay[0].id; ACTIVE._size=null; } else {
+      if(!selIsInDefault){ ACTIVE._selected = ((_mDisplay.find(v=>v._color===_mDefaultColor&&(v._sizes||[]).length)||_mDisplay.find(v=>v._color===_mDefaultColor))?.id) || _mDisplay[0].id; ACTIVE._size=null; } else {
         // if restored size not in newly selected variant, clear it
         const curV=_mDisplay.find(v=>v.id===ACTIVE._selected); if(curV && ACTIVE._size && !(curV._sizes||[]).includes(ACTIVE._size)) ACTIVE._size=null;
       }
@@ -1042,9 +1124,23 @@ function modalChangeQty(d){
   if(CART[idx].qty<=0) CART.splice(idx,1);
   save(); renderCart(); syncModalCartUI(); if(document.getElementById('products')) renderProducts();
 }
+function modalEffSizes(v){
+  // Effective sizes for the selected variant: its own Size values, else the
+  // union of sibling sizes (scoped to the selected parent in sub-variant mode)
+  // so size chips are always shown and always required before adding.
+  let list=sizeOf(v||{});
+  if(list.length) return list;
+  const all=ACTIVE?.variants||[];
+  let pool=all;
+  if(window._MSUBMODE && window._MPARENT_ID && window._MSUBOF){ try{ const s=window._MSUBOF(window._MPARENT_ID); if(s&&s.length) pool=s; }catch(e){} }
+  else if(v&&v._color){ const same=all.filter(x=>x._color===v._color&&sizeOf(x).length); if(same.length) pool=same; }
+  const u=[];
+  pool.forEach(x=>sizeOf(x).forEach(s=>{if(!u.includes(s)) u.push(s)}));
+  return u;
+}
 function renderModalSizes(){
   const box=document.getElementById('mSizes'), hint=document.getElementById('mSizeHint'), label=document.getElementById('mSizeLabel');
-  const list=sizeOf(selectedVariant()||{});
+  const list=modalEffSizes(selectedVariant());
   if(!list.length){label.style.display="none"; box.innerHTML=""; return;}
   label.style.display="";
   hint.textContent=ACTIVE._size?("— "+ACTIVE._size):("— pick one of "+list.length);
@@ -1052,12 +1148,14 @@ function renderModalSizes(){
 }
 function selSize(el){ACTIVE._size=el.dataset.s; document.querySelectorAll('#mSizes .size-chip').forEach(c=>c.classList.toggle('sel',c===el)); document.getElementById('mSizeHint').textContent="— "+ACTIVE._size; syncModalCartUI();}
 async function loadModalColors(){
+  // sub-variant mode keeps parent tiles (do not overwrite with product-level siblings)
+  if(window._MSUBMODE){ const w=document.getElementById('mColorWrap'); if(w) w.dataset.siblings="sub-variant-mode"; return; }
   // if variants already have Color attribute, keep variant colours (do not overwrite with product-level siblings)
   if((window._MDISPLAY||[]).some(v=>v._color)){ const w=document.getElementById('mColorWrap'); if(w) w.dataset.siblings="variant-colors"; return; }
   const wrap=document.getElementById('mColorWrap'), box=document.getElementById('mColors');
   wrap.style.display="none"; box.innerHTML="";
   try{
-    const d=await gql(`query{products(first:100){edges{node{id name slug thumbnail{url} category{name slug} attributes{attribute{name} values{name}} media{url} pricing{priceRange{start{gross{amount currency}}}} variants{ id sku name media{ url } pricing{price{gross{amount currency}}} attributes{attribute{name} values{name}}}}}}}`);
+    const d=await gql(`query{products(first:100){edges{node{id name slug thumbnail{url} category{name slug} attributes{attribute{name} values{name}} media{url} pricing{priceRange{start{gross{amount currency}}}} variants{ id sku name media{ url } metadata{ key value } pricing{price{gross{amount currency}}} attributes{attribute{name} values{name}}}}}}}`);
     const all=(d?.products?.edges||[]).map(e=>e.node);
     const key=(ACTIVE.name||"").trim().toLowerCase();
     const sibs=all.filter(p=>(p.name||"").trim().toLowerCase()===key);
@@ -1076,6 +1174,7 @@ function selectVariant(vid){
   ACTIVE._selected=vid;
   ACTIVE._size=null;
   syncModalImg();
+  if(window._MSUBMODE&&v&&v._parentOf){document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active',o.dataset.pid===v._parentOf));}
   if(v?._color){ const hint=document.getElementById('mColorHint'); if(hint) hint.textContent=`— ${v._color}`; document.querySelectorAll('#mColors .opt').forEach(o=>o.classList.toggle('active', o.dataset.color===v._color)); }
   renderModalSizes();
   const price=v?.pricing?.price?.gross || p.pricing?.priceRange?.start?.gross;
@@ -1103,13 +1202,29 @@ function updateAddPrice(){
   if(price) document.getElementById('mAddPrice').textContent = money(price.amount*QTY, price.currency);
 }
 document.getElementById('mAdd').addEventListener('click', ()=>{
-  const v = (ACTIVE.variants||[]).find(x=>x.id===ACTIVE._selected) || (ACTIVE.variants||[])[0] || null;
-  // require colour variant selection when colours exist (modal uses _MDISPLAY list)
-  const hasColourVariants = (window._MDISPLAY||ACTIVE.variants||[]).some(x=>x._color);
-  if(hasColourVariants && !v?._color){ toast("Please select a colour"); return; }
-  const sizes = sizeOf(v||{});
-  if(sizes.length && !ACTIVE._size){ toast("Please select a size"); return; }
-  addToCart(ACTIVE, v, QTY, ACTIVE._size); QTY=1;
+  const p=ACTIVE; if(!p) return;
+  const v = (p.variants||[]).find(x=>x.id===ACTIVE._selected) || null;
+  // Colour is required: in sub-variant mode a parent must be chosen; in legacy
+  // mode the chosen variant must carry a colour when colours exist (same rule
+  // as the product page).
+  if(window._MSUBMODE && !window._MPARENT_ID){ toast("Please select a colour"); return; }
+  if(!v){ toast("Please select a colour"); return; }
+  const hasColourVariants = (window._MDISPLAY||p.variants||[]).some(x=>x._color);
+  if(!window._MSUBMODE && hasColourVariants && !v._color){ toast("Please select a colour"); return; }
+  // Size is required whenever the (effective) variant offers sizes.
+  const eff = modalEffSizes(v);
+  if(eff.length && !ACTIVE._size){ toast("Please select a size"); return; }
+  // Pair a size picked from the fallback union with a real size-carrying
+  // variant (scoped to the selected parent in sub-variant mode) so the
+  // checkout receives a valid variantId — same as the product page.
+  let orderV=v, colorLabel=v._color||"";
+  if(ACTIVE._size && !(v._sizes||[]).includes(ACTIVE._size)){
+    let pool=(p.variants||[]);
+    if(window._MSUBMODE && window._MPARENT_ID && window._MSUBOF){ try{ const s=window._MSUBOF(window._MPARENT_ID); if(s&&s.length) pool=s; }catch(e){} }
+    orderV = pool.find(x=>(x._sizes||[]).includes(ACTIVE._size)&&(x._color||"")===(v._color||"")) || pool.find(x=>(x._sizes||[]).includes(ACTIVE._size)) || v;
+    if(window._MSUBMODE){ const par=(window._MPARENTS||[]).find(x=>x.id===window._MPARENT_ID); if(par) colorLabel=par.name||par._color||colorLabel; }
+  }
+  addToCart(p, orderV, QTY, ACTIVE._size, colorLabel); QTY=1;
 });
 document.getElementById('search').addEventListener('input', renderProducts);
 document.getElementById('wishlistBtn').addEventListener('click', ()=>{
@@ -1156,8 +1271,8 @@ document.getElementById('wishlistBtn').addEventListener('click', ()=>{
   nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> toggle(false)));
   window.addEventListener('resize', ()=> { if(window.innerWidth>900) toggle(false); });
 })();
-// expose for inline handlers
-window.pickModalColor=pickModalColor; window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.selSize=selSize; window.closeDrawer=closeDrawer; window.checkout=checkout; window.cardInc=cardInc; window.cardDec=cardDec;
+// expose for inline handlers (pickModalColor/pickModalParent are set on window by openModal before their buttons can be clicked)
+window.openModal=openModal; window.toggleWish=toggleWish; window.quickAdd=quickAdd; window.changeQty=changeQty; window.removeLine=removeLine; window.selectVariant=selectVariant; window.selSize=selSize; window.closeDrawer=closeDrawer; window.checkout=checkout; window.cardInc=cardInc; window.cardDec=cardDec;
 // show Profile only when logged in
 try{if(localStorage.getItem("ak_token")){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
 </script>

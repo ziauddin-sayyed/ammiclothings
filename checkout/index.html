@@ -78,6 +78,15 @@ a{color:inherit;text-decoration:none}
 #placeBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn-ghost{width:100%;background:#fff;border:1px solid var(--line);padding:12px;border-radius:999px;font-weight:700;cursor:pointer;margin-top:8px}
 .note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+.offers{margin-top:10px;border:1px dashed var(--accent);border-radius:14px;padding:10px 12px;background:var(--blush);display:none}
+.offers.show{display:block}
+.offers h4{margin:0 0 8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--primary)}
+.offers .off{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px}
+.offers .code{border:1px dashed var(--primary);background:#fff;color:var(--primary);border-radius:999px;padding:6px 12px;font-weight:800;cursor:pointer;font-size:12px;letter-spacing:.06em}
+.offers .code:hover{background:var(--primary);color:#fff}
+.offers .cheap{display:flex;gap:8px;overflow-x:auto;margin-top:8px}
+.offers .cheap a{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:6px 10px 6px 6px;font-size:12px;font-weight:700}
+.offers .cheap img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .tabs{display:flex;gap:8px;margin:0 0 14px}
 .tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px;font-weight:700;cursor:pointer;font-size:13px}
 .tabs button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
@@ -201,6 +210,7 @@ a{color:inherit;text-decoration:none}
       <div class="lines" id="lines"></div>
       <div style="display:flex;gap:8px;margin-top:10px"><input id="coupon" placeholder="Coupon code" style="flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px"/><button class="btn-ghost" id="promoBtn" style="width:auto;padding:10px 16px" onclick="applyCoupon()">Apply</button></div>
       <div class="note" id="promoMsg" style="display:none"></div>
+      <div class="offers" id="offersBox"><h4>🎁 Available offers — tap code to apply</h4><div id="offersList"></div><div class="cheap" id="cheapList" style="display:none"></div></div>
       <div class="tot" id="totals"></div>
       <div class="field" style="margin-top:10px"><label>Order notes (optional)</label><textarea id="notes" rows="2" placeholder="Delivery instructions..." style="border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;outline:none;background:#fff;font-family:inherit;resize:vertical"></textarea></div>
       <button class="btn-primary" id="placeBtn" onclick="placeOrder()">Pay : <span id="payTotal">—</span></button>
@@ -767,6 +777,39 @@ async function applyCoupon(){
   }catch(e){ toast((e.message||"Invalid coupon").slice(0,140)); updatePromoUI(); }
   finally{ btn.disabled=false; updatePromoUI(); }
 }
+/* ---------- available offers (discounts API) ---------- */
+async function loadOffers(){
+  const box=document.getElementById('offersBox'), list=document.getElementById('offersList'), cheap=document.getElementById('cheapList');
+  if(!box||!list) return;
+  try{
+    const r=await fetch(window.APP_CONFIG.API_BASE+"/discounts-and-cheap-products/");
+    if(!r.ok) throw new Error("offers "+r.status);
+    const j=await r.json();
+    const discounts=(j&&j.discounts)||[];
+    const cheaps=(j&&j.cheapProducts)||[];
+    if(!discounts.length&&!cheaps.length) return;
+    list.innerHTML=discounts.map(d=>{
+      const val=d.discountValueType==="percentage"?`${d.discountValue}% OFF`:(d.discountValue!=null?`${money(d.discountValue,d.currency||"INR")} OFF`:"Offer");
+      const extra=[d.minSpent?`min ${money(d.minSpent,d.currency||"INR")}`:"",d.endDate?`ends ${new Date(d.endDate).toLocaleDateString("en-IN")}`:""].filter(Boolean).join(" • ");
+      const code=String(d.code||"").replace(/"/g,"&quot;");
+      return `<div class="off"><button class="code" onclick="pickOffer('${code}')" title="Tap to apply">${code}</button><span><b>${d.name||code}</b> — ${val}${extra?` <span style="color:var(--muted)">(${extra})</span>`:""}</span></div>`;
+    }).join("");
+    if(cheaps.length&&cheap){
+      cheap.style.display="";
+      cheap.innerHTML=cheaps.map(c=>{
+        const nm=c.name||"Deal", slug=c.slug||"", img=c.thumbnail?.url||c.thumbnail||c.image||"", pr=c.price!=null?money(c.price,c.currency||"INR"):(c.pricing?.priceRange?.start?.gross?money(c.pricing.priceRange.start.gross.amount,c.pricing.priceRange.start.gross.currency):"");
+        const href=slug?`../product/?slug=${encodeURIComponent(slug)}`:"#";
+        return `<a href="${href}">${img?`<img src="${img}" alt=""/>`:""}<span>${nm}${pr?`<br/>${pr}`:""}</span></a>`;
+      }).join("");
+    }
+    box.classList.add('show');
+  }catch(e){ console.warn("offers:",e.message); }
+}
+function pickOffer(code){
+  if(!code) return;
+  document.getElementById('coupon').value=code;
+  applyCoupon();
+}
 async function removeCoupon(){
   try{
     if(CHECKOUT&&PROMO_CODE){
@@ -800,7 +843,7 @@ function closeSucc(){document.getElementById('success').classList.remove('open')
 })();
 if(IS_LOCAL){document.getElementById('localLoginBox').classList.add('show'); document.getElementById('localAddrBox').classList.add('show');}
 try{if(TOKEN){const l=document.getElementById('ordersLink'); if(l) l.style.display="";}}catch(e){}
-refreshAcct(); render(); handleCashfreeReturn();
+refreshAcct(); render(); handleCashfreeReturn(); loadOffers();
 // If another tab finishes this order, follow it to the success page
 // instead of getting stranded on checkout.
 window.addEventListener("storage",(e)=>{
